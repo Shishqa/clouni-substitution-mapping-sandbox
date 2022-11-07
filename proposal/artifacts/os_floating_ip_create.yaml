@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+  
+  - name: Acquire floating IPs for instance
+    openstack.cloud.floating_ip:
+      state: present
+      server: "shishqa-test-from-ansible"
+      network: "ispras"
+      wait: yes
+    register: result
