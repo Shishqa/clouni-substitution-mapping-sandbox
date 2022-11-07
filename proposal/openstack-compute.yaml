@@ -11,12 +11,10 @@ topology_template:
 
     key_name:
       type: string
-      default: shishqa-toadster
       description: Name of key-pair to be used for compute instance
 
     security_group_name:
       type: string
-      default: default
       description: Name of security group to be used for compute instance
 
   node_templates:
