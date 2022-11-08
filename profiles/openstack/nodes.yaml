@@ -10,6 +10,7 @@ node_types:
 
   # https://docs.openstack.org/heat/wallaby/template_guide/openstack.html#OS::Nova::Server
   nova.Server:
+    derived_from: tosca.nodes.Root
     properties:
       name:
         description: >-
@@ -30,6 +31,10 @@ node_types:
         type: map
         entry_schema:
           type: tosca.datatypes.network.PortInfo
+      security_groups:
+        type: list
+        entry_schema:
+          type: string
     capabilities:
       resource:
         type: Resource
@@ -54,12 +59,8 @@ node_types:
         occurrences: [ 1, 1 ]
     - security_group:
         capability: Resource
-        relationship: Depends
+        relationship: ComputeToSecurityGroup
         occurrences: [ 0, UNBOUNDED ]
-    - floating_ip:
-        capability: Resource
-        relationship: Depends
-        occurrences: [ 0, 1 ]
     interfaces:
       Standard:
         type: tosca.interfaces.node.lifecycle.Standard
@@ -88,6 +89,7 @@ node_types:
             implementation: artifacts/os_server_create.yaml
 
   nova.Flavor:
+    derived_from: tosca.nodes.Root
     capabilities:
       resource:
         type: Resource
@@ -96,8 +98,24 @@ node_types:
     attributes:
       id:
         type: string
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+        operations:
+          configure:
+            inputs:
+              required_ram:
+                value: { get_property: [ SELF, compute, mem_size ] }
+                type: string
+              required_vcups:
+                value: { get_property: [ SELF, compute, num_cpus ] }
+                type: string
+            outputs:
+              id: [ SELF, id ]
+            implementation: artifacts/os_flavor_find.yaml
 
   nova.KeyPair:
+    derived_from: tosca.nodes.Root
     capabilities:
       resource:
         type: Resource
@@ -109,21 +127,55 @@ node_types:
         required: false
 
   neutron.FloatingIp:
+    derived_from: tosca.nodes.Root
     capabilities:
       resource:
         type: Resource
       endpoint:
         type: tosca.capabilities.Endpoint
+    properties:
+      floating_ip_pool:
+        type: string
+    requirements:
+    - nova_server:
+        capability: Resource
+        relationship: FloatingIpToCompute
+        occurrences: [ 1, 1 ]
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+        operations:
+          configure:
+            inputs:
+              floating_ip_pool:
+                value: { get_property: [ SELF, floating_ip_pool ] }
+                type: string
+              server_name:
+                value: { get_property: [ SELF, nova_server, name ] }
+                type: string
+            implementation: artifacts/os_floating_ip_create.yaml
 
   neutron.SecurityGroup:
+    derived_from: tosca.nodes.Root
     capabilities:
       resource:
         type: Resource
     properties:
       name:
         type: string
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+        operations:
+          configure:
+            inputs:
+              name:
+                value: { get_property: [ SELF, name ] }
+                type: string
+            implementation: artifacts/os_security_group_create.yaml
 
   neutron.SecurityGroupRule:
+    derived_from: tosca.nodes.Root
     capabilities:
       resource:
         type: Resource
@@ -134,8 +186,10 @@ node_types:
         - valid_values: [ ingress, egress ]
       port_range_max:
         type: integer
+        required: false
       port_range_min:
         type: integer
+        required: false
       ethertype:
         type: string
         constraints:
@@ -153,6 +207,7 @@ node_types:
         occurrences: [ 1, 1 ]
 
   glance.WebImage:
+    derived_from: tosca.nodes.Root
     capabilities:
       resource:
         type: Resource
@@ -161,3 +216,21 @@ node_types:
     attributes:
       id:
         type: string
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+        operations:
+          configure:
+            inputs:
+              required_distro:
+                value: { get_property: [ SELF, os, distribution ] }
+                type: string
+              required_arch:
+                value: { get_property: [ SELF, os, architecture ] }
+                type: string
+              required_version:
+                value: { get_property: [ SELF, os, version ] }
+                type: string
+            outputs:
+              id: [ SELF, id ]
+            implementation: artifacts/os_image_find.yaml

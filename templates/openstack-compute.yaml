@@ -3,33 +3,32 @@ tosca_definitions_version: tosca_simple_yaml_1_3
 imports:
 
 - namespace_prefix: openstack
-  file: profiles/openstack/profile.yaml
+  file: ../profiles/openstack/profile.yaml
 
 topology_template:
 
   inputs:
 
+    instance_name:
+      type: string
+      description: Compute instance name
+
     key_name:
       type: string
       description: Name of key-pair to be used for compute instance
-
-    security_group_name:
-      type: string
-      description: Name of security group to be used for compute instance
 
   node_templates:
 
     os_server:
       type: openstack:nova.Server
       properties:
-        name: shishqa-test-from-ansible
+        name: { get_input: [ instance_name ] }
       requirements:
         - image: os_image
         - flavor: os_flavor
         - key_pair: os_key_pair
-        - security_group: os_security_group
+        - security_group: os_security_group_default
       
-
     os_key_pair:
       type: openstack:nova.KeyPair
       properties:
@@ -41,10 +40,10 @@ topology_template:
     os_flavor:
       type: openstack:nova.Flavor
 
-    os_security_group:
+    os_security_group_default:
       type: openstack:neutron.SecurityGroup
       properties:
-        name: { get_input: [ security_group_name ] }
+        name: default
 
   substitution_mappings:
     node_type: tosca.nodes.Compute
@@ -56,7 +55,7 @@ topology_template:
       binding: [ os_server, binding ]
     attributes:
       private_address: [ os_server, private_address ]
-      public_address: [ os_server, public_address ] # Puccini ругается
+      public_address: [ os_server, public_address ]
       networks: [ os_server, networks ]
       ports: [ os_server, ports ]
     interfaces:

@@ -3,48 +3,37 @@ tosca_definitions_version: tosca_simple_yaml_1_3
 data_types:
 
   IpAddress:
-    derived_from:
-      string
+    derived_from: string
 
   MacAddress:
-    derived_from:
-      string
+    derived_from: string
 
   NetCidr:
-    derived_from:
-      string
+    derived_from: string
 
   neutron.Network:
-    derived_from:
-      string
+    derived_from: string
 
   neutron.Port:
-    derived_from:
-      string
+    derived_from: string
 
   neutron.QosPolicy:
-    derived_from:
-      string
+    derived_from: string
 
   glance.Image:
-    derived_from:
-      string
+    derived_from: string
 
   cinder.Snapshot:
-    derived_from:
-      string
+    derived_from: string
 
   cinder.Volume:
-    derived_from:
-      string
+    derived_from: string
 
   nova.Flavor:
-    derived_from:
-      string
+    derived_from: string
 
   nova.Keypair:
-    derived_from:
-      string
+    derived_from: string
 
   nova.Server.Network:
     properties:
@@ -79,7 +68,8 @@ data_types:
           Dict, which has expand properties for port. Used only if port property is not specified
           for creating port.
         type: map
-        entry_schema: nova.Server.Port
+        entry_schema:
+          type: nova.Server.Port
       subnet:
         description: >-
           Subnet in which to allocate the IP address for port. Used for creating port, based on
@@ -101,7 +91,8 @@ data_types:
         description: >-
           Additional MAC/IP address pairs allowed to pass through the port.
         type: list
-        entry_schema: nova.Server.AddressPair
+        entry_schema:
+          type: nova.Server.AddressPair
       binding.vnic_type:
         description: >-
           The vnic type to be bound on the neutron port. To support SR-IOV PCI passthrough
@@ -131,7 +122,8 @@ data_types:
         description: >-
           Extra parameters to include in the request.
         type: map
-        entry_schema: string # TODO
+        entry_schema:
+          type: string # TODO
 
   nova.Server.AddressPair:
     properties:
