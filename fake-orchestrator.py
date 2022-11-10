@@ -1,7 +1,10 @@
 import os
+import argparse
+import subprocess as sp
+import yaml
 
 substitutions = {
-  'tosca.nodes.Compute': [
+  'tosca::Compute': [
     { 
       'file': 'templates/openstack-compute-public.yaml',
       # possibly, we can search by tags
@@ -18,16 +21,9 @@ substitutions = {
   ]
 }
 
-def fill_inputs(template):
-  print('please, fill inputs')
-  inputs = {}
-  for inpt in template['inputs']:
-    inputs[inpt] = input(f'{inpt}: ')
-  return ' '.join([f'-i {i[0]}={i[1]}'for i in inputs.items()])
+instance_models = []
 
-def main():
-  print('parsing tosca-server-example.yaml...')
-  os.system('puccini-tosca parse tosca-server-example.yaml')
+def foo():
   print('')
   print('node tosca_server_example is marked substitutable')
   print('please choose desired substitution')
@@ -51,6 +47,62 @@ def main():
       return
     else:
       print('please, choose correct option')
+
+
+def fill_inputs(template):
+  print('please, fill inputs')
+  inputs = {}
+  for inpt in template['inputs']:
+    inputs[inpt] = input(f'{inpt}: ')
+  return ' '.join([f'-i {i[0]}={i[1]}'for i in inputs.items()])
+
+def parse_template(path):
+  print(f'parsing {path}...')
+  pipe = sp.Popen(f'puccini-tosca parse {path}', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+  res = pipe.communicate()
+  if pipe.returncode != 0:
+    raise RuntimeError(res[1])
+  return yaml.safe_load(res[0])
+
+def find_substitutions(template):
+  for name, node in template["nodeTemplates"].items():
+    if "substitute" in node["directives"]:
+      print(f'node {name} is marked substitutable')
+      print('please choose desired substitution')
+      option_list = []
+      
+      for t in node["types"].keys():
+        if t not in substitutions.keys():
+          continue
+        option_list += substitutions[t]
+
+      for i, item in enumerate(option_list):
+        print(f' {i} - {item["file"]}')
+      
+      while True: # blame on me
+        choose = int(input('your choise: '))
+        if choose in range(len(option_list)):
+          print(f'chosen {option_list[choose]["file"]}')
+          
+          tmp = parse_template(option_list[choose]["file"])
+          find_substitutions(tmp)
+
+        else:
+          print('please, choose correct option')
+
+
+def parse_arguments():
+  parser = argparse.ArgumentParser(description='')
+  parser.add_argument('template', help='path to the TOSCA template')
+  return parser.parse_args()
+
+def main():
+  args = parse_arguments()
+  try:
+    template = parse_template(args.template)
+    find_substitutions(template)
+  except RuntimeError as err:
+    print(err.args[0])
 
 if __name__ == "__main__":
   main()

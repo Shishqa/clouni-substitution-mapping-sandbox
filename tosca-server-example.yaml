@@ -3,7 +3,31 @@ tosca_definitions_version: tosca_simple_yaml_1_3
 topology_template:
   node_templates:
 
-    tosca_server_example:
+    server_example_a:
+      type: tosca.nodes.Compute
+      capabilities:
+        host:
+          properties:
+            num_cpus: 1
+            disk_size: 10 GiB
+            mem_size: 1 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: x86_64
+            type: cirros
+            version: 0.4.0
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 5
+            default_instances: 1
+      directives:
+        - substitute
+
+    server_example_b:
       type: tosca.nodes.Compute
       capabilities:
         host:
