@@ -103,6 +103,15 @@ class NodeInstance:
   def init_substitution(self):
     self.select_substitution()
 
+    self.capabilities = {}
+    for cap_name in self.definition['capabilities'].keys():
+      if cap_name == 'feature':
+        continue
+      mapping = instance_models[self.substitution_index].definition['substitution']['capabilityMappings'][cap_name]
+      self.capabilities[cap_name] = instance_models[self.substitution_index].nodes[mapping['nodeTemplateName']].capabilities[mapping['target']]
+
+    print(instance_models[self.substitution_index].definition['substitution']['interfaceMappings'])
+
   def select_substitution(self):
     print(f'\nnode {self.name} is marked substitutable')
     print('please choose desired substitution')
