@@ -24,48 +24,122 @@ idx = 0
 instance_models = {}
 
 
+class PropertyInstance:
+  def __init__(self, name, node):
+    self.node = node
+    self.name = name
+    self.definition = copy.deepcopy(node.definition['properties'][name])
+
+  def get(self):
+    print(self.definition.keys())
+    return self.definition['$value']
+
+
+class AttributeInstance:
+  def __init__(self, name, node):
+    self.node = node
+    self.name = name
+    self.definition = copy.deepcopy(node.definition['attributes'][name])
+
+
+class CapabilityInstance:
+  def __init__(self, name, node):
+    self.node = node
+    self.name = name
+    self.definition = copy.deepcopy(node.definition['capabilities'][name])
+    self.properties = {}
+    for prop_name in self.definition['properties'].keys():
+      self.properties[prop_name] = PropertyInstance(prop_name, self)
+
+  def get_property(self, prop_name):
+    return self.properties[prop_name].get()
+
+
+class RequirementInstance:
+  def __init__(self, idx, node):
+    self.node = node
+    self.idx = idx
+    self.definition = copy.deepcopy(node.definition['requirements'][idx])
+
+
 class NodeInstance:
-  def __init__(self, name, template):
+  def __init__(self, name, topology):
+    self.topology = topology
     self.substitution_index = None
 
+    self.definition = copy.deepcopy(topology.definition["nodeTemplates"][name])
     self.name = copy.deepcopy(name)
-    self.types = copy.deepcopy(template['types'])
-    self.directives = copy.deepcopy(template['directives'])
-    self.requirements = copy.deepcopy(template['requirements'])
-    self.interfaces = copy.deepcopy(template['interfaces'])
-    self.properties = copy.deepcopy(template['properties'])
+    self.types = copy.deepcopy(self.definition['types'])
+    self.directives = copy.deepcopy(self.definition['directives'])
+
+    # self.requirements = copy.deepcopy(template['requirements'])
+    # self.interfaces = copy.deepcopy(template['interfaces'])
+    # self.properties = copy.deepcopy(template['properties'])
 
     if "substitute" in self.directives:
-      print(f'\nnode {self.name} is marked substitutable')
-      print('please choose desired substitution')
-      option_list = []
+      self.init_substitution()
+      # print(instance_models[self.substitution_index].substitution)
+      # keys = ['capabilityMappings', 'requirementMappings', 'propertyMappings', 'attributeMappings', 'interfaceMappings']
+    else:
+      self.init()
 
-      for t in self.types.keys():
-        if t not in substitutions.keys():
-          continue
-        option_list += substitutions[t]
+  def init(self):
+    self.properties = {}
+    for prop_name in self.definition['properties'].keys():
+      self.properties[prop_name] = PropertyInstance(prop_name, self)
 
-      for i, item in enumerate(option_list):
-        print(f' {i} - {item["file"]}')
+    self.attributes = {}
+    for attr_name in self.definition['attributes'].keys():
+      self.attributes[attr_name] = AttributeInstance(attr_name, self)
 
-      while True:  # blame on me
-        choose = int(input('your choise: '))
-        if choose in range(len(option_list)):
-          print(f'chosen {option_list[choose]["file"]}')
+    self.capabilities = {}
+    for cap_name in self.definition['capabilities'].keys():
+      self.capabilities[cap_name] = CapabilityInstance(cap_name, self)
 
-          self.substitution_index = instantiate_template(
-              option_list[choose]["file"])
-          break
+    self.requirements = []
+    for i in range(len(self.definition['requirements'])):
+      self.requirements.append(RequirementInstance(i, self))
 
-        else:
-          print('please, choose correct option')
+  def init_substitution(self):
+    self.select_substitution()
+
+  def select_substitution(self):
+    print(f'\nnode {self.name} is marked substitutable')
+    print('please choose desired substitution')
+    option_list = []
+
+    for t in self.types.keys():
+      if t not in substitutions.keys():
+        continue
+      option_list += substitutions[t]
+
+    for i, item in enumerate(option_list):
+      print(f' {i} - {item["file"]}')
+
+    while True:  # blame on me
+      choose = int(input('your choise: '))
+      if choose in range(len(option_list)):
+        print(f'chosen {option_list[choose]["file"]}')
+
+        self.substitution_index = instantiate_template(
+            option_list[choose]["file"])
+        break
+
+      else:
+        print('please, choose correct option')
+
+  def get_property(self, path, args):
+    if path != 'SELF':
+      # try find in topology
+      rest = len(args > 1) and args[1:] or []
+      return self.node.topology.nodes['path'].get_property(args[0], rest)
 
   def graphviz(self):
     types = list(self.types.keys())
     props_label = ''
-    if len(self.properties) > 0:
+    if len(self.definition['properties']) > 0:
       props = []
-      for p_name, p_body in self.properties.items():
+      for p_name, p_body in self.definition['properties'].items():
         if '$value' in p_body.keys():
           value = p_body["$value"]
           if '$string' in value:
@@ -85,25 +159,29 @@ class NodeInstance:
       print('TODO: parse substitution mapping interface')
       instance_models[self.substitution_index].deploy()
     else:
-      ops = self.interfaces['Standard']['operations']
+      ops = self.definition['interfaces']['Standard']['operations']
       ops_order = ['create', 'configure', 'start']
       for op_name in ops_order:
         if ops[op_name]["implementation"] != '':
           print(f'{op_name}: {ops[op_name]["implementation"]}')
 
 
-class TemplateInstance:
-  def __init__(self, idx, template, inputs):
+class TopologyTemplateInstance:
+  def __init__(self, idx, definition):
     self.idx = idx
-    self.template = copy.deepcopy(template)
-    self.substitution = copy.deepcopy(template['substitution'])
-    self.inputs = copy.deepcopy(inputs)
-    self.nodes = {}
-    for name, node in template["nodeTemplates"].items():
-      self.nodes[name] = NodeInstance(name, node)
+    self.definition = copy.deepcopy(definition)
+    # self.substitution = copy.deepcopy(template['substitution'])
+    # self.inputs = copy.deepcopy(inputs)
+    # for input_name, input_body in self.template['inputs'].items():
+    #   print(input_name)
+    #   print(input_body)
 
-  def __repr__(self):
-    return ','.join([n.name for n in self.nodes.values()])
+    self.instantiate_nodes()
+
+  def instantiate_nodes(self):
+    self.nodes = {}
+    for name in self.definition["nodeTemplates"].keys():
+      self.nodes[name] = NodeInstance(name, self)
 
   def graphviz(self):
     res = f'''
@@ -111,10 +189,10 @@ class TemplateInstance:
       color = black;
       label = "Instance {self.idx}";
     '''
-    if len(self.inputs) > 0:
-      res += f'''
-        instance_{self.idx}_inputs [label="{{ inputs | { '|'.join(f"{x[0]}: {x[1]}" for x in self.inputs.items()) } }}", shape=record];
-      '''
+    # if len(self.definition['inputs']) > 0:
+    #   res += f'''
+    #     instance_{self.idx}_inputs [label="{{ inputs | { '|'.join(f"{x[0]}: {x[1]}" for x in self.inputs.items()) } }}", shape=record];
+    #   '''
     for name, node in self.nodes.items():
       if node.substitution_index is not None:
         res += f'''
@@ -133,7 +211,7 @@ class TemplateInstance:
         instance_{self.idx}_{node.name} -> instance_{sub_template.idx}_{sub_nodes[0]} [label="substituted with", lhead="cluster_{sub_template.idx}"];
         '''
 
-      for req in node.requirements:
+      for req in node.definition['requirements']:
         res += f'''
         instance_{self.idx}_{node.name} -> instance_{self.idx}_{req['nodeTemplateName']};
         '''
@@ -168,7 +246,7 @@ class TemplateInstance:
     to_visit = set(self.nodes.keys())
     edges = {}
     for name, node in self.nodes.items():
-      for req in node.requirements:
+      for req in node.definition['requirements']:
         if req['nodeTemplateName'] in to_visit:
           to_visit.remove(req['nodeTemplateName'])
         if req['nodeTemplateName'] not in edges.keys():
@@ -179,7 +257,7 @@ class TemplateInstance:
     while len(to_visit) > 0:
       n = to_visit.pop()
       deploy_order.append(n)
-      for req in self.nodes[n].requirements:
+      for req in self.nodes[n].definition['requirements']:
         edges[req["nodeTemplateName"]].remove(n)
         if len(edges[req["nodeTemplateName"]]) == 0:
           to_visit.add(req["nodeTemplateName"])
@@ -236,12 +314,12 @@ def instantiate_template(path):
   if pipe.returncode != 0:
     raise RuntimeError(res[1])
 
-  template = yaml.safe_load(res[0])
-  template_id = idx + 1
+  definition = yaml.safe_load(res[0])
+  instance_id = idx + 1
   idx += 1
-  template_instance = TemplateInstance(template_id, copy.deepcopy(template), inputs)
-  instance_models[template_id] = template_instance
-  return template_instance.idx
+  instance_models[instance_id] = TopologyTemplateInstance(
+      instance_id, definition)
+  return instance_id
 
 
 def parse_arguments():
