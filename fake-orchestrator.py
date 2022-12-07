@@ -33,6 +33,7 @@ class NodeInstance:
     self.directives = copy.deepcopy(template['directives'])
     self.requirements = copy.deepcopy(template['requirements'])
     self.interfaces = copy.deepcopy(template['interfaces'])
+    self.properties = copy.deepcopy(template['properties'])
 
     if "substitute" in self.directives:
       print(f'node {self.name} is marked substitutable')
@@ -64,22 +65,38 @@ class NodeInstance:
       return instance_models[self.substitution_index].graphviz()
     else:
       types = list(self.types.keys())
-      return f'{self.name} [label="{{{self.name} | {types[0]}}}",shape=record]'
+      props_label = ''
+      if len(self.properties) > 0:
+        props = []
+        for p_name, p_body in self.properties.items():
+          if '$value' in p_body.keys():
+            props.append(f'{p_name}: {p_body["$value"]}')
+          elif '$functionCall' in p_body.keys():
+            props.append(f'{p_name}: {p_body["$functionCall"]["name"]}')
+          else:
+            props.append(p_name)
+        props_label = '|'.join(props)
+
+      return f'{self.name} [label="{{ {self.name} | {types[0]} { f"| {props_label}" if props_label != "" else "" } }}",shape=record]'
 
   def deploy(self):
     print(f"deploying {self.name}")
     if self.substitution_index is not None:
-      print('sub')
-      # instance_models[self.substitution_index].deploy()
+      instance_models[self.substitution_index].deploy()
     else:
-      print(self.interfaces)
+      ops = self.interfaces['Standard']['operations']
+      ops_order = ['create', 'configure', 'start']
+      for op_name in ops_order:
+        if ops[op_name]["implementation"] != '':
+          print(f'{op_name}: {ops[op_name]["implementation"]}')
 
 
 class TemplateInstance:
-  def __init__(self, idx, template):
+  def __init__(self, idx, template, inputs):
     self.idx = idx
     self.template = copy.deepcopy(template)
     self.substitution = copy.deepcopy(template['substitution'])
+    self.inputs = copy.deepcopy(inputs)
     self.nodes = {}
     for name, node in template["nodeTemplates"].items():
       self.nodes[name] = NodeInstance(name, node)
@@ -93,6 +110,10 @@ class TemplateInstance:
       color = black;
       label = "Instance {self.idx}";
     '''
+    if len(self.inputs) > 0:
+      res += f'''
+        instance_{self.idx}_inputs [label="{{ inputs | { '|'.join(f"{x[0]}: {x[1]}" for x in self.inputs.items()) } }}", shape=record];
+      '''
     for name, node in self.nodes.items():
       if node.substitution_index is not None:
         res += node.graphviz()
@@ -100,6 +121,15 @@ class TemplateInstance:
         res += f'''
         instance_{self.idx}_{node.graphviz()};
         '''
+    for name, node in self.nodes.items():
+      if node.substitution_index is not None:
+        continue
+
+      for req in node.requirements:
+        res += f'''
+        instance_{self.idx}_{node.name} -> instance_{self.idx}_{req['nodeTemplateName']};
+        '''
+
     res += '''
     }
     '''
@@ -118,12 +148,45 @@ class TemplateInstance:
 
     f = open(f'{path}.png', "w")
     pipe = sp.Popen(
-      f'dot -Tpng {path}.dot', shell=True, stdout=f, stderr=sp.PIPE)
+        f'dot -Tpng {path}.dot', shell=True, stdout=f, stderr=sp.PIPE)
     res = pipe.communicate()
     f.close()
 
     if pipe.returncode != 0:
       raise RuntimeError(res[1])
+
+  def get_deploy_order(self):
+    to_visit = set(self.nodes.keys())
+    edges = {}
+    for name, node in self.nodes.items():
+      for req in node.requirements:
+        if req['nodeTemplateName'] in to_visit:
+          to_visit.remove(req['nodeTemplateName'])
+        if req['nodeTemplateName'] not in edges.keys():
+          edges[req['nodeTemplateName']] = set()
+        edges[req['nodeTemplateName']].add(name)
+
+    deploy_order = []
+    while len(to_visit) > 0:
+      n = to_visit.pop()
+      deploy_order.append(n)
+      for req in self.nodes[n].requirements:
+        edges[req["nodeTemplateName"]].remove(n)
+        if len(edges[req["nodeTemplateName"]]) == 0:
+          to_visit.add(req["nodeTemplateName"])
+          edges.pop(req["nodeTemplateName"])
+
+    if len(edges.keys()) > 0:
+      raise RuntimeError('deploy graph has a cycle!')
+
+    deploy_order.reverse()
+    return deploy_order
+
+  def deploy(self):
+    order = self.get_deploy_order()
+    for n in order:
+      self.nodes[n].deploy()
+      print('')
 
 
 def instantiate_template(path):
@@ -166,7 +229,7 @@ def instantiate_template(path):
   template = yaml.safe_load(res[0])
   template_id = idx + 1
   idx += 1
-  template_instance = TemplateInstance(template_id, copy.deepcopy(template))
+  template_instance = TemplateInstance(template_id, copy.deepcopy(template), inputs)
   instance_models[template_id] = template_instance
   return template_instance.idx
 
@@ -182,6 +245,7 @@ def main():
   try:
     root = instantiate_template(args.template)
     instance_models[root].dump_graphviz('test')
+    instance_models[root].deploy()
   except RuntimeError as err:
     print(err.args[0].decode())
 
