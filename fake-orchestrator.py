@@ -20,24 +20,14 @@ substitutions = {
 }
 
 
-instance_models = []
+idx = 0
+instance_models = {}
 
 
 class NodeInstance:
-  metadata = None
-  description = None
-  types = None
-  directives = None
-  properties = None
-  attributes = None
-  requirements = None
-  capabilities = None
-  interfaces = None
-  artifacts = None
-
-  substitution_index = None
-
   def __init__(self, name, template):
+    self.substitution_index = None
+
     self.name = copy.deepcopy(name)
     self.types = copy.deepcopy(template['types'])
     self.directives = copy.deepcopy(template['directives'])
@@ -69,6 +59,13 @@ class NodeInstance:
         else:
           print('please, choose correct option')
 
+  def graphviz(self):
+    if self.substitution_index is not None:
+      return instance_models[self.substitution_index].graphviz()
+    else:
+      types = list(self.types.keys())
+      return f'{self.name} [label="{{{self.name} | {types[0]}}}",shape=record]'
+
   def deploy(self):
     print(f"deploying {self.name}")
     if self.substitution_index is not None:
@@ -79,27 +76,60 @@ class NodeInstance:
 
 
 class TemplateInstance:
-  template = None
-
-  substitution = None
-
-  nodes = {}
-
-  def __init__(self, template):
+  def __init__(self, idx, template):
+    self.idx = idx
     self.template = copy.deepcopy(template)
     self.substitution = copy.deepcopy(template['substitution'])
+    self.nodes = {}
     for name, node in template["nodeTemplates"].items():
       self.nodes[name] = NodeInstance(name, node)
 
   def __repr__(self):
     return ','.join([n.name for n in self.nodes.values()])
 
-  def deploy(self):
+  def graphviz(self):
+    res = f'''
+    subgraph cluster_{self.idx} {{
+      color = black;
+      label = "Instance {self.idx}";
+    '''
     for name, node in self.nodes.items():
-      print(name)
+      if node.substitution_index is not None:
+        res += node.graphviz()
+      else:
+        res += f'''
+        instance_{self.idx}_{node.graphviz()};
+        '''
+    res += '''
+    }
+    '''
+    return res
+
+  def dump_graphviz(self, path):
+    res = f'''
+    digraph G {{
+      {self.graphviz()}
+    }}
+    '''
+
+    f = open(f'{path}.dot', "w")
+    f.write(res)
+    f.close()
+
+    f = open(f'{path}.png', "w")
+    pipe = sp.Popen(
+      f'dot -Tpng {path}.dot', shell=True, stdout=f, stderr=sp.PIPE)
+    res = pipe.communicate()
+    f.close()
+
+    if pipe.returncode != 0:
+      raise RuntimeError(res[1])
 
 
 def instantiate_template(path):
+  global idx
+  global instance_models
+
   print(f'parsing {path}...')
 
   inputs = {}
@@ -134,9 +164,11 @@ def instantiate_template(path):
     raise RuntimeError(res[1])
 
   template = yaml.safe_load(res[0])
-  template_instance = TemplateInstance(copy.deepcopy(template))
-  instance_models.append(template_instance)
-  return len(instance_models) - 1
+  template_id = idx + 1
+  idx += 1
+  template_instance = TemplateInstance(template_id, copy.deepcopy(template))
+  instance_models[template_id] = template_instance
+  return template_instance.idx
 
 
 def parse_arguments():
@@ -149,9 +181,7 @@ def main():
   args = parse_arguments()
   try:
     root = instantiate_template(args.template)
-    print(instance_models)
-    # print('root=', root)
-    # instance_models[root].deploy()
+    instance_models[root].dump_graphviz('test')
   except RuntimeError as err:
     print(err.args[0].decode())
 
