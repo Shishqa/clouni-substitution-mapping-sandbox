@@ -36,7 +36,7 @@ class NodeInstance:
     self.properties = copy.deepcopy(template['properties'])
 
     if "substitute" in self.directives:
-      print(f'node {self.name} is marked substitutable')
+      print(f'\nnode {self.name} is marked substitutable')
       print('please choose desired substitution')
       option_list = []
 
@@ -61,27 +61,28 @@ class NodeInstance:
           print('please, choose correct option')
 
   def graphviz(self):
-    if self.substitution_index is not None:
-      return instance_models[self.substitution_index].graphviz()
-    else:
-      types = list(self.types.keys())
-      props_label = ''
-      if len(self.properties) > 0:
-        props = []
-        for p_name, p_body in self.properties.items():
-          if '$value' in p_body.keys():
-            props.append(f'{p_name}: {p_body["$value"]}')
-          elif '$functionCall' in p_body.keys():
-            props.append(f'{p_name}: {p_body["$functionCall"]["name"]}')
-          else:
-            props.append(p_name)
-        props_label = '|'.join(props)
+    types = list(self.types.keys())
+    props_label = ''
+    if len(self.properties) > 0:
+      props = []
+      for p_name, p_body in self.properties.items():
+        if '$value' in p_body.keys():
+          value = p_body["$value"]
+          if '$string' in value:
+            value = value['$string']
+          props.append(f'{p_name}: {value}')
+        elif '$functionCall' in p_body.keys():
+          props.append(f'{p_name}: {p_body["$functionCall"]["name"]}')
+        else:
+          props.append(p_name)
+      props_label = '|'.join(props)
 
-      return f'{self.name} [label="{{ {self.name} | {types[0]} { f"| {props_label}" if props_label != "" else "" } }}",shape=record]'
+    return f'[label="{{ {self.name} | {types[0]} { f"| {props_label}" if props_label != "" else "" } }}",shape=record]'
 
   def deploy(self):
-    print(f"deploying {self.name}")
+    print(f"\ndeploying {self.name}")
     if self.substitution_index is not None:
+      print('TODO: parse substitution mapping interface')
       instance_models[self.substitution_index].deploy()
     else:
       ops = self.interfaces['Standard']['operations']
@@ -116,14 +117,21 @@ class TemplateInstance:
       '''
     for name, node in self.nodes.items():
       if node.substitution_index is not None:
-        res += node.graphviz()
+        res += f'''
+        instance_{self.idx}_{name} {node.graphviz()};
+        {instance_models[node.substitution_index].graphviz()}
+        '''
       else:
         res += f'''
-        instance_{self.idx}_{node.graphviz()};
+        instance_{self.idx}_{name} {node.graphviz()};
         '''
     for name, node in self.nodes.items():
       if node.substitution_index is not None:
-        continue
+        sub_template = instance_models[node.substitution_index]
+        sub_nodes = list(sub_template.nodes.keys())
+        res += f'''
+        instance_{self.idx}_{node.name} -> instance_{sub_template.idx}_{sub_nodes[0]} [label="substituted with", lhead="cluster_{sub_template.idx}"];
+        '''
 
       for req in node.requirements:
         res += f'''
@@ -138,6 +146,7 @@ class TemplateInstance:
   def dump_graphviz(self, path):
     res = f'''
     digraph G {{
+      compound=true;
       {self.graphviz()}
     }}
     '''
@@ -183,17 +192,17 @@ class TemplateInstance:
     return deploy_order
 
   def deploy(self):
+    print(f'\ndeploying instance_{idx}')
     order = self.get_deploy_order()
     for n in order:
       self.nodes[n].deploy()
-      print('')
 
 
 def instantiate_template(path):
   global idx
   global instance_models
 
-  print(f'parsing {path}...')
+  print(f'\nparsing {path}...')
 
   inputs = {}
 
@@ -206,7 +215,8 @@ def instantiate_template(path):
 
   template = yaml.safe_load(res[0])
 
-  print('please, fill inputs')
+  if len(template['inputs']) > 0:
+    print('\nplease, fill inputs')
   for input_name, input_body in template['inputs'].items():
     if input_body['$value'] is None:
       value = input(f'{input_name}: ')

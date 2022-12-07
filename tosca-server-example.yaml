@@ -50,3 +50,24 @@ topology_template:
             default_instances: 1
       directives:
         - substitute
+
+    software_a:
+      type: tosca.nodes.SoftwareComponent
+      properties:
+        component_version: 1.0.1
+      requirements:
+        - host: server_example_a
+
+    software_b:
+      type: tosca.nodes.SoftwareComponent
+      properties:
+        component_version: 1.0.2
+      requirements:
+        - host: server_example_b
+    
+    software_c:
+      type: tosca.nodes.SoftwareComponent
+      properties:
+        component_version: 1.0.3
+      requirements:
+        - host: server_example_b
