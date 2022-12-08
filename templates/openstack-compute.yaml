@@ -58,6 +58,3 @@ topology_template:
       public_address: [ os_server, public_address ]
       networks: [ os_server, networks ]
       ports: [ os_server, ports ]
-    interfaces:
-      # The interface types must be compatible
-      Standard: [ os_server, Standard ]

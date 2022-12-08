@@ -25,14 +25,22 @@ instance_models = {}
 
 
 class PropertyInstance:
-  def __init__(self, name, node):
+  def __init__(self, name, node, attr='properties'):
     self.node = node
     self.name = name
-    self.definition = copy.deepcopy(node.definition['properties'][name])
+    self.definition = copy.deepcopy(node.definition[attr][name])
 
   def get(self):
     print(self.definition.keys())
-    return self.definition['$value']
+    if '$value' in self.definition.keys():
+      value = self.definition["$value"]
+      if isinstance(value, dict):
+        value = value['$string']
+      return value
+    elif '$functionCall' in self.definition.keys():
+      return self.definition["$functionCall"]["name"]
+    else:
+      raise RuntimeError('Unknown property type')
 
 
 class AttributeInstance:
@@ -47,12 +55,60 @@ class CapabilityInstance:
     self.node = node
     self.name = name
     self.definition = copy.deepcopy(node.definition['capabilities'][name])
+
+    self.find_type()
+
     self.properties = {}
     for prop_name in self.definition['properties'].keys():
       self.properties[prop_name] = PropertyInstance(prop_name, self)
 
+    self.attributes = {}
+    for attr_name in self.definition['attributes'].keys():
+      self.attributes[attr_name] = AttributeInstance(attr_name, self)
+
+  def find_type(self):
+    seen = set(self.definition['types'].keys())
+    for type_name, type_body in self.definition['types'].items():
+      if 'parent' in type_body.keys():
+        seen.remove(type_body['parent'])
+    self.type = seen.pop()
+
   def get_property(self, prop_name):
     return self.properties[prop_name].get()
+
+  def graphviz(self):
+    subgraph_name = f'cluster_{self.node.topology.idx}_{self.node.name}_capability_{self.name}'
+
+    res = f'''
+    subgraph {subgraph_name} {{
+      color = black;
+      graph [rankdir = "TB"];
+      label = "{self.name} ({self.type})";
+      "cap_{subgraph_name}" [shape=point,style=invis];
+    '''
+
+    if len(self.properties) > 0:
+      res += f'''
+      subgraph {subgraph_name}_properties {{
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      '''
+      for p_name, p_body in self.properties.items():
+        res += f'''
+        "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
+        '''
+      res += '''
+      }
+      '''
+
+    res += '''
+    }
+    '''
+
+    return res
 
 
 class RequirementInstance:
@@ -72,16 +128,19 @@ class NodeInstance:
     self.types = copy.deepcopy(self.definition['types'])
     self.directives = copy.deepcopy(self.definition['directives'])
 
-    # self.requirements = copy.deepcopy(template['requirements'])
-    # self.interfaces = copy.deepcopy(template['interfaces'])
-    # self.properties = copy.deepcopy(template['properties'])
+    self.find_type()
 
     if "substitute" in self.directives:
       self.init_substitution()
-      # print(instance_models[self.substitution_index].substitution)
-      # keys = ['capabilityMappings', 'requirementMappings', 'propertyMappings', 'attributeMappings', 'interfaceMappings']
     else:
       self.init()
+
+  def find_type(self):
+    seen = set(self.types.keys())
+    for type_name, type_body in self.types.items():
+      if 'parent' in type_body.keys():
+        seen.remove(type_body['parent'])
+    self.type = seen.pop()
 
   def init(self):
     self.properties = {}
@@ -103,14 +162,27 @@ class NodeInstance:
   def init_substitution(self):
     self.select_substitution()
 
+    self.properties = {}
+
+    self.attributes = {}
+    for attr_name in self.definition['attributes'].keys():
+      self.attributes[attr_name] = AttributeInstance(attr_name, self)
+      if attr_name in ['state', 'tosca_id', 'tosca_name']:
+        continue
+      mapping = instance_models[self.substitution_index].definition['substitution']['attributeMappings'][attr_name]
+      instance_models[self.substitution_index]\
+          .nodes[mapping['nodeTemplateName']]\
+          .attributes[mapping['target']] = self.attributes[attr_name]
+
     self.capabilities = {}
     for cap_name in self.definition['capabilities'].keys():
-      if cap_name == 'feature':
+      self.capabilities[cap_name] = CapabilityInstance(cap_name, self)
+      if cap_name in ['feature']:
         continue
       mapping = instance_models[self.substitution_index].definition['substitution']['capabilityMappings'][cap_name]
-      self.capabilities[cap_name] = instance_models[self.substitution_index].nodes[mapping['nodeTemplateName']].capabilities[mapping['target']]
-
-    print(instance_models[self.substitution_index].definition['substitution']['interfaceMappings'])
+      instance_models[self.substitution_index]\
+        .nodes[mapping['nodeTemplateName']]\
+        .capabilities[mapping['target']] = self.capabilities[cap_name]
 
   def select_substitution(self):
     print(f'\nnode {self.name} is marked substitutable')
@@ -144,23 +216,72 @@ class NodeInstance:
       return self.node.topology.nodes['path'].get_property(args[0], rest)
 
   def graphviz(self):
-    types = list(self.types.keys())
-    props_label = ''
-    if len(self.definition['properties']) > 0:
-      props = []
-      for p_name, p_body in self.definition['properties'].items():
-        if '$value' in p_body.keys():
-          value = p_body["$value"]
-          if '$string' in value:
-            value = value['$string']
-          props.append(f'{p_name}: {value}')
-        elif '$functionCall' in p_body.keys():
-          props.append(f'{p_name}: {p_body["$functionCall"]["name"]}')
-        else:
-          props.append(p_name)
-      props_label = '|'.join(props)
+    subgraph_name = f'cluster_{self.topology.idx}_{self.name}'
 
-    return f'[label="{{ {self.name} | {types[0]} { f"| {props_label}" if props_label != "" else "" } }}",shape=record]'
+    res = f'''
+    subgraph {subgraph_name} {{
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "{self.name} ({self.type})";
+      "node_{subgraph_name}" [shape=point, style=invis];
+    '''
+
+    if len(self.properties) > 0:
+      res += f'''
+      subgraph {subgraph_name}_properties {{
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      '''
+      for p_name, p_body in self.properties.items():
+        res += f'''
+        "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
+        '''
+      res += '''
+      }
+      '''
+
+    res += f'''
+    subgraph {subgraph_name}_capabilities {{
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    '''
+    for cap_name, cap in self.capabilities.items():
+      if cap.node is not self:
+        res += f'''
+        subgraph {subgraph_name}_capability_{cap_name} {{
+          label="{cap_name} ({cap.type})";
+          "cap_{subgraph_name}_capability_{cap_name}" [shape=point,style=invis];
+        }}
+        "cap_{subgraph_name}_capability_{cap_name}" -> "cap_cluster_{cap.node.topology.idx}_{cap.node.name}_capability_{cap.name}" [
+          label="substitute",
+          penwidth=3,
+          weight=1,
+          color=red,
+          ltail={subgraph_name}_capability_{cap_name},
+          lhead=cluster_{cap.node.topology.idx}_{cap.node.name}_capability_{cap.name}
+        ];
+        '''
+      else:
+        res += cap.graphviz()
+    res += '''
+    }
+    '''
+
+    res += '''
+    }
+    '''
+
+    if self.substitution_index is not None:
+      res += instance_models[self.substitution_index].graphviz()
+
+
+    return res
 
   def deploy(self):
     print(f"\ndeploying {self.name}")
@@ -179,11 +300,10 @@ class TopologyTemplateInstance:
   def __init__(self, idx, definition):
     self.idx = idx
     self.definition = copy.deepcopy(definition)
-    # self.substitution = copy.deepcopy(template['substitution'])
-    # self.inputs = copy.deepcopy(inputs)
-    # for input_name, input_body in self.template['inputs'].items():
-    #   print(input_name)
-    #   print(input_body)
+
+    self.inputs = {}
+    for input_name in self.definition['inputs'].keys():
+      self.inputs[input_name] = PropertyInstance(input_name, self, attr='inputs')
 
     self.instantiate_nodes()
 
@@ -195,36 +315,45 @@ class TopologyTemplateInstance:
   def graphviz(self):
     res = f'''
     subgraph cluster_{self.idx} {{
-      color = black;
+      penwidth=5;
+      graph [rankdir = "TB"];
+      color = green;
       label = "Instance {self.idx}";
     '''
-    # if len(self.definition['inputs']) > 0:
-    #   res += f'''
-    #     instance_{self.idx}_inputs [label="{{ inputs | { '|'.join(f"{x[0]}: {x[1]}" for x in self.inputs.items()) } }}", shape=record];
-    #   '''
-    for name, node in self.nodes.items():
-      if node.substitution_index is not None:
+    if len(self.inputs) > 0:
+      res += f'''
+      subgraph cluster_{self.idx}_inputs {{
+        penwidth=1;
+        style=filled;
+        fillcolor = yellow;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "inputs";
+      '''
+      for p_name, p_body in self.inputs.items():
         res += f'''
-        instance_{self.idx}_{name} {node.graphviz()};
-        {instance_models[node.substitution_index].graphviz()}
+        "cluster_{self.idx}_inputs_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
         '''
-      else:
-        res += f'''
-        instance_{self.idx}_{name} {node.graphviz()};
-        '''
+      res += '''
+      }
+      '''
+
     for name, node in self.nodes.items():
-      if node.substitution_index is not None:
-        sub_template = instance_models[node.substitution_index]
-        sub_nodes = list(sub_template.nodes.keys())
-        res += f'''
-        instance_{self.idx}_{node.name} -> instance_{sub_template.idx}_{sub_nodes[0]} [label="substituted with", lhead="cluster_{sub_template.idx}"];
+      res += f'''
+        {node.graphviz()}
         '''
 
+    for name, node in self.nodes.items():
+      node_subgraph_name = f'cluster_{node.topology.idx}_{node.name}'
       for req in node.definition['requirements']:
         res += f'''
-        instance_{self.idx}_{node.name} -> instance_{self.idx}_{req['nodeTemplateName']};
+        "node_{node_subgraph_name}" -> "node_cluster_{node.topology.idx}_{req['nodeTemplateName']}" [
+          penwidth=3,
+          weight=1,
+          ltail={node_subgraph_name}, 
+          lhead=cluster_{node.topology.idx}_{req['nodeTemplateName']}
+        ];
         '''
-
     res += '''
     }
     '''
@@ -233,7 +362,11 @@ class TopologyTemplateInstance:
   def dump_graphviz(self, path):
     res = f'''
     digraph G {{
+      margin=10;
       compound=true;
+      graph [ranksep=3];
+      graph [rankdir = "TB"];
+      node [shape = record];
       {self.graphviz()}
     }}
     '''
@@ -242,9 +375,9 @@ class TopologyTemplateInstance:
     f.write(res)
     f.close()
 
-    f = open(f'{path}.png', "w")
+    f = open(f'{path}.svg', "w")
     pipe = sp.Popen(
-        f'dot -Tpng {path}.dot', shell=True, stdout=f, stderr=sp.PIPE)
+        f'dot -Tsvg {path}.dot', shell=True, stdout=f, stderr=sp.PIPE)
     res = pipe.communicate()
     f.close()
 
@@ -317,7 +450,7 @@ def instantiate_template(path):
         ','.join([f'{item[0]}={item[1]}' for item in inputs.items()]) + '"'
 
   pipe = sp.Popen(
-      f'puccini-tosca parse {input_str} {path}', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+      f'puccini-tosca parse -s 10 {input_str} {path}', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
   res = pipe.communicate()
 
   if pipe.returncode != 0:
