@@ -1,0 +1,3224 @@
+
+    digraph G {
+      margin=10;
+      compound=true;
+      graph [ranksep=3];
+      graph [rankdir = "TB"];
+      node [shape = record];
+      
+    subgraph cluster_1 {
+      penwidth=5;
+      graph [rankdir = "TB"];
+      color = green;
+      label = "Instance 1";
+    
+      subgraph cluster_1_inputs {
+        penwidth=1;
+        style=filled;
+        fillcolor = yellow;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "inputs";
+      
+        "cluster_1_inputs_prop_cluster_name" [label="cluster_name = a"];
+        
+        "cluster_1_inputs_prop_dns_ip" [label="dns_ip = a"];
+        
+        "cluster_1_inputs_prop_kubernetes_version" [label="kubernetes_version = 1.2.3"];
+        
+        "cluster_1_inputs_prop_pod_cidr" [label="pod_cidr = a"];
+        
+        "cluster_1_inputs_prop_service_cidr" [label="service_cidr = a"];
+        
+      }
+      
+        
+    subgraph cluster_1_admin_cert {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "admin_cert (kubetos.nodes.Certificate)";
+      "node_cluster_1_admin_cert" [shape=point, style=invis];
+    
+      subgraph cluster_1_admin_cert_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_admin_cert_prop_common_name" [label="common_name = kubernetes-admin"];
+        
+        "cluster_1_admin_cert_prop_hostnames" [label="hostnames = []"];
+        
+        "cluster_1_admin_cert_prop_organisation" [label="organisation = system:masters"];
+        
+      }
+      
+    subgraph cluster_1_admin_cert_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_admin_cert_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_admin_cert_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_admin_cert_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_admin_cert_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_admin_kubeconfig {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "admin_kubeconfig (kubetos.nodes.Kubeconfig)";
+      "node_cluster_1_admin_kubeconfig" [shape=point, style=invis];
+    
+    subgraph cluster_1_admin_kubeconfig_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_admin_kubeconfig_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_admin_kubeconfig_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_admin_user {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "admin_user (kubetos.nodes.Kubernetes.User)";
+      "node_cluster_1_admin_user" [shape=point, style=invis];
+    
+    subgraph cluster_1_admin_user_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_admin_user_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_admin_user_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_admin_user_capability_user {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "user (kubetos.capabilities.Kubernetes.User)";
+      "cap_cluster_1_admin_user_capability_user" [shape=point,style=invis];
+    
+      subgraph cluster_1_admin_user_capability_user_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_admin_user_capability_user_prop_name" [label="name = default-admin"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_apiserver {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "apiserver (kubetos.nodes.Kube.APIServer)";
+      "node_cluster_1_apiserver" [shape=point, style=invis];
+    
+      subgraph cluster_1_apiserver_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_apiserver_prop_component_version" [label="component_version = 1.2.3"];
+        
+        "cluster_1_apiserver_prop_service_cidr" [label="service_cidr = a"];
+        
+      }
+      
+    subgraph cluster_1_apiserver_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_apiserver_capability_access_address {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "access_address (tosca::Endpoint)";
+      "cap_cluster_1_apiserver_capability_access_address" [shape=point,style=invis];
+    
+      subgraph cluster_1_apiserver_capability_access_address_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_apiserver_capability_access_address_prop_initiator" [label="initiator = source"];
+        
+        "cluster_1_apiserver_capability_access_address_prop_network_name" [label="network_name = PRIVATE"];
+        
+        "cluster_1_apiserver_capability_access_address_prop_port" [label="port = 6443"];
+        
+        "cluster_1_apiserver_capability_access_address_prop_protocol" [label="protocol = tcp"];
+        
+        "cluster_1_apiserver_capability_access_address_prop_secure" [label="secure = False"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_apiserver_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_apiserver_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_cni {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cni (kubetos.nodes.CNI)";
+      "node_cluster_1_cni" [shape=point, style=invis];
+    
+      subgraph cluster_1_cni_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_cni_prop_component_version" [label="component_version = 1.0.1"];
+        
+      }
+      
+    subgraph cluster_1_cni_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_cni_capability_cni {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cni (kubetos.capabilities.CNI)";
+      "cap_cluster_1_cni_capability_cni" [shape=point,style=invis];
+    
+      subgraph cluster_1_cni_capability_cni_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_cni_capability_cni_prop_binary_dir" [label="binary_dir = /opt/cni/bin"];
+        
+        "cluster_1_cni_capability_cni_prop_config_dir" [label="config_dir = /etc/cni/net.d"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_cni_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_cni_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_cni_worker {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cni_worker (kubetos.nodes.CNI)";
+      "node_cluster_1_cni_worker" [shape=point, style=invis];
+    
+      subgraph cluster_1_cni_worker_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_cni_worker_prop_component_version" [label="component_version = 1.0.1"];
+        
+      }
+      
+    subgraph cluster_1_cni_worker_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_cni_worker_capability_cni {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cni (kubetos.capabilities.CNI)";
+      "cap_cluster_1_cni_worker_capability_cni" [shape=point,style=invis];
+    
+      subgraph cluster_1_cni_worker_capability_cni_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_cni_worker_capability_cni_prop_binary_dir" [label="binary_dir = /opt/cni/bin"];
+        
+        "cluster_1_cni_worker_capability_cni_prop_config_dir" [label="config_dir = /etc/cni/net.d"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_cni_worker_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_cni_worker_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_compute {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "compute (openstack.nodes.Compute)";
+      "node_cluster_1_compute" [shape=point, style=invis];
+    
+      subgraph cluster_1_compute_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_compute_prop_flavor" [label="flavor = Memory2.small.s50"];
+        
+        "cluster_1_compute_prop_floating_ip_pool" [label="floating_ip_pool = ispras"];
+        
+        "cluster_1_compute_prop_image" [label="image = Ubuntu Server 20.04 LTS (Focal Fossa)"];
+        
+        "cluster_1_compute_prop_key_name" [label="key_name = shishqa"];
+        
+        "cluster_1_compute_prop_name" [label="name = kubetos--control-plane"];
+        
+        "cluster_1_compute_prop_network" [label="network = net-for-intra-sandbox"];
+        
+      }
+      
+    subgraph cluster_1_compute_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_compute_capability_binding {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "binding (tosca::Bindable)";
+      "cap_cluster_1_compute_capability_binding" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_compute_capability_endpoint {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "endpoint (tosca::Endpoint.Admin)";
+      "cap_cluster_1_compute_capability_endpoint" [shape=point,style=invis];
+    
+      subgraph cluster_1_compute_capability_endpoint_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_compute_capability_endpoint_prop_initiator" [label="initiator = source"];
+        
+        "cluster_1_compute_capability_endpoint_prop_network_name" [label="network_name = PRIVATE"];
+        
+        "cluster_1_compute_capability_endpoint_prop_protocol" [label="protocol = tcp"];
+        
+        "cluster_1_compute_capability_endpoint_prop_secure" [label="secure = True"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_compute_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_compute_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_compute_capability_host {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "host (tosca::Compute)";
+      "cap_cluster_1_compute_capability_host" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_compute_capability_os {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "os (tosca::OperatingSystem)";
+      "cap_cluster_1_compute_capability_os" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_compute_capability_scalable {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "scalable (tosca::Scalable)";
+      "cap_cluster_1_compute_capability_scalable" [shape=point,style=invis];
+    
+      subgraph cluster_1_compute_capability_scalable_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_compute_capability_scalable_prop_max_instances" [label="max_instances = 1"];
+        
+        "cluster_1_compute_capability_scalable_prop_min_instances" [label="min_instances = 1"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_compute_worker {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "compute_worker (openstack.nodes.Compute)";
+      "node_cluster_1_compute_worker" [shape=point, style=invis];
+    
+      subgraph cluster_1_compute_worker_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_compute_worker_prop_flavor" [label="flavor = Memory2.small.s50"];
+        
+        "cluster_1_compute_worker_prop_floating_ip_pool" [label="floating_ip_pool = ispras"];
+        
+        "cluster_1_compute_worker_prop_image" [label="image = Ubuntu Server 20.04 LTS (Focal Fossa)"];
+        
+        "cluster_1_compute_worker_prop_key_name" [label="key_name = shishqa"];
+        
+        "cluster_1_compute_worker_prop_name" [label="name = kubetos--worker"];
+        
+        "cluster_1_compute_worker_prop_network" [label="network = net-for-intra-sandbox"];
+        
+      }
+      
+    subgraph cluster_1_compute_worker_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_compute_worker_capability_binding {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "binding (tosca::Bindable)";
+      "cap_cluster_1_compute_worker_capability_binding" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_compute_worker_capability_endpoint {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "endpoint (tosca::Endpoint.Admin)";
+      "cap_cluster_1_compute_worker_capability_endpoint" [shape=point,style=invis];
+    
+      subgraph cluster_1_compute_worker_capability_endpoint_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_compute_worker_capability_endpoint_prop_initiator" [label="initiator = source"];
+        
+        "cluster_1_compute_worker_capability_endpoint_prop_network_name" [label="network_name = PRIVATE"];
+        
+        "cluster_1_compute_worker_capability_endpoint_prop_protocol" [label="protocol = tcp"];
+        
+        "cluster_1_compute_worker_capability_endpoint_prop_secure" [label="secure = True"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_compute_worker_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_compute_worker_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_compute_worker_capability_host {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "host (tosca::Compute)";
+      "cap_cluster_1_compute_worker_capability_host" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_compute_worker_capability_os {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "os (tosca::OperatingSystem)";
+      "cap_cluster_1_compute_worker_capability_os" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_compute_worker_capability_scalable {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "scalable (tosca::Scalable)";
+      "cap_cluster_1_compute_worker_capability_scalable" [shape=point,style=invis];
+    
+      subgraph cluster_1_compute_worker_capability_scalable_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_compute_worker_capability_scalable_prop_max_instances" [label="max_instances = 1"];
+        
+        "cluster_1_compute_worker_capability_scalable_prop_min_instances" [label="min_instances = 1"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_controller_manager {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "controller_manager (kubetos.nodes.Kube.ControllerManager)";
+      "node_cluster_1_controller_manager" [shape=point, style=invis];
+    
+      subgraph cluster_1_controller_manager_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_controller_manager_prop_cluster_cidr" [label="cluster_cidr = a"];
+        
+        "cluster_1_controller_manager_prop_component_version" [label="component_version = 1.2.3"];
+        
+        "cluster_1_controller_manager_prop_service_cidr" [label="service_cidr = a"];
+        
+      }
+      
+    subgraph cluster_1_controller_manager_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_controller_manager_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_controller_manager_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_controller_manager_kubeconfig {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "controller_manager_kubeconfig (kubetos.nodes.Kubeconfig)";
+      "node_cluster_1_controller_manager_kubeconfig" [shape=point, style=invis];
+    
+    subgraph cluster_1_controller_manager_kubeconfig_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_controller_manager_kubeconfig_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_controller_manager_kubeconfig_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_controller_manager_user {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "controller_manager_user (kubetos.nodes.Kubernetes.User)";
+      "node_cluster_1_controller_manager_user" [shape=point, style=invis];
+    
+    subgraph cluster_1_controller_manager_user_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_controller_manager_user_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_controller_manager_user_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_controller_manager_user_capability_user {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "user (kubetos.capabilities.Kubernetes.User)";
+      "cap_cluster_1_controller_manager_user_capability_user" [shape=point,style=invis];
+    
+      subgraph cluster_1_controller_manager_user_capability_user_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_controller_manager_user_capability_user_prop_name" [label="name = default-controller-manager"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_coredns {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "coredns (kubetos.nodes.CoreDNS)";
+      "node_cluster_1_coredns" [shape=point, style=invis];
+    
+      subgraph cluster_1_coredns_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_coredns_prop_component_version" [label="component_version = 1.9.2"];
+        
+      }
+      
+    subgraph cluster_1_coredns_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_coredns_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_coredns_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_crictl {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "crictl (kubetos.nodes.Crictl)";
+      "node_cluster_1_crictl" [shape=point, style=invis];
+    
+      subgraph cluster_1_crictl_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_crictl_prop_component_version" [label="component_version = 1.2.3"];
+        
+      }
+      
+    subgraph cluster_1_crictl_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_crictl_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_crictl_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_crictl_worker {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "crictl_worker (kubetos.nodes.Crictl)";
+      "node_cluster_1_crictl_worker" [shape=point, style=invis];
+    
+      subgraph cluster_1_crictl_worker_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_crictl_worker_prop_component_version" [label="component_version = 1.2.3"];
+        
+      }
+      
+    subgraph cluster_1_crictl_worker_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_crictl_worker_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_crictl_worker_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_crio {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "crio (kubetos.nodes.CRI-O)";
+      "node_cluster_1_crio" [shape=point, style=invis];
+    
+      subgraph cluster_1_crio_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_crio_prop_component_version" [label="component_version = 1.21"];
+        
+      }
+      
+    subgraph cluster_1_crio_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_crio_capability_cri {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cri (kubetos.capabilities.CRI)";
+      "cap_cluster_1_crio_capability_cri" [shape=point,style=invis];
+    
+      subgraph cluster_1_crio_capability_cri_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_crio_capability_cri_prop_initiator" [label="initiator = source"];
+        
+        "cluster_1_crio_capability_cri_prop_network_name" [label="network_name = PRIVATE"];
+        
+        "cluster_1_crio_capability_cri_prop_protocol" [label="protocol = rpc"];
+        
+        "cluster_1_crio_capability_cri_prop_secure" [label="secure = False"];
+        
+        "cluster_1_crio_capability_cri_prop_url_path" [label="url_path = /var/run/crio/crio.sock"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_crio_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_crio_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_crio_worker {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "crio_worker (kubetos.nodes.CRI-O)";
+      "node_cluster_1_crio_worker" [shape=point, style=invis];
+    
+      subgraph cluster_1_crio_worker_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_crio_worker_prop_component_version" [label="component_version = 1.21"];
+        
+      }
+      
+    subgraph cluster_1_crio_worker_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_crio_worker_capability_cri {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cri (kubetos.capabilities.CRI)";
+      "cap_cluster_1_crio_worker_capability_cri" [shape=point,style=invis];
+    
+      subgraph cluster_1_crio_worker_capability_cri_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_crio_worker_capability_cri_prop_initiator" [label="initiator = source"];
+        
+        "cluster_1_crio_worker_capability_cri_prop_network_name" [label="network_name = PRIVATE"];
+        
+        "cluster_1_crio_worker_capability_cri_prop_protocol" [label="protocol = rpc"];
+        
+        "cluster_1_crio_worker_capability_cri_prop_secure" [label="secure = False"];
+        
+        "cluster_1_crio_worker_capability_cri_prop_url_path" [label="url_path = /var/run/crio/crio.sock"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_crio_worker_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_crio_worker_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_etcd {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "etcd (kubetos.nodes.Etcd)";
+      "node_cluster_1_etcd" [shape=point, style=invis];
+    
+      subgraph cluster_1_etcd_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_etcd_prop_backup_retention_count" [label="backup_retention_count = -1"];
+        
+        "cluster_1_etcd_prop_component_version" [label="component_version = 3.4.13"];
+        
+        "cluster_1_etcd_prop_election_timeout" [label="election_timeout = 5 s"];
+        
+        "cluster_1_etcd_prop_heartbeat_interval" [label="heartbeat_interval = 0.25 s"];
+        
+        "cluster_1_etcd_prop_max_snapshots" [label="max_snapshots = 0"];
+        
+        "cluster_1_etcd_prop_max_wals" [label="max_wals = 0"];
+        
+        "cluster_1_etcd_prop_quota_backend_bytes" [label="quota_backend_bytes = 2147483648 B"];
+        
+        "cluster_1_etcd_prop_snapshot_count" [label="snapshot_count = 10000"];
+        
+      }
+      
+    subgraph cluster_1_etcd_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_etcd_capability_access_address {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "access_address (kubetos.capabilities.Etcd.Endpoint.Access)";
+      "cap_cluster_1_etcd_capability_access_address" [shape=point,style=invis];
+    
+      subgraph cluster_1_etcd_capability_access_address_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_etcd_capability_access_address_prop_api_version" [label="api_version = v2"];
+        
+        "cluster_1_etcd_capability_access_address_prop_initiator" [label="initiator = source"];
+        
+        "cluster_1_etcd_capability_access_address_prop_network_name" [label="network_name = PRIVATE"];
+        
+        "cluster_1_etcd_capability_access_address_prop_port" [label="port = 2379"];
+        
+        "cluster_1_etcd_capability_access_address_prop_protocol" [label="protocol = tcp"];
+        
+        "cluster_1_etcd_capability_access_address_prop_secure" [label="secure = False"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_etcd_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_etcd_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_etcd_capability_peer_address {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "peer_address (kubetos.capabilities.Etcd.Endpoint.Peer)";
+      "cap_cluster_1_etcd_capability_peer_address" [shape=point,style=invis];
+    
+      subgraph cluster_1_etcd_capability_peer_address_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_etcd_capability_peer_address_prop_initiator" [label="initiator = source"];
+        
+        "cluster_1_etcd_capability_peer_address_prop_network_name" [label="network_name = PRIVATE"];
+        
+        "cluster_1_etcd_capability_peer_address_prop_port" [label="port = 2380"];
+        
+        "cluster_1_etcd_capability_peer_address_prop_protocol" [label="protocol = tcp"];
+        
+        "cluster_1_etcd_capability_peer_address_prop_secure" [label="secure = False"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_etcd_cluster {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "etcd_cluster (kubetos.nodes.Etcd.Cluster)";
+      "node_cluster_1_etcd_cluster" [shape=point, style=invis];
+    
+    subgraph cluster_1_etcd_cluster_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_etcd_cluster_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_etcd_cluster_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_flannel {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "flannel (kubetos.nodes.Flannel)";
+      "node_cluster_1_flannel" [shape=point, style=invis];
+    
+      subgraph cluster_1_flannel_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_flannel_prop_component_version" [label="component_version = 0.17.0"];
+        
+        "cluster_1_flannel_prop_pod_cidr" [label="pod_cidr = a"];
+        
+      }
+      
+    subgraph cluster_1_flannel_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_flannel_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_flannel_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kata {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kata (kubetos.nodes.Kata)";
+      "node_cluster_1_kata" [shape=point, style=invis];
+    
+      subgraph cluster_1_kata_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kata_prop_component_version" [label="component_version = 2.1.0"];
+        
+      }
+      
+    subgraph cluster_1_kata_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kata_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kata_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kata_capability_oci {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "oci (kubetos.capabilities.OCI.Plugin)";
+      "cap_cluster_1_kata_capability_oci" [shape=point,style=invis];
+    
+      subgraph cluster_1_kata_capability_oci_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_kata_capability_oci_prop_spec" [label="spec = /opt/kata/bin/kata-runtime"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kata_worker {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kata_worker (kubetos.nodes.Kata)";
+      "node_cluster_1_kata_worker" [shape=point, style=invis];
+    
+      subgraph cluster_1_kata_worker_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kata_worker_prop_component_version" [label="component_version = 2.1.0"];
+        
+      }
+      
+    subgraph cluster_1_kata_worker_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kata_worker_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kata_worker_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kata_worker_capability_oci {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "oci (kubetos.capabilities.OCI.Plugin)";
+      "cap_cluster_1_kata_worker_capability_oci" [shape=point,style=invis];
+    
+      subgraph cluster_1_kata_worker_capability_oci_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_kata_worker_capability_oci_prop_spec" [label="spec = /run/kata-containers"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_apiserver_cert {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_apiserver_cert (kubetos.nodes.Certificate)";
+      "node_cluster_1_kube_apiserver_cert" [shape=point, style=invis];
+    
+      subgraph cluster_1_kube_apiserver_cert_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kube_apiserver_cert_prop_common_name" [label="common_name = kubernetes"];
+        
+        "cluster_1_kube_apiserver_cert_prop_hostnames" [label="hostnames = ['kubetos--control-plane', '10.32.0.1', '127.0.0.1']"];
+        
+        "cluster_1_kube_apiserver_cert_prop_organisation" [label="organisation = kubernetes"];
+        
+      }
+      
+    subgraph cluster_1_kube_apiserver_cert_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_apiserver_cert_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_kube_apiserver_cert_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kube_apiserver_cert_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_apiserver_cert_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_apiserver_client_cert {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_apiserver_client_cert (kubetos.nodes.Certificate)";
+      "node_cluster_1_kube_apiserver_client_cert" [shape=point, style=invis];
+    
+      subgraph cluster_1_kube_apiserver_client_cert_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kube_apiserver_client_cert_prop_common_name" [label="common_name = kubernetes"];
+        
+        "cluster_1_kube_apiserver_client_cert_prop_hostnames" [label="hostnames = []"];
+        
+        "cluster_1_kube_apiserver_client_cert_prop_organisation" [label="organisation = system:masters"];
+        
+      }
+      
+    subgraph cluster_1_kube_apiserver_client_cert_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_apiserver_client_cert_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_kube_apiserver_client_cert_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kube_apiserver_client_cert_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_apiserver_client_cert_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_cluster {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_cluster (kubetos.nodes.Kubernetes.Cluster)";
+      "node_cluster_1_kube_cluster" [shape=point, style=invis];
+    
+    subgraph cluster_1_kube_cluster_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_cluster_capability_cluster {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cluster (kubetos.capabilities.Kubernetes.Cluster)";
+      "cap_cluster_1_kube_cluster_capability_cluster" [shape=point,style=invis];
+    
+      subgraph cluster_1_kube_cluster_capability_cluster_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_kube_cluster_capability_cluster_prop_name" [label="name = kubernetes-cluster"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_kube_cluster_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_cluster_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_controller_manager_cert {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_controller_manager_cert (kubetos.nodes.Certificate)";
+      "node_cluster_1_kube_controller_manager_cert" [shape=point, style=invis];
+    
+      subgraph cluster_1_kube_controller_manager_cert_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kube_controller_manager_cert_prop_common_name" [label="common_name = system:kube-controller-manager"];
+        
+        "cluster_1_kube_controller_manager_cert_prop_hostnames" [label="hostnames = []"];
+        
+        "cluster_1_kube_controller_manager_cert_prop_organisation" [label="organisation = system:kube-controller-manager"];
+        
+      }
+      
+    subgraph cluster_1_kube_controller_manager_cert_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_controller_manager_cert_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_kube_controller_manager_cert_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kube_controller_manager_cert_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_controller_manager_cert_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_local_cluster {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_local_cluster (kubetos.nodes.Kubernetes.Cluster)";
+      "node_cluster_1_kube_local_cluster" [shape=point, style=invis];
+    
+    subgraph cluster_1_kube_local_cluster_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_local_cluster_capability_cluster {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cluster (kubetos.capabilities.Kubernetes.Cluster)";
+      "cap_cluster_1_kube_local_cluster_capability_cluster" [shape=point,style=invis];
+    
+      subgraph cluster_1_kube_local_cluster_capability_cluster_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_kube_local_cluster_capability_cluster_prop_name" [label="name = test-cluster"];
+        
+      }
+      
+    }
+    
+    subgraph cluster_1_kube_local_cluster_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_local_cluster_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_proxy {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_proxy (kubetos.nodes.Kube.Proxy)";
+      "node_cluster_1_kube_proxy" [shape=point, style=invis];
+    
+      subgraph cluster_1_kube_proxy_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kube_proxy_prop_cluster_cidr" [label="cluster_cidr = a"];
+        
+        "cluster_1_kube_proxy_prop_component_version" [label="component_version = 1.2.3"];
+        
+      }
+      
+    subgraph cluster_1_kube_proxy_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_proxy_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_proxy_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_proxy_cert {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_proxy_cert (kubetos.nodes.Certificate)";
+      "node_cluster_1_kube_proxy_cert" [shape=point, style=invis];
+    
+      subgraph cluster_1_kube_proxy_cert_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kube_proxy_cert_prop_common_name" [label="common_name = system:kube-proxy"];
+        
+        "cluster_1_kube_proxy_cert_prop_hostnames" [label="hostnames = []"];
+        
+        "cluster_1_kube_proxy_cert_prop_organisation" [label="organisation = system:node-proxier"];
+        
+      }
+      
+    subgraph cluster_1_kube_proxy_cert_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_proxy_cert_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_kube_proxy_cert_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kube_proxy_cert_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_proxy_cert_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_proxy_kubeconfig {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_proxy_kubeconfig (kubetos.nodes.Kubeconfig)";
+      "node_cluster_1_kube_proxy_kubeconfig" [shape=point, style=invis];
+    
+    subgraph cluster_1_kube_proxy_kubeconfig_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_proxy_kubeconfig_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_proxy_kubeconfig_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_proxy_user {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_proxy_user (kubetos.nodes.Kubernetes.User)";
+      "node_cluster_1_kube_proxy_user" [shape=point, style=invis];
+    
+    subgraph cluster_1_kube_proxy_user_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_proxy_user_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_proxy_user_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kube_proxy_user_capability_user {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "user (kubetos.capabilities.Kubernetes.User)";
+      "cap_cluster_1_kube_proxy_user_capability_user" [shape=point,style=invis];
+    
+      subgraph cluster_1_kube_proxy_user_capability_user_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_kube_proxy_user_capability_user_prop_name" [label="name = default-proxy"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kube_scheduler_cert {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kube_scheduler_cert (kubetos.nodes.Certificate)";
+      "node_cluster_1_kube_scheduler_cert" [shape=point, style=invis];
+    
+      subgraph cluster_1_kube_scheduler_cert_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kube_scheduler_cert_prop_common_name" [label="common_name = system:kube-scheduler"];
+        
+        "cluster_1_kube_scheduler_cert_prop_hostnames" [label="hostnames = []"];
+        
+        "cluster_1_kube_scheduler_cert_prop_organisation" [label="organisation = system:kube-scheduler"];
+        
+      }
+      
+    subgraph cluster_1_kube_scheduler_cert_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kube_scheduler_cert_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_kube_scheduler_cert_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kube_scheduler_cert_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kube_scheduler_cert_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubectl {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubectl (kubetos.nodes.Kubectl)";
+      "node_cluster_1_kubectl" [shape=point, style=invis];
+    
+      subgraph cluster_1_kubectl_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kubectl_prop_component_version" [label="component_version = 1.2.3"];
+        
+      }
+      
+    subgraph cluster_1_kubectl_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubectl_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubectl_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubelet {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet (kubetos.nodes.Kubelet)";
+      "node_cluster_1_kubelet" [shape=point, style=invis];
+    
+      subgraph cluster_1_kubelet_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kubelet_prop_component_version" [label="component_version = 1.2.3"];
+        
+        "cluster_1_kubelet_prop_pod_cidr" [label="pod_cidr = a"];
+        
+      }
+      
+    subgraph cluster_1_kubelet_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubelet_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubelet_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kubelet_capability_kubelet {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet (kubetos.capabilities.Kubelet)";
+      "cap_cluster_1_kubelet_capability_kubelet" [shape=point,style=invis];
+    
+      subgraph cluster_1_kubelet_capability_kubelet_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_kubelet_capability_kubelet_prop_static_pod_path" [label="static_pod_path = /etc/kubernetes/manifests"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubelet_cert {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet_cert (kubetos.nodes.Certificate)";
+      "node_cluster_1_kubelet_cert" [shape=point, style=invis];
+    
+      subgraph cluster_1_kubelet_cert_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kubelet_cert_prop_common_name" [label="common_name = system:node:kubetos--control-plane"];
+        
+        "cluster_1_kubelet_cert_prop_hostnames" [label="hostnames = ['kubetos--control-plane', '127.0.0.1']"];
+        
+        "cluster_1_kubelet_cert_prop_organisation" [label="organisation = system:nodes"];
+        
+      }
+      
+    subgraph cluster_1_kubelet_cert_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubelet_cert_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_kubelet_cert_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kubelet_cert_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubelet_cert_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubelet_kubeconfig {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet_kubeconfig (kubetos.nodes.Kubeconfig)";
+      "node_cluster_1_kubelet_kubeconfig" [shape=point, style=invis];
+    
+    subgraph cluster_1_kubelet_kubeconfig_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubelet_kubeconfig_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubelet_kubeconfig_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubelet_user {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet_user (kubetos.nodes.Kubernetes.User)";
+      "node_cluster_1_kubelet_user" [shape=point, style=invis];
+    
+    subgraph cluster_1_kubelet_user_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubelet_user_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubelet_user_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kubelet_user_capability_user {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "user (kubetos.capabilities.Kubernetes.User)";
+      "cap_cluster_1_kubelet_user_capability_user" [shape=point,style=invis];
+    
+      subgraph cluster_1_kubelet_user_capability_user_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_kubelet_user_capability_user_prop_name" [label="name = default-auth"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubelet_worker {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet_worker (kubetos.nodes.Kubelet)";
+      "node_cluster_1_kubelet_worker" [shape=point, style=invis];
+    
+      subgraph cluster_1_kubelet_worker_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kubelet_worker_prop_component_version" [label="component_version = 1.2.3"];
+        
+        "cluster_1_kubelet_worker_prop_pod_cidr" [label="pod_cidr = a"];
+        
+      }
+      
+    subgraph cluster_1_kubelet_worker_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubelet_worker_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubelet_worker_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kubelet_worker_capability_kubelet {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet (kubetos.capabilities.Kubelet)";
+      "cap_cluster_1_kubelet_worker_capability_kubelet" [shape=point,style=invis];
+    
+      subgraph cluster_1_kubelet_worker_capability_kubelet_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_kubelet_worker_capability_kubelet_prop_static_pod_path" [label="static_pod_path = /etc/kubernetes/manifests"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubelet_worker_cert {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet_worker_cert (kubetos.nodes.Certificate)";
+      "node_cluster_1_kubelet_worker_cert" [shape=point, style=invis];
+    
+      subgraph cluster_1_kubelet_worker_cert_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kubelet_worker_cert_prop_common_name" [label="common_name = system:node:kubetos--worker"];
+        
+        "cluster_1_kubelet_worker_cert_prop_hostnames" [label="hostnames = ['kubetos--worker', '127.0.0.1']"];
+        
+        "cluster_1_kubelet_worker_cert_prop_organisation" [label="organisation = system:nodes"];
+        
+      }
+      
+    subgraph cluster_1_kubelet_worker_cert_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubelet_worker_cert_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_kubelet_worker_cert_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kubelet_worker_cert_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubelet_worker_cert_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubelet_worker_kubeconfig {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet_worker_kubeconfig (kubetos.nodes.Kubeconfig)";
+      "node_cluster_1_kubelet_worker_kubeconfig" [shape=point, style=invis];
+    
+    subgraph cluster_1_kubelet_worker_kubeconfig_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubelet_worker_kubeconfig_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubelet_worker_kubeconfig_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubelet_worker_user {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubelet_worker_user (kubetos.nodes.Kubernetes.User)";
+      "node_cluster_1_kubelet_worker_user" [shape=point, style=invis];
+    
+    subgraph cluster_1_kubelet_worker_user_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubelet_worker_user_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubelet_worker_user_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kubelet_worker_user_capability_user {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "user (kubetos.capabilities.Kubernetes.User)";
+      "cap_cluster_1_kubelet_worker_user_capability_user" [shape=point,style=invis];
+    
+      subgraph cluster_1_kubelet_worker_user_capability_user_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_kubelet_worker_user_capability_user_prop_name" [label="name = default-auth"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_kubernetes_ca {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "kubernetes_ca (kubetos.nodes.CertificateAuthority)";
+      "node_cluster_1_kubernetes_ca" [shape=point, style=invis];
+    
+      subgraph cluster_1_kubernetes_ca_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_kubernetes_ca_prop_common_name" [label="common_name = kubernetes-ca"];
+        
+        "cluster_1_kubernetes_ca_prop_organisation" [label="organisation = kubernetes"];
+        
+      }
+      
+    subgraph cluster_1_kubernetes_ca_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_kubernetes_ca_capability_ca {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "ca (kubetos.capabilities.CertificateAuthority)";
+      "cap_cluster_1_kubernetes_ca_capability_ca" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kubernetes_ca_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_kubernetes_ca_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_kubernetes_ca_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_kubernetes_ca_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_runc {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "runc (kubetos.nodes.Runc)";
+      "node_cluster_1_runc" [shape=point, style=invis];
+    
+      subgraph cluster_1_runc_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_runc_prop_component_version" [label="component_version = 1.1.1"];
+        
+      }
+      
+    subgraph cluster_1_runc_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_runc_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_runc_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_runc_capability_oci {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "oci (kubetos.capabilities.OCI.Plugin)";
+      "cap_cluster_1_runc_capability_oci" [shape=point,style=invis];
+    
+      subgraph cluster_1_runc_capability_oci_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_runc_capability_oci_prop_spec" [label="spec = /run/runc"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_runc_worker {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "runc_worker (kubetos.nodes.Runc)";
+      "node_cluster_1_runc_worker" [shape=point, style=invis];
+    
+      subgraph cluster_1_runc_worker_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_runc_worker_prop_component_version" [label="component_version = 1.1.1"];
+        
+      }
+      
+    subgraph cluster_1_runc_worker_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_runc_worker_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_runc_worker_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_runc_worker_capability_oci {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "oci (kubetos.capabilities.OCI.Plugin)";
+      "cap_cluster_1_runc_worker_capability_oci" [shape=point,style=invis];
+    
+      subgraph cluster_1_runc_worker_capability_oci_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_runc_worker_capability_oci_prop_spec" [label="spec = /run/runc"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_scheduler {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "scheduler (kubetos.nodes.Kube.Scheduler)";
+      "node_cluster_1_scheduler" [shape=point, style=invis];
+    
+      subgraph cluster_1_scheduler_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_scheduler_prop_component_version" [label="component_version = 1.2.3"];
+        
+        "cluster_1_scheduler_prop_config_path" [label="config_path = /etc/kubernetes/kube-scheduler.yaml"];
+        
+      }
+      
+    subgraph cluster_1_scheduler_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_scheduler_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_scheduler_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_scheduler_kubeconfig {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "scheduler_kubeconfig (kubetos.nodes.Kubeconfig)";
+      "node_cluster_1_scheduler_kubeconfig" [shape=point, style=invis];
+    
+    subgraph cluster_1_scheduler_kubeconfig_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_scheduler_kubeconfig_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_scheduler_kubeconfig_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_scheduler_user {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "scheduler_user (kubetos.nodes.Kubernetes.User)";
+      "node_cluster_1_scheduler_user" [shape=point, style=invis];
+    
+    subgraph cluster_1_scheduler_user_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_scheduler_user_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_scheduler_user_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_scheduler_user_capability_user {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "user (kubetos.capabilities.Kubernetes.User)";
+      "cap_cluster_1_scheduler_user_capability_user" [shape=point,style=invis];
+    
+      subgraph cluster_1_scheduler_user_capability_user_properties {
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+        rank = same;
+      
+        "cluster_1_scheduler_user_capability_user_prop_name" [label="name = default-scheduler"];
+        
+      }
+      
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_service_account_cert {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "service_account_cert (kubetos.nodes.Certificate)";
+      "node_cluster_1_service_account_cert" [shape=point, style=invis];
+    
+      subgraph cluster_1_service_account_cert_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_service_account_cert_prop_common_name" [label="common_name = service-accounts"];
+        
+        "cluster_1_service_account_cert_prop_hostnames" [label="hostnames = []"];
+        
+        "cluster_1_service_account_cert_prop_organisation" [label="organisation = kubernetes"];
+        
+      }
+      
+    subgraph cluster_1_service_account_cert_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_service_account_cert_capability_cert {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "cert (kubetos.capabilities.Certificate)";
+      "cap_cluster_1_service_account_cert_capability_cert" [shape=point,style=invis];
+    
+    }
+    
+    subgraph cluster_1_service_account_cert_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_service_account_cert_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_sg {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "sg (openstack.nodes.SecurityGroup)";
+      "node_cluster_1_sg" [shape=point, style=invis];
+    
+      subgraph cluster_1_sg_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_sg_prop_description" [label="description = security group created with kubetos"];
+        
+        "cluster_1_sg_prop_name" [label="name = kubetos-security-group"];
+        
+      }
+      
+    subgraph cluster_1_sg_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_sg_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_sg_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_sg_rule_icmp {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "sg_rule_icmp (openstack.nodes.SecurityGroupRule)";
+      "node_cluster_1_sg_rule_icmp" [shape=point, style=invis];
+    
+      subgraph cluster_1_sg_rule_icmp_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_sg_rule_icmp_prop_protocol" [label="protocol = icmp"];
+        
+        "cluster_1_sg_rule_icmp_prop_remote_ip_prefix" [label="remote_ip_prefix = 0.0.0.0/0"];
+        
+      }
+      
+    subgraph cluster_1_sg_rule_icmp_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_sg_rule_icmp_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_sg_rule_icmp_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_sg_rule_tcp {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "sg_rule_tcp (openstack.nodes.SecurityGroupRule)";
+      "node_cluster_1_sg_rule_tcp" [shape=point, style=invis];
+    
+      subgraph cluster_1_sg_rule_tcp_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_sg_rule_tcp_prop_protocol" [label="protocol = tcp"];
+        
+        "cluster_1_sg_rule_tcp_prop_remote_ip_prefix" [label="remote_ip_prefix = 0.0.0.0/0"];
+        
+      }
+      
+    subgraph cluster_1_sg_rule_tcp_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_sg_rule_tcp_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_sg_rule_tcp_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        
+    subgraph cluster_1_sg_rule_udp {
+      penwidth=3;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "sg_rule_udp (openstack.nodes.SecurityGroupRule)";
+      "node_cluster_1_sg_rule_udp" [shape=point, style=invis];
+    
+      subgraph cluster_1_sg_rule_udp_properties {
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "properties";
+      
+        "cluster_1_sg_rule_udp_prop_protocol" [label="protocol = udp"];
+        
+        "cluster_1_sg_rule_udp_prop_remote_ip_prefix" [label="remote_ip_prefix = 0.0.0.0/0"];
+        
+      }
+      
+    subgraph cluster_1_sg_rule_udp_capabilities {
+      penwidth=1;
+      color = black;
+      graph [rankdir = "TB"];
+      label = "capabilities";
+    
+    subgraph cluster_1_sg_rule_udp_capability_feature {
+      color = black;
+      graph [rankdir = "TB"];
+      label = "feature (tosca::Node)";
+      "cap_cluster_1_sg_rule_udp_capability_feature" [shape=point,style=invis];
+    
+    }
+    
+    }
+    
+    }
+    
+        
+        "node_cluster_1_admin_cert" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_admin_cert, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_admin_kubeconfig" -> "node_cluster_1_kube_cluster" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_admin_kubeconfig, 
+          lhead=cluster_1_kube_cluster
+        ];
+        
+        "node_cluster_1_admin_kubeconfig" -> "node_cluster_1_admin_user" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_admin_kubeconfig, 
+          lhead=cluster_1_admin_user
+        ];
+        
+        "node_cluster_1_admin_user" -> "node_cluster_1_admin_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_admin_user, 
+          lhead=cluster_1_admin_cert
+        ];
+        
+        "node_cluster_1_apiserver" -> "node_cluster_1_kubelet" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_apiserver, 
+          lhead=cluster_1_kubelet
+        ];
+        
+        "node_cluster_1_apiserver" -> "node_cluster_1_etcd_cluster" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_apiserver, 
+          lhead=cluster_1_etcd_cluster
+        ];
+        
+        "node_cluster_1_apiserver" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_apiserver, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_apiserver" -> "node_cluster_1_kube_apiserver_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_apiserver, 
+          lhead=cluster_1_kube_apiserver_cert
+        ];
+        
+        "node_cluster_1_apiserver" -> "node_cluster_1_kube_apiserver_client_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_apiserver, 
+          lhead=cluster_1_kube_apiserver_client_cert
+        ];
+        
+        "node_cluster_1_apiserver" -> "node_cluster_1_service_account_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_apiserver, 
+          lhead=cluster_1_service_account_cert
+        ];
+        
+        "node_cluster_1_cni" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_cni, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_cni_worker" -> "node_cluster_1_compute_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_cni_worker, 
+          lhead=cluster_1_compute_worker
+        ];
+        
+        "node_cluster_1_compute" -> "node_cluster_1_sg" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_compute, 
+          lhead=cluster_1_sg
+        ];
+        
+        "node_cluster_1_compute_worker" -> "node_cluster_1_sg" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_compute_worker, 
+          lhead=cluster_1_sg
+        ];
+        
+        "node_cluster_1_controller_manager" -> "node_cluster_1_kubelet" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_controller_manager, 
+          lhead=cluster_1_kubelet
+        ];
+        
+        "node_cluster_1_controller_manager" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_controller_manager, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_controller_manager" -> "node_cluster_1_service_account_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_controller_manager, 
+          lhead=cluster_1_service_account_cert
+        ];
+        
+        "node_cluster_1_controller_manager" -> "node_cluster_1_controller_manager_kubeconfig" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_controller_manager, 
+          lhead=cluster_1_controller_manager_kubeconfig
+        ];
+        
+        "node_cluster_1_controller_manager_kubeconfig" -> "node_cluster_1_kube_local_cluster" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_controller_manager_kubeconfig, 
+          lhead=cluster_1_kube_local_cluster
+        ];
+        
+        "node_cluster_1_controller_manager_kubeconfig" -> "node_cluster_1_controller_manager_user" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_controller_manager_kubeconfig, 
+          lhead=cluster_1_controller_manager_user
+        ];
+        
+        "node_cluster_1_controller_manager_user" -> "node_cluster_1_kube_controller_manager_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_controller_manager_user, 
+          lhead=cluster_1_kube_controller_manager_cert
+        ];
+        
+        "node_cluster_1_coredns" -> "node_cluster_1_kubectl" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_coredns, 
+          lhead=cluster_1_kubectl
+        ];
+        
+        "node_cluster_1_coredns" -> "node_cluster_1_admin_kubeconfig" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_coredns, 
+          lhead=cluster_1_admin_kubeconfig
+        ];
+        
+        "node_cluster_1_coredns" -> "node_cluster_1_flannel" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_coredns, 
+          lhead=cluster_1_flannel
+        ];
+        
+        "node_cluster_1_crictl" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crictl, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_crictl" -> "node_cluster_1_crio" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crictl, 
+          lhead=cluster_1_crio
+        ];
+        
+        "node_cluster_1_crictl_worker" -> "node_cluster_1_compute_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crictl_worker, 
+          lhead=cluster_1_compute_worker
+        ];
+        
+        "node_cluster_1_crictl_worker" -> "node_cluster_1_crio_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crictl_worker, 
+          lhead=cluster_1_crio_worker
+        ];
+        
+        "node_cluster_1_crio" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crio, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_crio" -> "node_cluster_1_runc" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crio, 
+          lhead=cluster_1_runc
+        ];
+        
+        "node_cluster_1_crio" -> "node_cluster_1_kata" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crio, 
+          lhead=cluster_1_kata
+        ];
+        
+        "node_cluster_1_crio" -> "node_cluster_1_cni" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crio, 
+          lhead=cluster_1_cni
+        ];
+        
+        "node_cluster_1_crio_worker" -> "node_cluster_1_compute_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crio_worker, 
+          lhead=cluster_1_compute_worker
+        ];
+        
+        "node_cluster_1_crio_worker" -> "node_cluster_1_runc_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crio_worker, 
+          lhead=cluster_1_runc_worker
+        ];
+        
+        "node_cluster_1_crio_worker" -> "node_cluster_1_kata_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crio_worker, 
+          lhead=cluster_1_kata_worker
+        ];
+        
+        "node_cluster_1_crio_worker" -> "node_cluster_1_cni_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_crio_worker, 
+          lhead=cluster_1_cni_worker
+        ];
+        
+        "node_cluster_1_etcd" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_etcd, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_etcd" -> "node_cluster_1_etcd_cluster" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_etcd, 
+          lhead=cluster_1_etcd_cluster
+        ];
+        
+        "node_cluster_1_etcd_cluster" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_etcd_cluster, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_flannel" -> "node_cluster_1_kubectl" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_flannel, 
+          lhead=cluster_1_kubectl
+        ];
+        
+        "node_cluster_1_flannel" -> "node_cluster_1_admin_kubeconfig" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_flannel, 
+          lhead=cluster_1_admin_kubeconfig
+        ];
+        
+        "node_cluster_1_flannel" -> "node_cluster_1_cni" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_flannel, 
+          lhead=cluster_1_cni
+        ];
+        
+        "node_cluster_1_kata" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kata, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_kata_worker" -> "node_cluster_1_compute_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kata_worker, 
+          lhead=cluster_1_compute_worker
+        ];
+        
+        "node_cluster_1_kube_apiserver_cert" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_apiserver_cert, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kube_apiserver_cert" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_apiserver_cert, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_kube_apiserver_client_cert" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_apiserver_client_cert, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kube_cluster" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_cluster, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kube_cluster" -> "node_cluster_1_apiserver" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_cluster, 
+          lhead=cluster_1_apiserver
+        ];
+        
+        "node_cluster_1_kube_controller_manager_cert" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_controller_manager_cert, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kube_local_cluster" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_local_cluster, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kube_proxy" -> "node_cluster_1_kubectl" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_proxy, 
+          lhead=cluster_1_kubectl
+        ];
+        
+        "node_cluster_1_kube_proxy" -> "node_cluster_1_admin_kubeconfig" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_proxy, 
+          lhead=cluster_1_admin_kubeconfig
+        ];
+        
+        "node_cluster_1_kube_proxy" -> "node_cluster_1_kube_proxy_kubeconfig" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_proxy, 
+          lhead=cluster_1_kube_proxy_kubeconfig
+        ];
+        
+        "node_cluster_1_kube_proxy_cert" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_proxy_cert, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kube_proxy_kubeconfig" -> "node_cluster_1_kube_cluster" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_proxy_kubeconfig, 
+          lhead=cluster_1_kube_cluster
+        ];
+        
+        "node_cluster_1_kube_proxy_kubeconfig" -> "node_cluster_1_kube_proxy_user" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_proxy_kubeconfig, 
+          lhead=cluster_1_kube_proxy_user
+        ];
+        
+        "node_cluster_1_kube_proxy_user" -> "node_cluster_1_kube_proxy_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_proxy_user, 
+          lhead=cluster_1_kube_proxy_cert
+        ];
+        
+        "node_cluster_1_kube_scheduler_cert" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kube_scheduler_cert, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kubectl" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubectl, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_kubectl" -> "node_cluster_1_admin_kubeconfig" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubectl, 
+          lhead=cluster_1_admin_kubeconfig
+        ];
+        
+        "node_cluster_1_kubelet" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_kubelet" -> "node_cluster_1_crio" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet, 
+          lhead=cluster_1_crio
+        ];
+        
+        "node_cluster_1_kubelet" -> "node_cluster_1_kubelet_kubeconfig" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet, 
+          lhead=cluster_1_kubelet_kubeconfig
+        ];
+        
+        "node_cluster_1_kubelet" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kubelet" -> "node_cluster_1_kubelet_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet, 
+          lhead=cluster_1_kubelet_cert
+        ];
+        
+        "node_cluster_1_kubelet_cert" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_cert, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kubelet_cert" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_cert, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_kubelet_kubeconfig" -> "node_cluster_1_kube_local_cluster" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_kubeconfig, 
+          lhead=cluster_1_kube_local_cluster
+        ];
+        
+        "node_cluster_1_kubelet_kubeconfig" -> "node_cluster_1_kubelet_user" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_kubeconfig, 
+          lhead=cluster_1_kubelet_user
+        ];
+        
+        "node_cluster_1_kubelet_user" -> "node_cluster_1_kubelet_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_user, 
+          lhead=cluster_1_kubelet_cert
+        ];
+        
+        "node_cluster_1_kubelet_worker" -> "node_cluster_1_compute_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker, 
+          lhead=cluster_1_compute_worker
+        ];
+        
+        "node_cluster_1_kubelet_worker" -> "node_cluster_1_crio_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker, 
+          lhead=cluster_1_crio_worker
+        ];
+        
+        "node_cluster_1_kubelet_worker" -> "node_cluster_1_kubelet_worker_kubeconfig" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker, 
+          lhead=cluster_1_kubelet_worker_kubeconfig
+        ];
+        
+        "node_cluster_1_kubelet_worker" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kubelet_worker" -> "node_cluster_1_kubelet_worker_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker, 
+          lhead=cluster_1_kubelet_worker_cert
+        ];
+        
+        "node_cluster_1_kubelet_worker_cert" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker_cert, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_kubelet_worker_cert" -> "node_cluster_1_compute_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker_cert, 
+          lhead=cluster_1_compute_worker
+        ];
+        
+        "node_cluster_1_kubelet_worker_kubeconfig" -> "node_cluster_1_kube_cluster" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker_kubeconfig, 
+          lhead=cluster_1_kube_cluster
+        ];
+        
+        "node_cluster_1_kubelet_worker_kubeconfig" -> "node_cluster_1_kubelet_worker_user" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker_kubeconfig, 
+          lhead=cluster_1_kubelet_worker_user
+        ];
+        
+        "node_cluster_1_kubelet_worker_user" -> "node_cluster_1_kubelet_worker_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_kubelet_worker_user, 
+          lhead=cluster_1_kubelet_worker_cert
+        ];
+        
+        "node_cluster_1_runc" -> "node_cluster_1_compute" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_runc, 
+          lhead=cluster_1_compute
+        ];
+        
+        "node_cluster_1_runc_worker" -> "node_cluster_1_compute_worker" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_runc_worker, 
+          lhead=cluster_1_compute_worker
+        ];
+        
+        "node_cluster_1_scheduler" -> "node_cluster_1_kubelet" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_scheduler, 
+          lhead=cluster_1_kubelet
+        ];
+        
+        "node_cluster_1_scheduler" -> "node_cluster_1_scheduler_kubeconfig" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_scheduler, 
+          lhead=cluster_1_scheduler_kubeconfig
+        ];
+        
+        "node_cluster_1_scheduler_kubeconfig" -> "node_cluster_1_kube_local_cluster" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_scheduler_kubeconfig, 
+          lhead=cluster_1_kube_local_cluster
+        ];
+        
+        "node_cluster_1_scheduler_kubeconfig" -> "node_cluster_1_scheduler_user" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_scheduler_kubeconfig, 
+          lhead=cluster_1_scheduler_user
+        ];
+        
+        "node_cluster_1_scheduler_user" -> "node_cluster_1_kube_scheduler_cert" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_scheduler_user, 
+          lhead=cluster_1_kube_scheduler_cert
+        ];
+        
+        "node_cluster_1_service_account_cert" -> "node_cluster_1_kubernetes_ca" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_service_account_cert, 
+          lhead=cluster_1_kubernetes_ca
+        ];
+        
+        "node_cluster_1_sg_rule_icmp" -> "node_cluster_1_sg" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_sg_rule_icmp, 
+          lhead=cluster_1_sg
+        ];
+        
+        "node_cluster_1_sg_rule_tcp" -> "node_cluster_1_sg" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_sg_rule_tcp, 
+          lhead=cluster_1_sg
+        ];
+        
+        "node_cluster_1_sg_rule_udp" -> "node_cluster_1_sg" [
+          penwidth=3,
+          weight=1,
+          ltail=cluster_1_sg_rule_udp, 
+          lhead=cluster_1_sg
+        ];
+        
+    }
+    
+    }
+    
