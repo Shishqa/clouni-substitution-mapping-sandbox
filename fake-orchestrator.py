@@ -24,30 +24,190 @@ idx = 0
 instance_models = {}
 
 
-class PropertyInstance:
-  def __init__(self, name, node, attr='properties'):
+def create_value(node, type_def, definition):
+  if '$functionCall' in definition.keys():
+    return create_function(node, type_def, definition)
+
+  if '$list' in definition:
+    return List(node, type_def, definition)
+
+  if '$map' in definition.keys():
+    return Map(node, type_def, definition)
+
+  if type_def['name'] == 'version':
+    return Version(node, type_def, definition['$value'])
+
+  if type_def['name'] == 'scalar-unit.time':
+    return ScalarUnitTime(node, type_def, definition['$value'])
+
+  if type_def['name'] == 'scalar-unit.size':
+    return ScalarUnitSize(node, type_def, definition['$value'])
+
+  print(definition)
+  return String(node, type_def, definition['$value'])
+
+
+def create_function(node, type_def, definition):
+  func = definition['$functionCall']
+
+  if func['name'] == 'tosca.function.get_input':
+    return GetInput(node, type_def, func['arguments'])
+
+  if func['name'] == 'tosca.function.get_property':
+    return GetProperty(node, type_def, func['arguments'])
+
+  if func['name'] == 'tosca.function.get_attribute':
+    return GetAttribute(node, type_def, func['arguments'])
+
+  if func['name'] == 'tosca.function.concat':
+    return Concat(node, type_def, func['arguments'])
+
+  raise RuntimeError('unknown function')
+
+
+class ValueInstance:
+  def __init__(self, node, type_def):
     self.node = node
-    self.name = name
-    self.definition = copy.deepcopy(node.definition[attr][name])
+    self.type = type_def
 
   def get(self):
-    print(self.definition.keys())
-    if '$value' in self.definition.keys():
-      value = self.definition["$value"]
-      if isinstance(value, dict):
-        value = value['$string']
-      return value
-    elif '$functionCall' in self.definition.keys():
-      return self.definition["$functionCall"]["name"]
+    raise RuntimeError('Unimplemented get')
+
+
+class String(ValueInstance):
+  def __init__(self, node, type_def, value):
+    super().__init__(node, type_def)
+    self.value = value
+
+  def get(self):
+    return self.value
+
+
+class Version(ValueInstance):
+  def __init__(self, node, type_def, value):
+    super().__init__(node, type_def)
+    self.value = value['$string']
+
+  def get(self):
+    return self.value
+
+
+class ScalarUnitTime(ValueInstance):
+  def __init__(self, node, type_def, value):
+    super().__init__(node, type_def)
+    self.value = value['$string']
+
+  def get(self):
+    return self.value
+
+
+class ScalarUnitSize(ValueInstance):
+  def __init__(self, node, type_def, value):
+    super().__init__(node, type_def)
+    self.value = value['$string']
+
+  def get(self):
+    return self.value
+
+
+class List(ValueInstance):
+  def __init__(self, node, type_def, definition):
+    super().__init__(node, type_def)
+    self.entry_type = definition['$information']['entry']
+    self.values = [create_value(node, self.entry_type, entry)
+                   for entry in definition['$list']]
+
+  def get(self):
+    values = [v.get() for v in self.values]
+    return values
+
+
+class Map(ValueInstance):
+  def __init__(self, node, type_def, definition):
+    super().__init__(node, type_def)
+    self.values = dict()
+    for e in definition['$map']:
+      key = e['$key']['$value']
+      self.values[key] = create_value(node, e['$information']['type'], e)
+
+  def get(self):
+    values = dict()
+    for key, value in self.values.items():
+      values = value.get()
+    return values
+
+
+class GetInput(ValueInstance):
+  def __init__(self, node, type_def, args):
+    super().__init__(node, type_def)
+    self.input_name = args[0]['$value']
+
+  def get(self):
+    return self.node.topology.get_input(self.input_name)
+
+
+class GetProperty(ValueInstance):
+  def __init__(self, node, type_def, args):
+    super().__init__(node, type_def)
+    self.args = [e['$value'] for e in args]
+
+  def get(self):
+    start = self.args[0]
+    if start == 'SELF':
+      return self.node.get_property(self.args[1:])
     else:
-      raise RuntimeError('Unknown property type')
+      print(self.args)
+      raise RuntimeError('not supported for now')
+
+
+class GetAttribute(ValueInstance):
+  def __init__(self, node, type_def, args):
+    super().__init__(node, type_def)
+    self.args = [e['$value'] for e in args]
+
+  def get(self):
+    return self.node.get_attribute(self.args)
+
+
+class Concat(ValueInstance):
+  def __init__(self, node, type_def, args):
+    super().__init__(node, type_def)
+    self.args = []
+    print(args)
+    for arg in args:
+      print(arg)
+      if '$value' in arg.keys():
+        self.args.append(String(node, {}, arg['$value']))
+      else:
+        self.args.append(create_function(node, {}, arg))
+
+  def get(self):
+    strings = [a.get() for a in self.args]
+    return ''.join(strings)
+
+
+class PropertyInstance:
+  def __init__(self, node, definition):
+    self.node = node
+    self.definition = copy.deepcopy(definition)
+
+    self.type = self.definition['$information']['type']
+    self.value = create_value(node, self.type, self.definition)
+
+  def get(self):
+    return self.value.get()
 
 
 class AttributeInstance:
-  def __init__(self, name, node):
+  def __init__(self, node, definition):
     self.node = node
-    self.name = name
-    self.definition = copy.deepcopy(node.definition['attributes'][name])
+    self.definition = copy.deepcopy(definition)
+
+    self.type = self.definition['$information']['type']
+    self.value = create_value(node, self.type, self.definition)
+
+  def get(self):
+    return self.value.get()
 
 
 class CapabilityInstance:
@@ -60,11 +220,13 @@ class CapabilityInstance:
 
     self.properties = {}
     for prop_name in self.definition['properties'].keys():
-      self.properties[prop_name] = PropertyInstance(prop_name, self)
+      self.properties[prop_name] = PropertyInstance(
+          self, self.definition['properties'][prop_name])
 
     self.attributes = {}
     for attr_name in self.definition['attributes'].keys():
-      self.attributes[attr_name] = AttributeInstance(attr_name, self)
+      self.attributes[attr_name] = AttributeInstance(
+          self, self.definition['attributes'][attr_name])
 
   def find_type(self):
     seen = set(self.definition['types'].keys())
@@ -73,8 +235,12 @@ class CapabilityInstance:
         seen.remove(type_body['parent'])
     self.type = seen.pop()
 
-  def get_property(self, prop_name):
-    return self.properties[prop_name].get()
+  def get_property(self, args):
+    print('CAP get property', args)
+    path = args[0]
+    if path in self.properties.keys():
+      return self.properties[path].get()
+    raise RuntimeError('no property')
 
   def graphviz(self):
     subgraph_name = f'cluster_{self.node.topology.idx}_{self.node.name}_capability_{self.name}'
@@ -116,6 +282,7 @@ class RequirementInstance:
     self.node = node
     self.idx = idx
     self.definition = copy.deepcopy(node.definition['requirements'][idx])
+    self.name = self.definition['name']
 
 
 class NodeInstance:
@@ -145,11 +312,13 @@ class NodeInstance:
   def init(self):
     self.properties = {}
     for prop_name in self.definition['properties'].keys():
-      self.properties[prop_name] = PropertyInstance(prop_name, self)
+      self.properties[prop_name] = PropertyInstance(
+          self, self.definition['properties'][prop_name])
 
     self.attributes = {}
     for attr_name in self.definition['attributes'].keys():
-      self.attributes[attr_name] = AttributeInstance(attr_name, self)
+      self.attributes[attr_name] = AttributeInstance(
+          self, self.definition['attributes'][attr_name])
 
     self.capabilities = {}
     for cap_name in self.definition['capabilities'].keys():
@@ -166,7 +335,8 @@ class NodeInstance:
 
     self.attributes = {}
     for attr_name in self.definition['attributes'].keys():
-      self.attributes[attr_name] = AttributeInstance(attr_name, self)
+      self.attributes[attr_name] = AttributeInstance(
+          self, self.definition['attributes'][attr_name])
       if attr_name in ['state', 'tosca_id', 'tosca_name']:
         continue
       mapping = instance_models[self.substitution_index].definition['substitution']['attributeMappings'][attr_name]
@@ -181,8 +351,8 @@ class NodeInstance:
         continue
       mapping = instance_models[self.substitution_index].definition['substitution']['capabilityMappings'][cap_name]
       instance_models[self.substitution_index]\
-        .nodes[mapping['nodeTemplateName']]\
-        .capabilities[mapping['target']] = self.capabilities[cap_name]
+          .nodes[mapping['nodeTemplateName']]\
+          .capabilities[mapping['target']] = self.capabilities[cap_name]
 
   def select_substitution(self):
     print(f'\nnode {self.name} is marked substitutable')
@@ -209,11 +379,22 @@ class NodeInstance:
       else:
         print('please, choose correct option')
 
-  def get_property(self, path, args):
-    if path != 'SELF':
-      # try find in topology
-      rest = len(args > 1) and args[1:] or []
-      return self.node.topology.nodes['path'].get_property(args[0], rest)
+  def get_property(self, args):
+    print(self.name, 'NODE get property', args)
+    path = args[0]
+    rest = args[1:]
+
+    if path in self.capabilities.keys():
+      return self.capabilities[path].get_property(rest)
+
+    for r in self.requirements:
+      if r.name == path:
+        return self.topology.nodes[r.definition['nodeTemplateName']].get_property(rest)
+
+    if path in self.properties.keys():
+      return self.properties[path].get()
+
+    raise RuntimeError('no property')
 
   def graphviz(self):
     subgraph_name = f'cluster_{self.topology.idx}_{self.name}'
@@ -237,9 +418,12 @@ class NodeInstance:
         label = "properties";
       '''
       for p_name, p_body in self.properties.items():
-        res += f'''
+        # print(p_name)
+        p = f'''
         "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
         '''
+        # print(p)
+        res += p
       res += '''
       }
       '''
@@ -280,7 +464,6 @@ class NodeInstance:
     if self.substitution_index is not None:
       res += instance_models[self.substitution_index].graphviz()
 
-
     return res
 
   def deploy(self):
@@ -303,7 +486,8 @@ class TopologyTemplateInstance:
 
     self.inputs = {}
     for input_name in self.definition['inputs'].keys():
-      self.inputs[input_name] = PropertyInstance(input_name, self, attr='inputs')
+      self.inputs[input_name] = PropertyInstance(
+          self, self.definition['inputs'][input_name])
 
     self.instantiate_nodes()
 
@@ -311,6 +495,9 @@ class TopologyTemplateInstance:
     self.nodes = {}
     for name in self.definition["nodeTemplates"].keys():
       self.nodes[name] = NodeInstance(name, self)
+
+  def get_input(self, input_name):
+    return self.inputs[input_name].get()
 
   def graphviz(self):
     res = f'''
@@ -431,7 +618,7 @@ def instantiate_template(path):
   res = pipe.communicate()
 
   if pipe.returncode != 0:
-    raise RuntimeError(res[1])
+    raise RuntimeError(res[1].decode())
 
   template = yaml.safe_load(res[0])
 
@@ -454,7 +641,7 @@ def instantiate_template(path):
   res = pipe.communicate()
 
   if pipe.returncode != 0:
-    raise RuntimeError(res[1])
+    raise RuntimeError(res[1].decode())
 
   definition = yaml.safe_load(res[0])
   instance_id = idx + 1
@@ -475,9 +662,9 @@ def main():
   try:
     root = instantiate_template(args.template)
     instance_models[root].dump_graphviz('test')
-    instance_models[root].deploy()
+    # instance_models[root].deploy()
   except RuntimeError as err:
-    print(err.args[0].decode())
+    print(err.args[0])
 
 
 if __name__ == "__main__":
