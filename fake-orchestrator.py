@@ -166,7 +166,12 @@ class GetAttribute(ValueInstance):
     self.args = [e['$value'] for e in args]
 
   def get(self):
-    return self.node.get_attribute(self.args)
+    start = self.args[0]
+    if start == 'SELF':
+      return self.node.get_attribute(self.args[1:])
+    else:
+      print(self.args)
+      raise RuntimeError('not supported for now')
 
 
 class Concat(ValueInstance):
@@ -241,6 +246,13 @@ class CapabilityInstance:
     if path in self.properties.keys():
       return self.properties[path].get()
     raise RuntimeError('no property')
+
+  def get_attribute(self, args):
+    print('CAP get attribute', args)
+    path = args[0]
+    if path in self.attributes.keys():
+      return self.attributes[path].get()
+    raise RuntimeError('no attribute')
 
   def graphviz(self):
     subgraph_name = f'cluster_{self.node.topology.idx}_{self.node.name}_capability_{self.name}'
@@ -384,6 +396,9 @@ class NodeInstance:
     path = args[0]
     rest = args[1:]
 
+    if path in self.properties.keys():
+      return self.properties[path].get()
+
     if path in self.capabilities.keys():
       return self.capabilities[path].get_property(rest)
 
@@ -391,10 +406,24 @@ class NodeInstance:
       if r.name == path:
         return self.topology.nodes[r.definition['nodeTemplateName']].get_property(rest)
 
-    if path in self.properties.keys():
-      return self.properties[path].get()
-
     raise RuntimeError('no property')
+
+  def get_attribute(self, args):
+    print(self.name, 'NODE get attribute', args)
+    path = args[0]
+    rest = args[1:]
+
+    if path in self.attributes.keys():
+      return self.attributes[path].get()
+
+    if path in self.capabilities.keys():
+      return self.capabilities[path].get_attribute(rest)
+
+    for r in self.requirements:
+      if r.name == path:
+        return self.topology.nodes[r.definition['nodeTemplateName']].get_attribute(rest)
+
+    raise RuntimeError('no attribute')
 
   def graphviz(self):
     subgraph_name = f'cluster_{self.topology.idx}_{self.name}'
@@ -469,7 +498,7 @@ class NodeInstance:
   def deploy(self):
     print(f"\ndeploying {self.name}")
     if self.substitution_index is not None:
-      print('TODO: parse substitution mapping interface')
+      # print('TODO: parse substitution mapping interface')
       instance_models[self.substitution_index].deploy()
     else:
       ops = self.definition['interfaces']['Standard']['operations']
@@ -477,6 +506,15 @@ class NodeInstance:
       for op_name in ops_order:
         if ops[op_name]["implementation"] != '':
           print(f'{op_name}: {ops[op_name]["implementation"]}')
+          print(ops[op_name]['inputs'])
+          op_inputs = {}
+          for input_name in ops[op_name]['inputs'].keys():
+            print(input_name)
+            op_inputs[input_name] = PropertyInstance(
+                self, ops[op_name]['inputs'][input_name])
+            
+            value = op_inputs[input_name].get()
+            print('\t',value)
 
 
 class TopologyTemplateInstance:
@@ -662,7 +700,7 @@ def main():
   try:
     root = instantiate_template(args.template)
     instance_models[root].dump_graphviz('test')
-    # instance_models[root].deploy()
+    instance_models[root].deploy()
   except RuntimeError as err:
     print(err.args[0])
 
