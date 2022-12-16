@@ -87,9 +87,9 @@ node_types:
               ca_key:
                 value: { get_attribute: [ SELF, ca, key ] }
                 type: string
-              tosca_id:
-                value: { get_attribute: [ SELF, tosca_id ] }
-                type: string
+              # tosca_id:
+              #   value: { get_attribute: [ SELF, tosca_id ] }
+              #   type: string
             outputs:
               cert: [ SELF, cert ]
               key: [ SELF, key ]
@@ -126,9 +126,9 @@ node_types:
               organisation:
                 value: { get_property: [ SELF, organisation ] }
                 type: string
-              tosca_id:
-                value: { get_attribute: [ SELF, tosca_id ] }
-                type: string
+              # tosca_id:
+              #   value: { get_attribute: [ SELF, tosca_id ] }
+              #   type: string
             outputs:
               cert: [ SELF, cert ]
               key: [ SELF, key ]
