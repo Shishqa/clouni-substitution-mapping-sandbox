@@ -45,7 +45,7 @@ node_types:
                 type: string
               deploy_kubeconfig_path: { value: { get_attribute: [ SELF, deploy_kubeconfig_path ] }, type: string }
             implementation:
-              primary: ansible/kube-proxy--start.yaml
+              primary: profiles/kubernetes/ansible/kube-proxy--start.yaml
 
   kubetos.nodes.CoreDNS:
     derived_from: tosca.nodes.Root
@@ -82,7 +82,7 @@ node_types:
             inputs:
               deploy_kubeconfig_path: { value: { get_attribute: [ SELF, deploy_kubeconfig_path ] }, type: string }
             implementation:
-              primary: ansible/coredns--start.yaml
+              primary: profiles/kubernetes/ansible/coredns--start.yaml
 
   kubetos.nodes.Flannel:
     derived_from: tosca.nodes.Root
@@ -131,4 +131,4 @@ node_types:
             inputs:
               deploy_kubeconfig_path: { value: { get_attribute: [ SELF, deploy_kubeconfig_path ] }, type: string }
             implementation:
-              primary: ansible/flannel--start.yaml
+              primary: profiles/kubernetes/ansible/flannel--start.yaml

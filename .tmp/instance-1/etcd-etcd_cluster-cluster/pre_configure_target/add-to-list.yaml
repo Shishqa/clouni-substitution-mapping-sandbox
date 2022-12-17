@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+
+    - name: Add item to list
+      set_stats:
+        data:
+          new_list: "{{ list + [ new_item ] }}"

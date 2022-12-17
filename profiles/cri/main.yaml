@@ -52,7 +52,7 @@ relationship_types:
                 type: kubetos.datatypes.OCI.RuntimeSpec
             outputs:
               new_list: [ SOURCE, runtimes ]
-            implementation: ../../utils/add-to-list.yaml
+            implementation: artifacts/add-to-list.yaml
 
 node_types:
 
@@ -71,7 +71,7 @@ node_types:
           runc_version: { value: { get_property: [ SELF, component_version ] }, type: string }
         operations:
           create:
-            implementation: ansible/runc--create.yaml
+            implementation: profiles/cri/ansible/runc--create.yaml
 
   kubetos.nodes.Kata:
     derived_from: tosca.nodes.SoftwareComponent
@@ -91,22 +91,22 @@ node_types:
         operations:
           create:
             implementation:
-              primary: ansible/kata--create.yaml
+              primary: profiles/cri/ansible/kata--create.yaml
               dependencies:
                 - kata_role
                 - download_role
           configure:
             implementation:
-              primary: ansible/kata--configure.yaml
+              primary: profiles/cri/ansible/kata--configure.yaml
               dependencies:
                 - kata_role
     artifacts:
       kata_role:
-        file: ansible/roles/kata
+        file: profiles/cri/ansible/roles/kata
         type: tosca.artifacts.File
         deploy_path: roles/kata
       download_role:
-        file: ../../utils/roles/download
+        file: utils/roles/download
         type: tosca.artifacts.File
         deploy_path: roles/download
 
@@ -147,12 +147,12 @@ node_types:
               cni_bin_dir: { value: { get_property: [ SELF, cni, cni, binary_dir ] }, type: string }
               cni_conf_dir: { value: { get_property: [ SELF, cni, cni, config_dir ] }, type: string }
             implementation:
-              primary: ansible/cri-o--configure.yaml
+              primary: profiles/cri/ansible/cri-o--configure.yaml
               dependencies:
                 - crio_role
     artifacts:
       crio_role:
-        file: ansible/roles/cri-o
+        file: profiles/cri/ansible/roles/cri-o
         type: tosca.artifacts.File
         deploy_path: roles/cri-o
 
@@ -177,16 +177,16 @@ node_types:
                 type: string
               cri_socket: { value: { get_property: [ SELF, cri_runtime, cri, url_path ] }, type: string }
             implementation:
-              primary: ansible/crictl--create.yaml
+              primary: profiles/cri/ansible/crictl--create.yaml
               dependencies:
                 - crictl_role
                 - download_role
     artifacts:
       crictl_role:
-        file: ansible/roles/crictl
+        file: profiles/cri/ansible/roles/crictl
         type: tosca.artifacts.File
         deploy_path: roles/crictl
       download_role:
-        file: ../../utils/roles/download
+        file: utils/roles/download
         type: tosca.artifacts.File
         deploy_path: roles/download

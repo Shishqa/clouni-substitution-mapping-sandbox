@@ -19,7 +19,7 @@ relationship_types:
                   type: string
             outputs:
               new_list: [ SOURCE, security_groups ]
-            implementation: ../../utils/add-to-list.yaml
+            implementation: artifacts/add-to-list.yaml
 
 node_types:
 
@@ -43,7 +43,7 @@ node_types:
             inputs:
               security_group: { value: { get_property: [ SELF, name ] }, type: string }
               description: { value: { get_property: [ SELF, description ] }, type: string }
-            implementation: ansible/group--create.yaml
+            implementation: profiles/openstack/ansible/group--create.yaml
 
   openstack.nodes.SecurityGroupRule:
     derived_from: tosca.nodes.Root
@@ -69,7 +69,7 @@ node_types:
               security_group: { value: { get_property: [ SELF, security_group, name ] }, type: string }
               protocol: { value: { get_property: [ SELF, protocol ] }, type: string }
               remote_ip_prefix: { value: { get_property: [ SELF, remote_ip_prefix ] }, type: string }
-            implementation: ansible/group-rule--create.yaml
+            implementation: profiles/openstack/ansible/group-rule--create.yaml
 
   openstack.nodes.Compute:
     derived_from: tosca.nodes.Compute
@@ -120,4 +120,4 @@ node_types:
               public_address: [ SELF, public_address ]
               private_address: [ SELF, private_address ]
               id: [ SELF, id ]
-            implementation: ansible/compute--create.yaml
+            implementation: profiles/openstack/ansible/compute--create.yaml

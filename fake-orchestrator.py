@@ -3,6 +3,7 @@ import argparse
 import subprocess as sp
 import yaml
 import copy
+import shutil
 
 substitutions = {
     'tosca::Compute': [
@@ -155,6 +156,10 @@ class GetProperty(ValueInstance):
     start = self.args[0]
     if start == 'SELF':
       return self.node.get_property(self.args[1:])
+    elif start == 'TARGET':
+      return self.node.target.get_property(self.args[1:])
+    elif start == 'SOURCE':
+      return self.node.source.get_property(self.args[1:])
     else:
       print(self.args)
       raise RuntimeError('not supported for now')
@@ -169,6 +174,10 @@ class GetAttribute(ValueInstance):
     start = self.args[0]
     if start == 'SELF':
       return self.node.get_attribute(self.args[1:])
+    elif start == 'TARGET':
+      return self.node.target.get_attribute(self.args[1:])
+    elif start == 'SOURCE':
+      return self.node.source.get_attribute(self.args[1:])
     else:
       print(self.args)
       raise RuntimeError('not supported for now')
@@ -214,6 +223,9 @@ class AttributeInstance:
   def get(self):
     return self.value.get()
 
+  def set(self, value):
+    self.value = value
+
 
 class CapabilityInstance:
   def __init__(self, name, node):
@@ -226,12 +238,12 @@ class CapabilityInstance:
     self.properties = {}
     for prop_name in self.definition['properties'].keys():
       self.properties[prop_name] = PropertyInstance(
-          self, self.definition['properties'][prop_name])
+          self.node, self.definition['properties'][prop_name])
 
     self.attributes = {}
     for attr_name in self.definition['attributes'].keys():
       self.attributes[attr_name] = AttributeInstance(
-          self, self.definition['attributes'][attr_name])
+          self.node, self.definition['attributes'][attr_name])
 
   def find_type(self):
     seen = set(self.definition['types'].keys())
@@ -295,6 +307,174 @@ class RequirementInstance:
     self.idx = idx
     self.definition = copy.deepcopy(node.definition['requirements'][idx])
     self.name = self.definition['name']
+    print(self.definition)
+    self.source = node
+    self.target = self.source.topology.nodes[self.definition['nodeTemplateName']]
+    self.target.sources.append(self)
+    self.relationship = self.definition['relationship']
+
+    if self.relationship is not None:
+      self.properties = {}
+      for prop_name in self.relationship['properties'].keys():
+        self.properties[prop_name] = PropertyInstance(
+            self, self.relationship['properties'][prop_name])
+
+      self.attributes = {}
+      for attr_name in self.relationship['attributes'].keys():
+        self.attributes[attr_name] = AttributeInstance(
+            self, self.relationship['attributes'][attr_name])
+
+  def get_property(self, args):
+    print('REQ get property', args)
+    path = args[0]
+    if path in self.properties.keys():
+      return self.properties[path].get()
+    raise RuntimeError('no property')
+
+  def get_attribute(self, args):
+    print('REQ get attribute', args)
+    path = args[0]
+    if path in self.attributes.keys():
+      return self.attributes[path].get()
+    raise RuntimeError('no attribute')
+
+  def pre_configure_source(self):
+    if self.relationship is None:
+      return
+    op = self.relationship['interfaces']['Configure']['operations']['pre_configure_source']
+    if op["implementation"] != '':
+      # print(op_name)
+      # print(ops[op_name])
+      op_inputs = {}
+      for input_name in op['inputs'].keys():
+        # print(input_name)
+        op_inputs[input_name] = PropertyInstance(
+            self, op['inputs'][input_name]).get()
+
+        #value = op_inputs[input_name].get()
+        #print('\t', value)
+      print('inputs = ', str(op_inputs))
+
+      path = f'.tmp/instance-{self.source.topology.idx}/{self.source.name}-{self.target.name}-{self.name}/pre_configure_source'
+      os.makedirs(path, exist_ok=True)
+
+      impl = os.path.basename(op["implementation"])
+      shutil.copy(op["implementation"], f'{path}/{impl}')
+
+      print('start deps')
+      for dependency in op['dependencies']:
+        # if dependency in self.definition['artifacts'].keys():
+        #   deploy_path = self.definition['artifacts'][dependency]['targetPath']
+        #   os.makedirs(
+        #       f'{path}/{os.path.dirname(deploy_path)}', exist_ok=True)
+        #   shutil.copytree(
+        #       f'artifacts/{self.definition["artifacts"][dependency]["filename"]}', f'{path}/{deploy_path}')
+        # else:
+        dependency_file = os.path.basename(dependency)
+        shutil.copy(dependency, f'{path}/{dependency_file}')
+
+      print('end deps')
+
+      print('looking for host')
+      host = None
+      for req in self.source.requirements:
+        # print(req.definition)
+        if req.name == 'host':
+          host = self.source.topology.nodes[req.definition['nodeTemplateName']]
+          print('host = ', host.name)
+          break
+
+      if host is None:
+        print('host = ORCHESTRATOR')
+
+      pipe = sp.Popen(
+          f'ansible-playbook {path}/{impl} --check', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+      res = pipe.communicate()
+
+      if pipe.returncode != 0:
+        raise RuntimeError(res[1].decode())
+
+      print(res[0])
+
+      print('outputs', op['outputs'])
+
+      for output_name, output in op['outputs'].items():
+        print(output_name)
+        node = self.source.topology.nodes[output['nodeTemplateName']]
+        node.attributes[output['target']].set(
+            String(node, {}, 'UPDATED'))
+
+  def pre_configure_target(self):
+    if self.relationship is None:
+      return
+    op = self.relationship['interfaces']['Configure']['operations']['pre_configure_target']
+    if op["implementation"] != '':
+      # print(op_name)
+      # print(ops[op_name])
+      op_inputs = {}
+      for input_name in op['inputs'].keys():
+        # print(input_name)
+        op_inputs[input_name] = PropertyInstance(
+            self, op['inputs'][input_name]).get()
+
+        #value = op_inputs[input_name].get()
+        #print('\t', value)
+      print('inputs = ', str(op_inputs))
+
+      path = f'.tmp/instance-{self.source.topology.idx}/{self.source.name}-{self.target.name}-{self.name}/pre_configure_target'
+      os.makedirs(path, exist_ok=True)
+
+      impl = os.path.basename(op["implementation"])
+      shutil.copy(op["implementation"], f'{path}/{impl}')
+
+      print('start deps')
+      for dependency in op['dependencies']:
+        # if dependency in self.definition['artifacts'].keys():
+        #   deploy_path = self.definition['artifacts'][dependency]['targetPath']
+        #   os.makedirs(
+        #       f'{path}/{os.path.dirname(deploy_path)}', exist_ok=True)
+        #   shutil.copytree(
+        #       f'artifacts/{self.definition["artifacts"][dependency]["filename"]}', f'{path}/{deploy_path}')
+        # else:
+        dependency_file = os.path.basename(dependency)
+        shutil.copy(dependency, f'{path}/{dependency_file}')
+
+      print('end deps')
+
+      print('looking for host')
+      host = None
+      for req in self.target.requirements:
+        # print(req.definition)
+        if req.name == 'host':
+          host = self.target.topology.nodes[req.definition['nodeTemplateName']]
+          print('host = ', host.name)
+          break
+
+      if host is None:
+        print('host = ORCHESTRATOR')
+
+      pipe = sp.Popen(
+          f'ansible-playbook {path}/{impl} --check', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+      res = pipe.communicate()
+
+      if pipe.returncode != 0:
+        raise RuntimeError(res[1].decode())
+
+      print(res[0])
+
+      print('outputs', op['outputs'])
+
+      for output_name, output in op['outputs'].items():
+        print(output_name)
+        node = self.target.topology.nodes[output['nodeTemplateName']]
+        node.attributes[output['target']].set(
+            String(node, {}, 'UPDATED'))
+
+
+class ArtifactInstance:
+  def __init__(self, node, definition):
+    self.node = node
+    self.definition = copy.deepcopy(definition)
 
 
 class NodeInstance:
@@ -307,12 +487,24 @@ class NodeInstance:
     self.types = copy.deepcopy(self.definition['types'])
     self.directives = copy.deepcopy(self.definition['directives'])
 
+    # print(name)
+    # print(self.definition.keys())
+    # print(self.definition['artifacts'])
+    # print('')
+
+    self.sources = []
+
     self.find_type()
 
     if "substitute" in self.directives:
       self.init_substitution()
     else:
       self.init()
+
+  def init_requirements(self):
+    self.requirements = []
+    for i in range(len(self.definition['requirements'])):
+      self.requirements.append(RequirementInstance(i, self))
 
   def find_type(self):
     seen = set(self.types.keys())
@@ -335,10 +527,6 @@ class NodeInstance:
     self.capabilities = {}
     for cap_name in self.definition['capabilities'].keys():
       self.capabilities[cap_name] = CapabilityInstance(cap_name, self)
-
-    self.requirements = []
-    for i in range(len(self.definition['requirements'])):
-      self.requirements.append(RequirementInstance(i, self))
 
   def init_substitution(self):
     self.select_substitution()
@@ -504,17 +692,71 @@ class NodeInstance:
       ops = self.definition['interfaces']['Standard']['operations']
       ops_order = ['create', 'configure', 'start']
       for op_name in ops_order:
+        if op_name == 'configure':
+          for source in self.sources:
+            source.pre_configure_target()
+          for req in self.requirements:
+            req.pre_configure_source()
+
         if ops[op_name]["implementation"] != '':
-          print(f'{op_name}: {ops[op_name]["implementation"]}')
-          print(ops[op_name]['inputs'])
+          print(op_name)
+          # print(ops[op_name])
           op_inputs = {}
           for input_name in ops[op_name]['inputs'].keys():
-            print(input_name)
+            # print(input_name)
             op_inputs[input_name] = PropertyInstance(
-                self, ops[op_name]['inputs'][input_name])
-            
-            value = op_inputs[input_name].get()
-            print('\t',value)
+                self, ops[op_name]['inputs'][input_name]).get()
+
+            #value = op_inputs[input_name].get()
+            #print('\t', value)
+          print('inputs = ', str(op_inputs))
+
+          path = f'.tmp/instance-{self.topology.idx}/{self.name}/{op_name}'
+          os.makedirs(path, exist_ok=True)
+
+          impl = os.path.basename(ops[op_name]["implementation"])
+          shutil.copy(ops[op_name]["implementation"], f'{path}/{impl}')
+
+          print('start deps')
+          for dependency in ops[op_name]['dependencies']:
+            if dependency in self.definition['artifacts'].keys():
+              deploy_path = self.definition['artifacts'][dependency]['targetPath']
+              os.makedirs(
+                  f'{path}/{os.path.dirname(deploy_path)}', exist_ok=True)
+              shutil.copytree(
+                  f'artifacts/{self.definition["artifacts"][dependency]["filename"]}', f'{path}/{deploy_path}')
+            else:
+              dependency_file = os.path.basename(dependency)
+              shutil.copy(dependency, f'{path}/{dependency_file}')
+
+          print('end deps')
+
+          print('looking for host')
+          host = None
+          for req in self.requirements:
+            # print(req.definition)
+            if req.name == 'host':
+              host = self.topology.nodes[req.definition['nodeTemplateName']]
+              print('host = ', host.name)
+              break
+
+          if host is None:
+            print('host = ORCHESTRATOR')
+
+          pipe = sp.Popen(
+              f'ansible-playbook {path}/{impl} --check', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+          res = pipe.communicate()
+
+          if pipe.returncode != 0:
+            raise RuntimeError(res[1].decode())
+
+          print(res[0])
+
+          for output_name, output in ops[op_name]['outputs'].items():
+            print(output_name)
+            node = self.topology.nodes[output['nodeTemplateName']]
+            node.attributes[output['target']].set(
+                String(node, {}, 'UPDATED'))
 
 
 class TopologyTemplateInstance:
@@ -533,6 +775,8 @@ class TopologyTemplateInstance:
     self.nodes = {}
     for name in self.definition["nodeTemplates"].keys():
       self.nodes[name] = NodeInstance(name, self)
+    for name in self.definition["nodeTemplates"].keys():
+      self.nodes[name].init_requirements()
 
   def get_input(self, input_name):
     return self.inputs[input_name].get()

@@ -1,32 +1,32 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
 
-relationship_types:
+# relationship_types:
 
-  kubetos.relationships.UsesCertificate:
-    derived_from: tosca.relationships.DependsOn
-    properties:
-      cert_path:
-        type: string
-      key_path:
-        type: string
-    interfaces:
-      Configure:
-        operations:
-          pre_configure_source:
-            inputs:
-              cert:
-                value: { get_attribute: [ TARGET, cert ] }
-                type: string
-              key:
-                value: { get_attribute: [ TARGET, key ] }
-                type: string
-              cert_path:
-                value: { get_property: [ SELF, cert_path ] }
-                type: string
-              key_path:
-                value: { get_property: [ SELF, key_path ] }
-                type: string
-            implementation: ansible/cert-mirror--create.yaml
+#   kubetos.relationships.UsesCertificate:
+#     derived_from: tosca.relationships.DependsOn
+#     properties:
+#       cert_path:
+#         type: string
+#       key_path:
+#         type: string
+#     interfaces:
+#       Configure:
+#         operations:
+#           pre_configure_source:
+#             inputs:
+#               cert:
+#                 value: { get_attribute: [ TARGET, cert ] }
+#                 type: string
+#               key:
+#                 value: { get_attribute: [ TARGET, key ] }
+#                 type: string
+#               cert_path:
+#                 value: { get_property: [ SELF, cert_path ] }
+#                 type: string
+#               key_path:
+#                 value: { get_property: [ SELF, key_path ] }
+#                 type: string
+#             implementation: ansible/cert-mirror--create.yaml
 
 capability_types:
 
@@ -40,6 +40,37 @@ capability_types:
     derived_from: tosca.capabilities.Root
 
 node_types:
+
+  kubetos.nodes.Artifact.Certificate:
+    derived_from: tosca.nodes.SoftwareComponent
+    properties:
+      cert_path:
+        type: string
+      key_path:
+        type: string
+    requirements:
+      - cert:
+          capability: kubetos.capabilities.Certificate
+          relationship: tosca.relationships.DependsOn
+    interfaces:
+      Standard:
+        type: tosca.interfaces.node.lifecycle.Standard
+        operations:
+          create:
+            inputs:
+              cert:
+                value: { get_attribute: [ SELF, cert, cert ] }
+                type: string
+              key:
+                value: { get_attribute: [ SELF, cert, key ] }
+                type: string
+              cert_path:
+                value: { get_property: [ SELF, cert_path ] }
+                type: string
+              key_path:
+                value: { get_property: [ SELF, key_path ] }
+                type: string
+            implementation: profiles/pki/ansible/cert-mirror--create.yaml
 
   kubetos.nodes.Certificate:
     derived_from: tosca.nodes.Root
@@ -94,10 +125,10 @@ node_types:
               cert: [ SELF, cert ]
               key: [ SELF, key ]
             implementation:
-              primary: ./ansible/cert--create.yaml
+              primary: profiles/pki/ansible/cert--create.yaml
               dependencies:
-                - ./ansible/files/csr.json.j2
-                - ./ansible/files/ca-config.json
+                - profiles/pki/ansible/files/csr.json.j2
+                - profiles/pki/ansible/files/ca-config.json
 
   kubetos.nodes.CertificateAuthority:
     derived_from: tosca.nodes.Root
@@ -133,7 +164,7 @@ node_types:
               cert: [ SELF, cert ]
               key: [ SELF, key ]
             implementation:
-              primary: ./ansible/ca--create.yaml
+              primary: profiles/pki/ansible/ca--create.yaml
               dependencies:
-                - ./ansible/files/csr.json.j2
+                - profiles/pki/ansible/files/csr.json.j2
 

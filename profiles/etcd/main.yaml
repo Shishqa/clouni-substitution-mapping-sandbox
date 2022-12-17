@@ -62,7 +62,7 @@ relationship_types:
                 type: kubetos.datatypes.Etcd.PeerSpec
             outputs:
               new_list: [ TARGET, peers ]
-            implementation: ../../utils/add-to-list.yaml
+            implementation: artifacts/add-to-list.yaml
 
 node_types:
 
@@ -125,7 +125,7 @@ node_types:
         operations:
           create:
             implementation:
-              primary: ansible/etcd--create.yaml
+              primary: profiles/etcd/ansible/etcd--create.yaml
               dependencies:
                 - etcd_role
                 - download_role
@@ -142,12 +142,12 @@ node_types:
                 entry_schema:
                   type: kubetos.datatypes.Etcd.PeerSpec
             implementation:
-              primary: ansible/etcd--configure.yaml
+              primary: profiles/etcd/ansible/etcd--configure.yaml
               dependencies:
                 - etcd_role
           start:
             implementation:
-              primary: ansible/etcd--start.yaml
+              primary: profiles/etcd/ansible/etcd--start.yaml
               dependencies:
                 - etcd_role
     artifacts:
@@ -156,6 +156,6 @@ node_types:
         type: tosca.artifacts.File
         deploy_path: roles/etcd
       download_role:
-        file: ../../utils/roles/download
+        file: utils/roles/download
         type: tosca.artifacts.File
         deploy_path: roles/download
