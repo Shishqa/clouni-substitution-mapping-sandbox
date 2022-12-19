@@ -20,8 +20,8 @@ relationship_types:
               new_item:
                 value: { get_property: [ TARGET, name ] }
                 type: string
-            outputs:
-              new_list: [ SOURCE, security_groups ]
+            # outputs:
+            #   new_list: [ SOURCE, security_groups ]
             implementation: artifacts/add_to_list.yaml
 
   FloatingIpToCompute:

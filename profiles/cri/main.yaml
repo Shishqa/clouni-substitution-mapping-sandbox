@@ -34,7 +34,7 @@ capability_types:
 
 relationship_types:
 
-  kubetos.relationships.OCI.Plugin.CRI-O:
+  kubetos.relationships.OCI.Plugin:
     derived_from: tosca.relationships.DependsOn
     interfaces:
       Configure:
@@ -50,16 +50,19 @@ relationship_types:
               new_item:
                 value: { get_property: [ TARGET, oci, spec ] }
                 type: kubetos.datatypes.OCI.RuntimeSpec
-            outputs:
-              new_list: [ SOURCE, runtimes ]
+            # outputs:
+            #   new_list: [ SOURCE, runtimes ]
             implementation: ../../utils/add-to-list.yaml
 
 node_types:
 
-  kubetos.nodes.Runc:
+  kubetos.nodes.Abstract.OCI:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
       oci: kubetos.capabilities.OCI.Plugin
+
+  kubetos.nodes.Runc:
+    derived_from: kubetos.nodes.Abstract.OCI
     properties:
       component_version:
         type: version
@@ -74,9 +77,7 @@ node_types:
             implementation: ansible/runc--create.yaml
 
   kubetos.nodes.Kata:
-    derived_from: tosca.nodes.SoftwareComponent
-    capabilities:
-      oci: kubetos.capabilities.OCI.Plugin
+    derived_from: kubetos.nodes.Abstract.OCI
     properties:
       component_version:
         type: version
@@ -110,14 +111,10 @@ node_types:
         type: tosca.artifacts.File
         deploy_path: roles/download
 
-  kubetos.nodes.CRI-O:
+  kubetos.nodes.Abstract.CRI:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
       cri: kubetos.capabilities.CRI
-    properties:
-      component_version:
-        type: version
-        default: "1.21"
     attributes:
       runtimes:
         type: list
@@ -126,11 +123,18 @@ node_types:
     requirements:
       - oci_runtime:
           capability: kubetos.capabilities.OCI.Plugin
-          relationship: kubetos.relationships.OCI.Plugin.CRI-O
+          relationship: kubetos.relationships.OCI.Plugin
           occurrences: [ 1, UNBOUNDED ]
       - cni:
           capability: kubetos.capabilities.CNI
           relationship: tosca.relationships.DependsOn
+
+  kubetos.nodes.CRI-O:
+    derived_from: kubetos.nodes.Abstract.CRI
+    properties:
+      component_version:
+        type: version
+        default: "1.21"
     interfaces:
       Standard:
         type: tosca.interfaces.node.lifecycle.Standard

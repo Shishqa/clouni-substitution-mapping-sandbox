@@ -6,10 +6,12 @@ topology_template:
 
     public_address:
       type: string
+      default: 1.1.1.1
       description: Public address of existing server
 
     private_address:
       type: string
+      default: 2.2.2.2
       description: Private address of existing server
 
   node_templates:

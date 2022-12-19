@@ -60,8 +60,8 @@ relationship_types:
                   peer_address: { get_attribute: [ SOURCE, host, private_address ] }
                   peer_port: { get_property: [ SOURCE, peer_address, port ] }
                 type: kubetos.datatypes.Etcd.PeerSpec
-            outputs:
-              new_list: [ TARGET, peers ]
+            # outputs:
+            #   new_list: [ TARGET, peers ]
             implementation: ../../utils/add-to-list.yaml
 
 node_types:
@@ -73,6 +73,12 @@ node_types:
         type: list
         entry_schema:
           type: kubetos.datatypes.Etcd.PeerSpec
+    requirements:
+      - peer:
+          capability: kubetos.capabilities.Etcd.Endpoint.Peer
+          node: kubetos.nodes.Etcd
+          relationship: kubetos.relationships.EtcdPeer
+          occurrences: [ 1, UNBOUNDED ]
 
   kubetos.nodes.Etcd:
     derived_from: tosca.nodes.SoftwareComponent
@@ -85,6 +91,10 @@ node_types:
       name:
         type: string
         default: { get_attribute: [ SELF, tosca_id ] }
+      peers:
+        type: list
+        entry_schema:
+          type: kubetos.datatypes.Etcd.PeerSpec
     properties:
       component_version:
         type: version
@@ -110,11 +120,6 @@ node_types:
       max_wals:
         type: integer
         default: 0
-    requirements:
-      - cluster:
-          capability: tosca.capabilities.Node
-          node: kubetos.nodes.Etcd.Cluster
-          relationship: kubetos.relationships.EtcdPeer
     interfaces:
       Standard:
         type: tosca.interfaces.node.lifecycle.Standard
@@ -137,7 +142,7 @@ node_types:
               etcd_access_port: { value: { get_property: [ SELF, access_address, port ] }, type: integer }
               etcd_member_name: { value: { get_attribute: [ SELF, name ] }, type: string }
               etcd_peers:
-                value: { get_attribute: [ SELF, cluster, peers ] }
+                value: { get_attribute: [ SELF, peers ] }
                 type: list
                 entry_schema:
                   type: kubetos.datatypes.Etcd.PeerSpec

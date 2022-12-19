@@ -1,0 +1,93 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: "kubetos"
+  template_author: "shishqa"
+  template_version: "1.0"
+
+imports:
+  - profiles/etcd/main.yaml
+  - profiles/cri/main.yaml
+  - profiles/cni/main.yaml
+  - profiles/kubernetes/main.yaml
+
+topology_template:
+
+  inputs:
+
+    kubernetes_version:
+      type: version
+      default: 1.21.0
+
+    cluster_name:
+      type: string
+      default: kubernetes-cluster
+
+    cluster_cidr:
+      type: string
+      default: 10.233.0.0/16
+
+    service_cidr:
+      type: string
+      default: 10.32.0.0/16
+
+    dns_ip:
+      type: string
+      default: 10.32.0.3
+
+  node_templates:
+
+    controller_manager:
+      type: kubetos.nodes.Abstract.Kube.ControllerManager
+      properties:
+        component_version: { get_input: [ kubernetes_version ] }
+        cluster_cidr: { get_input: [ cluster_cidr ] }
+        service_cidr: { get_input: [ service_cidr ] }
+      directives:
+        - substitute
+      # requirements:
+      #   - dependency: kube_node
+
+    scheduler:
+      type: kubetos.nodes.Abstract.Kube.Scheduler
+      properties:
+        component_version: { get_input: [ kubernetes_version ] }
+        config_path: /etc/kubernetes/kube-scheduler.yaml
+      directives:
+        - substitute
+      # requirements:
+      #   - dependency: kube_node
+
+    apiserver:
+      type: kubetos.nodes.Abstract.Kube.APIServer
+      capabilities:
+        access_address:
+          properties:
+            port: 6443
+      properties:
+        component_version: { get_input: [ kubernetes_version ] }
+        service_cidr: { get_input: [ service_cidr ] }
+      requirements:
+        - etcd: etcd_cluster
+        # - dependency: kube_node
+      directives:
+        - substitute
+
+    etcd_cluster:
+      type: kubetos.nodes.Etcd.Cluster
+      directives:
+        - substitute
+
+    # kube_node:
+    #   type: kubetos.nodes.Abstract.KubeNode
+    #   directives:
+    #     - substitute
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Abstract.ControlPlane
+    capabilities:
+      access_address: [ apiserver, access_address ]
+    properties:
+      component_version: [ kubernetes_version ]
+      cluster_cidr: [ cluster_cidr ]
+      service_cidr: [ service_cidr ]

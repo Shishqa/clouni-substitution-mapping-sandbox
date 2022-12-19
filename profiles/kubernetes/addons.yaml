@@ -13,9 +13,6 @@ node_types:
         default: 1.21.0
       cluster_cidr:
         type: string
-    attributes:
-      deploy_kubeconfig_path:
-        type: string
     requirements:
       - kubectl:
           capability: tosca.capabilities.Node
@@ -23,8 +20,7 @@ node_types:
           relationship: tosca.relationships.HostedOn
       - deploy_kubeconfig:
           capability: tosca.capabilities.Node
-          node: kubetos.nodes.Kubeconfig
-          relationship: kubetos.relationships.UsesKubeconfig
+          node: kubetos.nodes.Artifact.Kubeconfig
       - kubeconfig:
           capability: tosca.capabilities.Node
           node: kubetos.nodes.Kubeconfig
@@ -43,7 +39,7 @@ node_types:
               kubeconfig:
                 value: { get_attribute: [ SELF, kubeconfig, conf ] }
                 type: string
-              deploy_kubeconfig_path: { value: { get_attribute: [ SELF, deploy_kubeconfig_path ] }, type: string }
+              deploy_kubeconfig_path: { value: { get_property: [ SELF, deploy_kubeconfig, path ] }, type: string }
             implementation:
               primary: ansible/kube-proxy--start.yaml
 
@@ -56,8 +52,6 @@ node_types:
     attributes:
       dns_ip:
         type: string
-      deploy_kubeconfig_path:
-        type: string
     requirements:
       - kubectl:
           capability: tosca.capabilities.Node
@@ -65,8 +59,7 @@ node_types:
           relationship: tosca.relationships.HostedOn
       - deploy_kubeconfig:
           capability: tosca.capabilities.Node
-          node: kubetos.nodes.Kubeconfig
-          relationship: kubetos.relationships.UsesKubeconfig
+          node: kubetos.nodes.Artifact.Kubeconfig
     interfaces:
       Standard:
         type: tosca.interfaces.node.lifecycle.Standard
@@ -80,7 +73,7 @@ node_types:
         operations:
           start:
             inputs:
-              deploy_kubeconfig_path: { value: { get_attribute: [ SELF, deploy_kubeconfig_path ] }, type: string }
+              deploy_kubeconfig_path: { value: { get_property: [ SELF, deploy_kubeconfig, path ] }, type: string }
             implementation:
               primary: ansible/coredns--start.yaml
 
@@ -92,9 +85,6 @@ node_types:
         default: 0.17.0
       pod_cidr:
         type: string
-    attributes:
-      deploy_kubeconfig_path:
-        type: string
     requirements:
       - kubectl:
           capability: tosca.capabilities.Node
@@ -102,8 +92,7 @@ node_types:
           relationship: tosca.relationships.HostedOn
       - deploy_kubeconfig:
           capability: tosca.capabilities.Node
-          node: kubetos.nodes.Kubeconfig
-          relationship: kubetos.relationships.UsesKubeconfig
+          node: kubetos.nodes.Artifact.Kubeconfig
       - cni:
           capability: kubetos.capabilities.CNI
           relationship: tosca.relationships.DependsOn
@@ -129,6 +118,6 @@ node_types:
         operations:
           start:
             inputs:
-              deploy_kubeconfig_path: { value: { get_attribute: [ SELF, deploy_kubeconfig_path ] }, type: string }
+              deploy_kubeconfig_path: { value: { get_property: [ SELF, deploy_kubeconfig, path ] }, type: string }
             implementation:
               primary: ansible/flannel--start.yaml
