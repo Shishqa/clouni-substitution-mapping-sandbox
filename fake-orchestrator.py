@@ -33,10 +33,10 @@ def create_value(node, type_def, definition):
   if '$functionCall' in definition.keys():
     return create_function(node, type_def, definition)
 
-  if '$list' in definition:
+  if '$list' in definition or type_def['name'] == 'list':
     return List(node, type_def, definition)
 
-  if '$map' in definition.keys():
+  if '$map' in definition.keys() or type_def['name'] == 'map':
     return Map(node, type_def, definition)
 
   if type_def['name'] == 'version':
@@ -48,7 +48,6 @@ def create_value(node, type_def, definition):
   if type_def['name'] == 'scalar-unit.size':
     return ScalarUnitSize(node, type_def, definition['$value'])
 
-  print(definition)
   return String(node, type_def, definition['$value'])
 
 
@@ -91,6 +90,9 @@ class String(ValueInstance):
 class Version(ValueInstance):
   def __init__(self, node, type_def, value):
     super().__init__(node, type_def)
+    if value is None:
+      self.value = None
+      return
     self.value = value['$string']
 
   def get(self):
@@ -100,6 +102,9 @@ class Version(ValueInstance):
 class ScalarUnitTime(ValueInstance):
   def __init__(self, node, type_def, value):
     super().__init__(node, type_def)
+    if value is None:
+      self.value = None
+      return
     self.value = value['$string']
 
   def get(self):
@@ -109,6 +114,9 @@ class ScalarUnitTime(ValueInstance):
 class ScalarUnitSize(ValueInstance):
   def __init__(self, node, type_def, value):
     super().__init__(node, type_def)
+    if value is None:
+      self.value = None
+      return
     self.value = value['$string']
 
   def get(self):
@@ -119,10 +127,18 @@ class List(ValueInstance):
   def __init__(self, node, type_def, definition):
     super().__init__(node, type_def)
     self.entry_type = definition['$information']['entry']
+    
+    if '$value' in definition.keys() and definition['$value'] is None:
+      self.values = None
+      return
+
     self.values = [create_value(node, self.entry_type, entry)
                    for entry in definition['$list']]
 
   def get(self):
+    if self.values is None:
+      return None
+
     values = [v.get() for v in self.values]
     return values
 
@@ -130,12 +146,19 @@ class List(ValueInstance):
 class Map(ValueInstance):
   def __init__(self, node, type_def, definition):
     super().__init__(node, type_def)
+    
+    if '$value' in definition.keys() and definition['$value'] is None:
+      self.values = None
+      return
+
     self.values = dict()
     for e in definition['$map']:
       key = e['$key']['$value']
       self.values[key] = create_value(node, e['$information']['type'], e)
 
   def get(self):
+    if self.values is None:
+      return None
     values = dict()
     for key, value in self.values.items():
       values = value.get()
@@ -181,9 +204,7 @@ class Concat(ValueInstance):
   def __init__(self, node, type_def, args):
     super().__init__(node, type_def)
     self.args = []
-    print(args)
     for arg in args:
-      print(arg)
       if '$value' in arg.keys():
         self.args.append(String(node, {}, arg['$value']))
       else:
@@ -247,14 +268,12 @@ class CapabilityInstance:
     self.type = seen.pop()
 
   def get_property(self, args):
-    print('CAP get property', args)
     path = args[0]
     if path in self.properties.keys():
       return self.properties[path].get()
     raise RuntimeError('no property')
 
   def get_attribute(self, args):
-    print('CAP get attribute', args)
     path = args[0]
     if path in self.attributes.keys():
       return self.attributes[path].get()
@@ -374,18 +393,16 @@ class NodeInstance:
 
       mapping = instance_models[self.substitution_index].definition['substitution']['attributeMappings'][attr_name]
 
-      if instance_models[self.substitution_index]\
-          .nodes[mapping['nodeTemplateName']]\
-              .attributes[mapping['target']].value is None:
+      if attr_name == 'tosca_name':
+        # XXX: only name should be propagated forwards?
         instance_models[self.substitution_index]\
             .nodes[mapping['nodeTemplateName']]\
             .attributes[mapping['target']] = self.attributes[attr_name]
-      elif self.attributes[attr_name] is None:
-        self.attributes[attr_name] = instance_models[self.substitution_index]\
-            .nodes[mapping['nodeTemplateName']]\
-            .attributes[mapping['target']]
-      else:
-        raise RuntimeError('Cannot merge attributes')
+        continue
+
+      self.attributes[attr_name] = instance_models[self.substitution_index]\
+          .nodes[mapping['nodeTemplateName']]\
+          .attributes[mapping['target']]
 
     self.capabilities = {}
     for cap_name in self.definition['capabilities'].keys():
@@ -423,7 +440,6 @@ class NodeInstance:
         print('please, choose correct option')
 
   def get_property(self, args):
-    print(self.name, 'NODE get property', args)
     path = args[0]
     rest = args[1:]
 
@@ -440,7 +456,6 @@ class NodeInstance:
     raise RuntimeError('no property')
 
   def get_attribute(self, args):
-    print(self.name, 'NODE get attribute', args)
     path = args[0]
     rest = args[1:]
 
@@ -478,12 +493,9 @@ class NodeInstance:
         label = "properties";
       '''
       for p_name, p_body in self.properties.items():
-        # print(p_name)
-        p = f'''
+        res += f'''
         "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
         '''
-        # print(p)
-        res += p
       res += '''
       }
       '''
@@ -498,12 +510,9 @@ class NodeInstance:
         label = "attributes";
       '''
       for a_name, a_body in self.attributes.items():
-        # print(p_name)
-        a = f'''
+        res += f'''
         "{subgraph_name}_attr_{a_name}" [label="{a_name} = {a_body.get()}"];
         '''
-        # print(p)
-        res += a
       res += '''
       }
       '''
@@ -549,7 +558,6 @@ class NodeInstance:
   def deploy(self):
     print(f"\ndeploying {self.name}")
     if self.substitution_index is not None:
-      # print('TODO: parse substitution mapping interface')
       instance_models[self.substitution_index].deploy()
     else:
       ops = self.definition['interfaces']['Standard']['operations']
@@ -751,7 +759,7 @@ def main():
   try:
     root = instantiate_template(args.template)
     instance_models[root].dump_graphviz('test')
-    instance_models[root].deploy()
+    # instance_models[root].deploy()
   except RuntimeError as err:
     print(err.args[0])
 
