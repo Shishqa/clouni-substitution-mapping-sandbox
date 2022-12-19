@@ -9,10 +9,6 @@ topology_template:
 
   inputs:
 
-    instance_name:
-      type: string
-      description: Compute instance name
-
     key_name:
       type: string
       description: Name of key-pair to be used for compute instance
@@ -25,8 +21,6 @@ topology_template:
 
     os_server:
       type: openstack:nova.Server
-      properties:
-        name: { get_input: [ instance_name ] }
       requirements:
         - image: os_image
         - flavor: os_flavor
@@ -62,7 +56,7 @@ topology_template:
       properties:
         name:
           concat:
-            - { get_property: [ os_server, name ] }
+            - { get_attribute: [ os_server, tosca_name ] }
             - '-security-group'
 
     os_security_group_custom_rule_incoming_tcp_traffic:
@@ -88,3 +82,4 @@ topology_template:
       public_address: [ os_server, public_address ]
       networks: [ os_server, networks ]
       ports: [ os_server, ports ]
+      tosca_name: [ os_server, tosca_name ]

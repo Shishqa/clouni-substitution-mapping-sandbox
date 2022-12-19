@@ -3,6 +3,7 @@ import argparse
 import subprocess as sp
 import yaml
 import copy
+import uuid
 
 substitutions = {
     'tosca::Compute': [
@@ -15,6 +16,10 @@ substitutions = {
         {
             'file': 'templates/openstack-compute.yaml',
             'tags': ['openstack'],
+        },
+        {
+            'file': 'templates/baremetal-compute.yaml',
+            'tags': ['baremetal'],
         },
     ]
 }
@@ -156,8 +161,7 @@ class GetProperty(ValueInstance):
     if start == 'SELF':
       return self.node.get_property(self.args[1:])
     else:
-      print(self.args)
-      raise RuntimeError('not supported for now')
+      return self.node.topology.nodes[start].get_property(self.args[1:])
 
 
 class GetAttribute(ValueInstance):
@@ -170,8 +174,7 @@ class GetAttribute(ValueInstance):
     if start == 'SELF':
       return self.node.get_attribute(self.args[1:])
     else:
-      print(self.args)
-      raise RuntimeError('not supported for now')
+      return self.node.topology.nodes[start].get_attribute(self.args[1:])
 
 
 class Concat(ValueInstance):
@@ -213,6 +216,9 @@ class AttributeInstance:
 
   def get(self):
     return self.value.get()
+
+  def set(self, value):
+    self.value = value
 
 
 class CapabilityInstance:
@@ -332,6 +338,11 @@ class NodeInstance:
       self.attributes[attr_name] = AttributeInstance(
           self, self.definition['attributes'][attr_name])
 
+      if attr_name == 'tosca_name':
+        self.attributes[attr_name].set(String(self, {}, self.name))
+      elif attr_name == 'tosca_id':
+        self.attributes[attr_name].set(String(self, {}, uuid.uuid4().hex))
+
     self.capabilities = {}
     for cap_name in self.definition['capabilities'].keys():
       self.capabilities[cap_name] = CapabilityInstance(cap_name, self)
@@ -344,17 +355,37 @@ class NodeInstance:
     self.select_substitution()
 
     self.properties = {}
+    for prop_name in self.definition['properties'].keys():
+      self.properties[prop_name] = PropertyInstance(
+          self, self.definition['properties'][prop_name])
 
     self.attributes = {}
     for attr_name in self.definition['attributes'].keys():
       self.attributes[attr_name] = AttributeInstance(
           self, self.definition['attributes'][attr_name])
-      if attr_name in ['state', 'tosca_id', 'tosca_name']:
+
+      if attr_name == 'tosca_name':
+        self.attributes[attr_name].set(String(self, {}, self.name))
+      elif attr_name == 'tosca_id':
+        self.attributes[attr_name].set(String(self, {}, uuid.uuid4().hex))
+
+      if attr_name in ['state', 'tosca_id', 'tosca_name'] and attr_name not in instance_models[self.substitution_index].definition['substitution']['attributeMappings'].keys():
         continue
+
       mapping = instance_models[self.substitution_index].definition['substitution']['attributeMappings'][attr_name]
-      instance_models[self.substitution_index]\
+
+      if instance_models[self.substitution_index]\
           .nodes[mapping['nodeTemplateName']]\
-          .attributes[mapping['target']] = self.attributes[attr_name]
+              .attributes[mapping['target']].value is None:
+        instance_models[self.substitution_index]\
+            .nodes[mapping['nodeTemplateName']]\
+            .attributes[mapping['target']] = self.attributes[attr_name]
+      elif self.attributes[attr_name] is None:
+        self.attributes[attr_name] = instance_models[self.substitution_index]\
+            .nodes[mapping['nodeTemplateName']]\
+            .attributes[mapping['target']]
+      else:
+        raise RuntimeError('Cannot merge attributes')
 
     self.capabilities = {}
     for cap_name in self.definition['capabilities'].keys():
@@ -457,6 +488,26 @@ class NodeInstance:
       }
       '''
 
+    if len(self.attributes) > 0:
+      res += f'''
+      subgraph {subgraph_name}_attributes {{
+        penwidth=1;
+        color = black;
+        graph [rankdir = "LR"];
+        rank = same;
+        label = "attributes";
+      '''
+      for a_name, a_body in self.attributes.items():
+        # print(p_name)
+        a = f'''
+        "{subgraph_name}_attr_{a_name}" [label="{a_name} = {a_body.get()}"];
+        '''
+        # print(p)
+        res += a
+      res += '''
+      }
+      '''
+
     res += f'''
     subgraph {subgraph_name}_capabilities {{
       penwidth=1;
@@ -512,9 +563,9 @@ class NodeInstance:
             print(input_name)
             op_inputs[input_name] = PropertyInstance(
                 self, ops[op_name]['inputs'][input_name])
-            
+
             value = op_inputs[input_name].get()
-            print('\t',value)
+            print('\t', value)
 
 
 class TopologyTemplateInstance:
@@ -643,7 +694,7 @@ class TopologyTemplateInstance:
       self.nodes[n].deploy()
 
 
-def instantiate_template(path):
+def instantiate_template(path, inputs={}):
   global idx
   global instance_models
 
