@@ -37,12 +37,30 @@ topology_template:
 
   node_templates:
 
-    cluster_a:
-      type: kubetos.nodes.Abstract.Cluster
+    control_plane:
+      type: kubetos.nodes.Abstract.ControlPlane
       properties:
         component_version: { get_input: [ kubernetes_version ] }
         cluster_cidr: { get_input: [ cluster_cidr ] }
         service_cidr: { get_input: [ service_cidr ] }
+      directives:
+        - substitute
+
+    worker:
+      type: kubetos.nodes.Abstract.KubeNode
+      properties:
+        component_version: { get_input: [ kubernetes_version ] }
+        pod_cidr: { get_input: [ cluster_cidr ] }
         dns_ip: { get_input: [ dns_ip ] }
       directives:
         - substitute
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Abstract.Cluster
+    capabilities:
+      access_address: [ control_plane, access_address ]
+    properties:
+      component_version: [ kubernetes_version ]
+      cluster_cidr: [ cluster_cidr ]
+      service_cidr: [ service_cidr ]
+      dns_ip: [ dns_ip ]

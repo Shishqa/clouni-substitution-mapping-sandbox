@@ -5,24 +5,8 @@ import yaml
 import copy
 import uuid
 
-substitutions = {
-    'tosca::Compute': [
-        {
-            'file': 'templates/openstack-compute-public.yaml',
-            # possibly, we can search by tags
-            # tags are provided via 3.6.2 Metadata?
-            'tags': ['openstack', 'floating-ip'],
-        },
-        {
-            'file': 'templates/openstack-compute.yaml',
-            'tags': ['openstack'],
-        },
-        {
-            'file': 'templates/baremetal-compute.yaml',
-            'tags': ['baremetal'],
-        },
-    ]
-}
+substitutions = {}
+inventory = {}
 
 
 idx = 0
@@ -30,6 +14,8 @@ instance_models = {}
 
 
 def create_value(node, type_def, definition):
+  print(definition)
+
   if '$functionCall' in definition.keys():
     return create_function(node, type_def, definition)
 
@@ -126,12 +112,12 @@ class ScalarUnitSize(ValueInstance):
 class List(ValueInstance):
   def __init__(self, node, type_def, definition):
     super().__init__(node, type_def)
-    self.entry_type = definition['$information']['entry']
     
     if '$value' in definition.keys() and definition['$value'] is None:
       self.values = None
       return
 
+    self.entry_type = definition['$information']['entry']
     self.values = [create_value(node, self.entry_type, entry)
                    for entry in definition['$list']]
 
@@ -180,6 +166,7 @@ class GetProperty(ValueInstance):
     self.args = [e['$value'] for e in args]
 
   def get(self):
+    print('GETPROP', self.args)
     start = self.args[0]
     if start == 'SELF':
       return self.node.get_property(self.args[1:])
@@ -193,6 +180,7 @@ class GetAttribute(ValueInstance):
     self.args = [e['$value'] for e in args]
 
   def get(self):
+    print('GETATTR', self.args)
     start = self.args[0]
     if start == 'SELF':
       return self.node.get_attribute(self.args[1:])
@@ -290,22 +278,22 @@ class CapabilityInstance:
       "cap_{subgraph_name}" [shape=point,style=invis];
     '''
 
-    if len(self.properties) > 0:
-      res += f'''
-      subgraph {subgraph_name}_properties {{
-        color = black;
-        graph [rankdir = "LR"];
-        rank = same;
-        label = "properties";
-        rank = same;
-      '''
-      for p_name, p_body in self.properties.items():
-        res += f'''
-        "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
-        '''
-      res += '''
-      }
-      '''
+    # if len(self.properties) > 0:
+    #   res += f'''
+    #   subgraph {subgraph_name}_properties {{
+    #     color = black;
+    #     graph [rankdir = "LR"];
+    #     rank = same;
+    #     label = "properties";
+    #     rank = same;
+    #   '''
+    #   for p_name, p_body in self.properties.items():
+    #     res += f'''
+    #     "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
+    #     '''
+    #   res += '''
+    #   }
+    #   '''
 
     res += '''
     }
@@ -338,6 +326,11 @@ class NodeInstance:
       self.init_substitution()
     else:
       self.init()
+
+    global inventory
+    if self.type not in inventory.keys():
+      inventory[self.type] = []
+    inventory[self.type].append(self)
 
   def find_type(self):
     seen = set(self.types.keys())
@@ -414,21 +407,26 @@ class NodeInstance:
           .nodes[mapping['nodeTemplateName']]\
           .capabilities[mapping['target']] = self.capabilities[cap_name]
 
+    self.requirements = {}
+
   def select_substitution(self):
     print(f'\nnode {self.name} is marked substitutable')
     print('please choose desired substitution')
-    option_list = []
+    
+    if self.type not in substitutions.keys():
+      raise RuntimeError('cannot substitute')
+    option_list = substitutions[self.type]
 
-    for t in self.types.keys():
-      if t not in substitutions.keys():
-        continue
-      option_list += substitutions[t]
+    if len(option_list) == 1:
+      self.substitution_index = instantiate_template(
+            option_list[0]["file"])
+      return
 
     for i, item in enumerate(option_list):
       print(f' {i} - {item["file"]}')
 
     while True:  # blame on me
-      choose = int(input('your choise: '))
+      choose = int(input('your choice: '))
       if choose in range(len(option_list)):
         print(f'chosen {option_list[choose]["file"]}')
 
@@ -483,39 +481,39 @@ class NodeInstance:
       "node_{subgraph_name}" [shape=point, style=invis];
     '''
 
-    if len(self.properties) > 0:
-      res += f'''
-      subgraph {subgraph_name}_properties {{
-        penwidth=1;
-        color = black;
-        graph [rankdir = "LR"];
-        rank = same;
-        label = "properties";
-      '''
-      for p_name, p_body in self.properties.items():
-        res += f'''
-        "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
-        '''
-      res += '''
-      }
-      '''
+    # if len(self.properties) > 0:
+    #   res += f'''
+    #   subgraph {subgraph_name}_properties {{
+    #     penwidth=1;
+    #     color = black;
+    #     graph [rankdir = "LR"];
+    #     rank = same;
+    #     label = "properties";
+    #   '''
+    #   for p_name, p_body in self.properties.items():
+    #     res += f'''
+    #     "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
+    #     '''
+    #   res += '''
+    #   }
+    #   '''
 
-    if len(self.attributes) > 0:
-      res += f'''
-      subgraph {subgraph_name}_attributes {{
-        penwidth=1;
-        color = black;
-        graph [rankdir = "LR"];
-        rank = same;
-        label = "attributes";
-      '''
-      for a_name, a_body in self.attributes.items():
-        res += f'''
-        "{subgraph_name}_attr_{a_name}" [label="{a_name} = {a_body.get()}"];
-        '''
-      res += '''
-      }
-      '''
+    # if len(self.attributes) > 0:
+    #   res += f'''
+    #   subgraph {subgraph_name}_attributes {{
+    #     penwidth=1;
+    #     color = black;
+    #     graph [rankdir = "LR"];
+    #     rank = same;
+    #     label = "attributes";
+    #   '''
+    #   for a_name, a_body in self.attributes.items():
+    #     res += f'''
+    #     "{subgraph_name}_attr_{a_name}" [label="{a_name} = {a_body.get()}"];
+    #     '''
+    #   res += '''
+    #   }
+    #   '''
 
     res += f'''
     subgraph {subgraph_name}_capabilities {{
@@ -589,9 +587,45 @@ class TopologyTemplateInstance:
     self.instantiate_nodes()
 
   def instantiate_nodes(self):
+    selections = []
+
     self.nodes = {}
     for name in self.definition["nodeTemplates"].keys():
+      if "select" in self.definition["nodeTemplates"][name]["directives"]:
+        selections.append(name)
+        print("select", name)
+        continue
       self.nodes[name] = NodeInstance(name, self)
+
+    for name in selections:
+      print(f'\nnode {name} is marked selectable')
+      print('please choose desired node from inventory')
+      
+      types = self.definition["nodeTemplates"][name]["types"]
+      seen = set(types.keys())
+      for type_name, type_body in types.items():
+        if 'parent' in type_body.keys():
+          seen.remove(type_body['parent'])
+      node_type = seen.pop()
+
+      if node_type not in inventory.keys():
+        raise RuntimeError('cannot select')
+      option_list = inventory[node_type]
+
+      if len(option_list) == 1:
+        return option_list[0]
+
+      for i, node in enumerate(option_list):
+        print(f' {i} - instance-{node.topology.idx} : {node.name}')
+
+      while True:  # blame on me
+        choose = int(input('your choice: '))
+        if choose in range(len(option_list)):
+          print(f'chosen {choose}')
+          self.nodes[name] = option_list[choose]
+          break
+        else:
+          print('please, choose correct option')
 
   def get_input(self, input_name):
     return self.inputs[input_name].get()
@@ -719,19 +753,19 @@ def instantiate_template(path, inputs={}):
 
   template = yaml.safe_load(res[0])
 
-  if len(template['inputs']) > 0:
-    print('\nplease, fill inputs')
-  for input_name, input_body in template['inputs'].items():
-    if input_body['$value'] is None:
-      value = input(f'{input_name}: ')
-      inputs[input_name] = value
-    else:
-      inputs[input_name] = input_body['$value']
+  # if len(template['inputs']) > 0:
+  #   print('\nplease, fill inputs')
+  # for input_name, input_body in template['inputs'].items():
+  #   if input_body['$value'] is None:
+  #     value = input(f'{input_name}: ')
+  #     inputs[input_name] = value
+  #   else:
+  #     inputs[input_name] = input_body['$value']
 
   input_str = ''
-  if len(inputs.keys()) > 0:
-    input_str = '-i "' + \
-        ','.join([f'{item[0]}={item[1]}' for item in inputs.items()]) + '"'
+  # if len(inputs.keys()) > 0:
+  #   input_str = '-i "' + \
+  #       ','.join([f'{item[0]}={item[1]}' for item in inputs.items()]) + '"'
 
   pipe = sp.Popen(
       f'puccini-tosca parse -s 10 {input_str} {path}', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
@@ -754,9 +788,36 @@ def parse_arguments():
   return parser.parse_args()
 
 
+def init_substitution_database():
+  global substitutions
+
+  for filename in os.listdir('templates'):
+    path = os.path.join('templates', filename)
+
+    pipe = sp.Popen(
+      f'puccini-tosca parse -s 2 {path}', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+    res = pipe.communicate()
+
+    if pipe.returncode != 0:
+      raise RuntimeError(res[1].decode())
+
+    definition = yaml.safe_load(res[0])
+    substitution = definition['substitution']
+    if substitution is None:
+      continue
+
+    substitution_type = substitution['type']
+    if substitution_type not in substitutions:
+      substitutions[substitution_type] = []
+
+    substitutions[substitution_type].append({'file': path})
+
+
 def main():
   args = parse_arguments()
   try:
+    init_substitution_database()
+
     root = instantiate_template(args.template)
     instance_models[root].dump_graphviz('test')
     # instance_models[root].deploy()

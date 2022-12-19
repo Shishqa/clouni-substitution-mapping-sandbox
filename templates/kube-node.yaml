@@ -1,0 +1,170 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: "kubetos"
+  template_author: "shishqa"
+  template_version: "1.0"
+
+imports:
+  - ../profiles/cri/main.yaml
+  - ../profiles/kubernetes/main.yaml
+
+topology_template:
+
+  inputs:
+
+    kubelet_version:
+      type: version
+      default: 1.21.0
+
+    pod_cidr:
+      type: string
+      default: 10.233.0.0/16
+
+    dns_ip:
+      type: string
+      default: 10.32.0.3
+
+  node_templates:
+
+    kubelet:
+      type: kubetos.nodes.Kubelet
+      capabilities:
+        kubelet:
+          properties:
+            static_pod_path: /etc/kubernetes/manifests
+      properties:
+        component_version: { get_input: [ kubelet_version ] }
+        pod_cidr: { get_input: [ pod_cidr ] }
+        dns_ip: { get_input: [ dns_ip ] }
+      requirements:
+        - host: compute
+        - cri_runtime: cri
+            # relationship:
+            #   type: kubetos.relationships.Kubelet.UsesRuntime
+            #   properties:
+            #     dns_ip: 1.1.1.1
+        - kubeconfig: kubelet_kubeconfig_hosted
+        - ca: kubernetes_ca_hosted
+        - cert: kubelet_cert_hosted
+
+    kube_local_cluster:
+      type: kubetos.nodes.Kubernetes.Cluster
+      capabilities:
+        cluster:
+          properties:
+            name: test-cluster
+      attributes:
+        apiserver_address: 127.0.0.1
+      requirements:
+        - ca: kubernetes_ca
+
+    kubelet_kubeconfig_hosted:
+      type: kubetos.nodes.Artifact.Kubeconfig
+      properties:
+        path: /etc/kubernetes/kubelet.conf
+      requirements:
+        - kubeconfig: kubelet_kubeconfig
+        - host: compute
+
+    kubelet_kubeconfig:
+      type: kubetos.nodes.Kubeconfig
+      requirements:
+        - cluster: kube_local_cluster
+        - user: kubelet_user
+
+    kubelet_user:
+      type: kubetos.nodes.Kubernetes.User
+      capabilities:
+        user:
+          properties:
+            name: default-auth
+      requirements:
+        - cert: kubelet_cert
+
+    kubelet_cert_hosted:
+      type: kubetos.nodes.Artifact.Certificate
+      properties:
+        cert_path: /etc/kubernetes/pki/kubelet.crt
+        key_path: /etc/kubernetes/pki/kubelet.key
+      requirements:
+        - cert: kubelet_cert
+        - host: compute
+
+    kubelet_cert:
+      type: kubetos.nodes.Certificate
+      properties:
+        common_name: { concat: [ "system:node:", { get_attribute: [ SELF, dependency, tosca_name ] } ] }
+        organisation: system:nodes
+        hostnames:
+          - { get_attribute: [ SELF, dependency, tosca_name ] }
+          - { get_attribute: [ SELF, dependency, private_address ] }
+          - { get_attribute: [ SELF, dependency, public_address ] }
+          - 127.0.0.1
+      requirements:
+        - ca: kubernetes_ca
+        - dependency: compute
+
+    kubernetes_ca_hosted:
+      type: kubetos.nodes.Artifact.Certificate
+      properties:
+        cert_path: /etc/kubernetes/pki/ca.crt
+        key_path: /etc/kubernetes/pki/ca.pem
+      requirements:
+        - cert: kubernetes_ca
+        - host: compute
+
+    kubernetes_ca:
+      type: kubetos.nodes.CertificateAuthority
+      properties:
+        common_name: kubernetes-ca
+        organisation: kubernetes
+
+    cri:
+      type: kubetos.nodes.Abstract.CRI
+      directives:
+        - substitute
+
+    compute:
+      type: tosca.nodes.Compute
+      capabilities:
+        host:
+          properties:
+            num_cpus: 1
+            disk_size: 10 GiB
+            mem_size: 1 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: x86_64
+            distribution: ubuntu
+            version: "20.04"
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 5
+            default_instances: 1
+      directives:
+        - substitute
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Abstract.KubeNode
+    capabilities:
+      kubelet: [ kubelet, kubelet ]
+      host: [ compute, host ]
+      os: [ compute, os ]
+      endpoint: [ compute, endpoint ]
+      scalable: [ compute, scalable ]
+      binding: [ compute, binding ]
+    properties:
+      component_version: [ kubelet_version ]
+      pod_cidr: [ pod_cidr ]
+      dns_ip: [ dns_ip ]
+    attributes:
+      private_address: [ compute, private_address ]
+      public_address: [ compute, public_address ]
+      networks: [ compute, networks ]
+      ports: [ compute, ports ]
+      tosca_name: [ compute, tosca_name ]

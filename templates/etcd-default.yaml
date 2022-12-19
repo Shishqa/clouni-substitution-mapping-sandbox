@@ -1,0 +1,41 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: "kubetos-etcd"
+  template_author: "shishqa"
+  template_version: "1.0"
+
+imports:
+  - ../profiles/etcd/main.yaml
+
+topology_template:
+
+  node_templates:
+
+    etcd_cluster:
+      type: kubetos.nodes.Etcd.Cluster
+      requirements:
+        - peer: etcd
+
+    etcd:
+      type: kubetos.nodes.Etcd
+      capabilities:
+        access_address:
+          properties:
+            port: 2379
+            api_version: v2
+        peer_address:
+          properties:
+            port: 2380
+      requirements:
+        - host: compute
+
+    compute:
+      type: tosca.nodes.Compute
+      directives:
+        - substitute
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Etcd.Cluster
+    attributes:
+      peers: [ etcd_cluster, peers ]

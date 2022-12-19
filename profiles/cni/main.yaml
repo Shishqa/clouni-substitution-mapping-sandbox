@@ -14,7 +14,7 @@ capability_types:
 
 node_types:
 
-  kubetos.nodes.CNI:
+  kubetos.nodes.Abstract.CNI:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
       cni: kubetos.capabilities.CNI
@@ -22,6 +22,9 @@ node_types:
       component_version:
         type: version
         default: 1.0.1
+
+  kubetos.nodes.CNI:
+    derived_from: kubetos.nodes.Abstract.CNI
     interfaces:
       Standard:
         type: tosca.interfaces.node.lifecycle.Standard
