@@ -1,0 +1,36 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+topology_template:
+
+  inputs:
+
+    public_address:
+      type: string
+      description: Public address of existing server
+
+    private_address:
+      type: string
+      description: Private address of existing server
+
+  node_templates:
+
+    baremetal_server:
+      type: tosca.nodes.Compute
+      attributes:
+        public_address: { get_input: [ public_address ] }
+        private_address: { get_input: [ private_address ] }
+
+  substitution_mappings:
+    node_type: tosca.nodes.Compute
+    capabilities:
+      host: [ baremetal_server, host ]
+      os: [ baremetal_server, os ]
+      endpoint: [ baremetal_server, endpoint ]
+      scalable: [ baremetal_server, scalable ]
+      binding: [ baremetal_server, binding ]
+    attributes:
+      private_address: [ baremetal_server, private_address ]
+      public_address: [ baremetal_server, public_address ]
+      networks: [ baremetal_server, networks ]
+      ports: [ baremetal_server, ports ]
+      tosca_name: [ baremetal_server, tosca_name ]

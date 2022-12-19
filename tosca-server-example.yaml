@@ -17,8 +17,8 @@ topology_template:
         os:
           properties:
             architecture: x86_64
-            type: cirros
-            version: 0.4.0
+            distribution: ubuntu
+            version: "20.04"
         scalable:
           properties:
             min_instances: 1
@@ -41,8 +41,8 @@ topology_template:
         os:
           properties:
             architecture: x86_64
-            type: cirros
-            version: 0.4.0
+            distribution: ubuntu
+            version: "20.04"
         scalable:
           properties:
             min_instances: 1
