@@ -45,8 +45,6 @@ topology_template:
         service_cidr: { get_input: [ service_cidr ] }
       directives:
         - substitute
-      # requirements:
-      #   - dependency: kube_node
 
     scheduler:
       type: kubetos.nodes.Abstract.Kube.Scheduler
@@ -55,8 +53,6 @@ topology_template:
         config_path: /etc/kubernetes/kube-scheduler.yaml
       directives:
         - substitute
-      # requirements:
-      #   - dependency: kube_node
 
     apiserver:
       type: kubetos.nodes.Abstract.Kube.APIServer
@@ -69,19 +65,48 @@ topology_template:
         service_cidr: { get_input: [ service_cidr ] }
       requirements:
         - etcd: etcd_cluster
-        # - dependency: kube_node
       directives:
         - substitute
+
+    service_account_cert:
+      type: kubetos.nodes.Certificate
+      properties:
+        common_name: service-accounts
+        organisation: kubernetes
+      requirements:
+        - ca: kubernetes_ca
+
+    kube_node:
+      type: kubetos.nodes.Abstract.KubeNode
+      directives:
+        - substitute
+
+    kube_local_cluster:
+      type: kubetos.nodes.Kubernetes.Cluster
+      capabilities:
+        cluster:
+          properties:
+            name: local-cluster
+      requirements:
+        - apiserver: apiserver_localhost
+        - ca: kubernetes_ca
+
+    kubernetes_ca:
+      type: kubetos.nodes.CertificateAuthority
+      directives:
+        - select
+
+    apiserver_localhost:
+      type: kubetos.nodes.Abstract.ControlPlane
+      capabilities:
+        access_address:
+          attributes:
+            ip_address: 127.0.0.1
 
     etcd_cluster:
       type: kubetos.nodes.Etcd.Cluster
       directives:
         - substitute
-
-    # kube_node:
-    #   type: kubetos.nodes.Abstract.KubeNode
-    #   directives:
-    #     - substitute
 
   substitution_mappings:
     node_type: kubetos.nodes.Abstract.ControlPlane

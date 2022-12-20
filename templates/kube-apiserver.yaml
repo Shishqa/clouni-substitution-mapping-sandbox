@@ -123,14 +123,13 @@ topology_template:
 
     kubernetes_ca:
       type: kubetos.nodes.CertificateAuthority
-      properties:
-        common_name: kubernetes-ca
-        organisation: kubernetes
+      directives:
+        - select
 
     kube_node:
       type: kubetos.nodes.Abstract.KubeNode
       directives:
-        - substitute
+        - select
 
   substitution_mappings:
     node_type: kubetos.nodes.Abstract.Kube.APIServer

@@ -37,6 +37,25 @@ topology_template:
 
   node_templates:
 
+    worker:
+      type: kubetos.nodes.Abstract.KubeNode
+      properties:
+        component_version: { get_input: [ kubernetes_version ] }
+        pod_cidr: { get_input: [ cluster_cidr ] }
+        dns_ip: { get_input: [ dns_ip ] }
+      directives:
+        - substitute
+
+    kube_cluster:
+      type: kubetos.nodes.Kubernetes.Cluster
+      capabilities:
+        cluster:
+          properties:
+            name: test-cluster
+      requirements:
+        - apiserver: control_plane
+        - ca: kubernetes_ca
+
     control_plane:
       type: kubetos.nodes.Abstract.ControlPlane
       properties:
@@ -46,14 +65,11 @@ topology_template:
       directives:
         - substitute
 
-    worker:
-      type: kubetos.nodes.Abstract.KubeNode
+    kubernetes_ca:
+      type: kubetos.nodes.CertificateAuthority
       properties:
-        component_version: { get_input: [ kubernetes_version ] }
-        pod_cidr: { get_input: [ cluster_cidr ] }
-        dns_ip: { get_input: [ dns_ip ] }
-      directives:
-        - substitute
+        common_name: kubernetes-ca
+        organisation: kubernetes
 
   substitution_mappings:
     node_type: kubetos.nodes.Abstract.Cluster

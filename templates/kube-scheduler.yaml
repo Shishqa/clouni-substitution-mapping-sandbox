@@ -54,7 +54,7 @@ topology_template:
     scheduler_kubeconfig:
       type: kubetos.nodes.Kubeconfig
       requirements:
-        - cluster: kube_local_cluster
+        - cluster: cluster
         - user: scheduler_user
 
     kube_scheduler_cert:
@@ -67,20 +67,13 @@ topology_template:
 
     kubernetes_ca:
       type: kubetos.nodes.CertificateAuthority
-      properties:
-        common_name: kubernetes-ca
-        organisation: kubernetes
+      directives:
+        - select
 
-    kube_local_cluster:
+    cluster:
       type: kubetos.nodes.Kubernetes.Cluster
-      capabilities:
-        cluster:
-          properties:
-            name: test-cluster
-      attributes:
-        apiserver_address: 127.0.0.1
-      requirements:
-        - ca: kubernetes_ca
+      directives:
+        - select
 
     kube_node:
       type: kubetos.nodes.Abstract.KubeNode

@@ -19,6 +19,7 @@ capability_types:
     properties:
       name:
         type: string
+        required: false
 
   kubetos.capabilities.Kubernetes.User:
     derived_from: tosca.capabilities.Root
@@ -52,13 +53,11 @@ node_types:
     attributes:
       apiserver_address:
         type: string
-        # FIXME: get ip from Endpoint
-        default: { get_attribute: [ SELF, apiserver, host, host, private_address ] }
+        default: { get_attribute: [ SELF, apiserver, access_address, ip_address ] }
     requirements:
       - apiserver:
           capability: tosca.capabilities.Endpoint
           relationship: tosca.relationships.ConnectsTo
-          occurrences: [0, 1]
       - ca:
           capability: kubetos.capabilities.Certificate
           relationship: tosca.relationships.DependsOn
@@ -266,10 +265,13 @@ node_types:
       component_version:
         type: version
         default: 1.21.0
+        required: false
       service_cidr:
         type: string
+        required: false
       cluster_cidr:
         type: string
+        required: false
         
 
   kubetos.nodes.Abstract.Cluster:
