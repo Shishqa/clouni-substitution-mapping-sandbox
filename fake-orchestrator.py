@@ -9,6 +9,12 @@ substitutions = {}
 inventory = {}
 
 
+selections = []
+
+
+# visited = set()
+
+
 idx = 0
 instance_models = {}
 
@@ -112,7 +118,7 @@ class ScalarUnitSize(ValueInstance):
 class List(ValueInstance):
   def __init__(self, node, type_def, definition):
     super().__init__(node, type_def)
-    
+
     if '$value' in definition.keys() and definition['$value'] is None:
       self.values = None
       return
@@ -132,7 +138,7 @@ class List(ValueInstance):
 class Map(ValueInstance):
   def __init__(self, node, type_def, definition):
     super().__init__(node, type_def)
-    
+
     if '$value' in definition.keys() and definition['$value'] is None:
       self.values = None
       return
@@ -268,7 +274,14 @@ class CapabilityInstance:
     raise RuntimeError('no attribute')
 
   def graphviz(self):
-    subgraph_name = f'cluster_{self.node.topology.idx}_{self.node.name}_capability_{self.name}'
+    # global visited
+
+    subgraph_name = f'cluster_{self.node.topology.name}_{self.node.name}_capability_{self.name}'
+    # if subgraph_name in visited:
+    #   print(visited)
+    #   return ''
+
+    # visited.add('CAP'+subgraph_name)
 
     res = f'''
     subgraph {subgraph_name} {{
@@ -313,7 +326,7 @@ class RequirementInstance:
 class NodeInstance:
   def __init__(self, name, topology):
     self.topology = topology
-    self.substitution_index = None
+    self.substitution = None
 
     self.definition = copy.deepcopy(topology.definition["nodeTemplates"][name])
     self.name = copy.deepcopy(name)
@@ -381,19 +394,19 @@ class NodeInstance:
       elif attr_name == 'tosca_id':
         self.attributes[attr_name].set(String(self, {}, uuid.uuid4().hex))
 
-      if attr_name in ['state', 'tosca_id', 'tosca_name'] and attr_name not in instance_models[self.substitution_index].definition['substitution']['attributeMappings'].keys():
+      if attr_name in ['state', 'tosca_id', 'tosca_name'] and attr_name not in self.substitution.definition['substitution']['attributeMappings'].keys():
         continue
 
-      mapping = instance_models[self.substitution_index].definition['substitution']['attributeMappings'][attr_name]
+      mapping = self.substitution.definition['substitution']['attributeMappings'][attr_name]
 
       if attr_name == 'tosca_name':
         # XXX: only name should be propagated forwards?
-        instance_models[self.substitution_index]\
+        self.substitution\
             .nodes[mapping['nodeTemplateName']]\
             .attributes[mapping['target']] = self.attributes[attr_name]
         continue
 
-      self.attributes[attr_name] = instance_models[self.substitution_index]\
+      self.attributes[attr_name] = self.substitution\
           .nodes[mapping['nodeTemplateName']]\
           .attributes[mapping['target']]
 
@@ -402,24 +415,25 @@ class NodeInstance:
       self.capabilities[cap_name] = CapabilityInstance(cap_name, self)
       if cap_name in ['feature']:
         continue
-      mapping = instance_models[self.substitution_index].definition['substitution']['capabilityMappings'][cap_name]
-      instance_models[self.substitution_index]\
+      mapping = self.substitution.definition['substitution']['capabilityMappings'][cap_name]
+      self.substitution\
           .nodes[mapping['nodeTemplateName']]\
           .capabilities[mapping['target']] = self.capabilities[cap_name]
 
     self.requirements = {}
 
   def select_substitution(self):
-    print(f'\nnode {self.name} is marked substitutable')
+    print(
+        f'\nnode {self.name} is marked substitutable\nin {self.topology.name}\n└({self.topology.path})\n')
     print('please choose desired substitution')
-    
+
     if self.type not in substitutions.keys():
       raise RuntimeError('cannot substitute')
     option_list = substitutions[self.type]
 
     if len(option_list) == 1:
-      self.substitution_index = instantiate_template(
-            option_list[0]["file"])
+      self.substitution = instantiate_template(
+          f'{self.topology.name}_{self.name}', option_list[0]["file"])
       return
 
     for i, item in enumerate(option_list):
@@ -430,8 +444,8 @@ class NodeInstance:
       if choose in range(len(option_list)):
         print(f'chosen {option_list[choose]["file"]}')
 
-        self.substitution_index = instantiate_template(
-            option_list[choose]["file"])
+        self.substitution = instantiate_template(
+            f'{self.topology.name}_{self.name}', option_list[choose]["file"])
         break
 
       else:
@@ -470,7 +484,14 @@ class NodeInstance:
     raise RuntimeError('no attribute')
 
   def graphviz(self):
-    subgraph_name = f'cluster_{self.topology.idx}_{self.name}'
+    # global visited
+
+    subgraph_name = f'cluster_{self.topology.name}_{self.name}'
+    # if subgraph_name in visited:
+    #   print(visited)
+    #   return ''
+
+    # visited.add('NODE'+subgraph_name)
 
     res = f'''
     subgraph {subgraph_name} {{
@@ -529,13 +550,13 @@ class NodeInstance:
           label="{cap_name} ({cap.type})";
           "cap_{subgraph_name}_capability_{cap_name}" [shape=point,style=invis];
         }}
-        "cap_{subgraph_name}_capability_{cap_name}" -> "cap_cluster_{cap.node.topology.idx}_{cap.node.name}_capability_{cap.name}" [
+        "cap_{subgraph_name}_capability_{cap_name}" -> "cap_cluster_{cap.node.topology.name}_{cap.node.name}_capability_{cap.name}" [
           label="substitute",
           penwidth=3,
           weight=1,
           color=red,
           ltail={subgraph_name}_capability_{cap_name},
-          lhead=cluster_{cap.node.topology.idx}_{cap.node.name}_capability_{cap.name}
+          lhead=cluster_{cap.node.topology.name}_{cap.node.name}_capability_{cap.name}
         ];
         '''
       else:
@@ -548,15 +569,15 @@ class NodeInstance:
     }
     '''
 
-    if self.substitution_index is not None:
-      res += instance_models[self.substitution_index].graphviz()
+    if self.substitution is not None:
+      res += self.substitution.graphviz()
 
     return res
 
   def deploy(self):
     print(f"\ndeploying {self.name}")
-    if self.substitution_index is not None:
-      instance_models[self.substitution_index].deploy()
+    if self.substitution is not None:
+      self.substitution.deploy()
     else:
       ops = self.definition['interfaces']['Standard']['operations']
       ops_order = ['create', 'configure', 'start']
@@ -575,9 +596,11 @@ class NodeInstance:
 
 
 class TopologyTemplateInstance:
-  def __init__(self, idx, definition):
-    self.idx = idx
+  def __init__(self, name, definition, path):
+    self.name = name
     self.definition = copy.deepcopy(definition)
+    self.path = path
+    self.instance_models = {}
 
     self.inputs = {}
     for input_name in self.definition['inputs'].keys():
@@ -587,60 +610,39 @@ class TopologyTemplateInstance:
     self.instantiate_nodes()
 
   def instantiate_nodes(self):
-    selections = []
+    global selections
 
     self.nodes = {}
     for name in self.definition["nodeTemplates"].keys():
       if "select" in self.definition["nodeTemplates"][name]["directives"]:
-        selections.append(name)
+        selections.append({'instance': self, 'node': name})
         print("select", name)
         continue
       self.nodes[name] = NodeInstance(name, self)
-
-    for name in selections:
-      print(f'\nnode {name} is marked selectable')
-      print('please choose desired node from inventory')
-      
-      types = self.definition["nodeTemplates"][name]["types"]
-      seen = set(types.keys())
-      for type_name, type_body in types.items():
-        if 'parent' in type_body.keys():
-          seen.remove(type_body['parent'])
-      node_type = seen.pop()
-
-      if node_type not in inventory.keys():
-        raise RuntimeError('cannot select')
-      option_list = inventory[node_type]
-
-      if len(option_list) == 1:
-        return option_list[0]
-
-      for i, node in enumerate(option_list):
-        print(f' {i} - instance-{node.topology.idx} : {node.name}')
-
-      while True:  # blame on me
-        choose = int(input('your choice: '))
-        if choose in range(len(option_list)):
-          print(f'chosen {choose}')
-          self.nodes[name] = option_list[choose]
-          break
-        else:
-          print('please, choose correct option')
 
   def get_input(self, input_name):
     return self.inputs[input_name].get()
 
   def graphviz(self):
+    # global visited
+    cluster_name = f'cluster_{self.name}'
+
+    # if cluster_name in visited:
+    #   print(visited)
+    #   return ''
+
+    # visited.add('TOPOLOGY'+cluster_name)
+
     res = f'''
-    subgraph cluster_{self.idx} {{
+    subgraph cluster_{self.name} {{
       penwidth=5;
       graph [rankdir = "TB"];
       color = green;
-      label = "Instance {self.idx}";
+      label = "Instance {self.name} ({self.path})";
     '''
     if len(self.inputs) > 0:
       res += f'''
-      subgraph cluster_{self.idx}_inputs {{
+      subgraph cluster_{self.name}_inputs {{
         penwidth=1;
         style=filled;
         fillcolor = yellow;
@@ -650,26 +652,30 @@ class TopologyTemplateInstance:
       '''
       for p_name, p_body in self.inputs.items():
         res += f'''
-        "cluster_{self.idx}_inputs_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
+        "cluster_{self.name}_inputs_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
         '''
       res += '''
       }
       '''
 
     for name, node in self.nodes.items():
+      if node.topology.name != self.name:
+        continue
       res += f'''
         {node.graphviz()}
         '''
 
     for name, node in self.nodes.items():
-      node_subgraph_name = f'cluster_{node.topology.idx}_{node.name}'
+      node_subgraph_name = f'cluster_{node.topology.name}_{node.name}'
       for req in node.definition['requirements']:
+        if req['nodeTemplateName'] == '':
+          continue
         res += f'''
-        "node_{node_subgraph_name}" -> "node_cluster_{node.topology.idx}_{req['nodeTemplateName']}" [
+        "node_{node_subgraph_name}" -> "node_cluster_{node.topology.nodes[req['nodeTemplateName']].topology.name}_{req['nodeTemplateName']}" [
           penwidth=3,
           weight=1,
           ltail={node_subgraph_name}, 
-          lhead=cluster_{node.topology.idx}_{req['nodeTemplateName']}
+          lhead=cluster_{node.topology.nodes[req['nodeTemplateName']].topology.name}_{req['nodeTemplateName']}
         ];
         '''
     res += '''
@@ -736,9 +742,9 @@ class TopologyTemplateInstance:
       self.nodes[n].deploy()
 
 
-def instantiate_template(path, inputs={}):
-  global idx
-  global instance_models
+def instantiate_template(name, path, inputs={}):
+  # global idx
+  # global instance_models
 
   print(f'\nparsing {path}...')
 
@@ -775,11 +781,7 @@ def instantiate_template(path, inputs={}):
     raise RuntimeError(res[1].decode())
 
   definition = yaml.safe_load(res[0])
-  instance_id = idx + 1
-  idx += 1
-  instance_models[instance_id] = TopologyTemplateInstance(
-      instance_id, definition)
-  return instance_id
+  return TopologyTemplateInstance(name, definition, path)
 
 
 def parse_arguments():
@@ -795,7 +797,7 @@ def init_substitution_database():
     path = os.path.join('templates', filename)
 
     pipe = sp.Popen(
-      f'puccini-tosca parse -s 2 {path}', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
+        f'puccini-tosca parse -s 2 {path}', shell=True, stdout=sp.PIPE, stderr=sp.PIPE)
     res = pipe.communicate()
 
     if pipe.returncode != 0:
@@ -818,8 +820,46 @@ def main():
   try:
     init_substitution_database()
 
-    root = instantiate_template(args.template)
-    instance_models[root].dump_graphviz('test')
+    root = instantiate_template(os.path.basename(os.path.splitext(args.template)[0]), args.template)
+
+    for selection in selections:
+      name = selection['node']
+      topology = selection['instance']
+
+      print(
+          f'\nnode {name} is marked selectable\nin instance {topology.name}\n└({topology.path})\n')
+      print('please choose desired node from inventory')
+
+      types = topology.definition["nodeTemplates"][name]["types"]
+      seen = set(types.keys())
+      for type_name, type_body in types.items():
+        if 'parent' in type_body.keys():
+          seen.remove(type_body['parent'])
+      node_type = seen.pop()
+
+      if node_type not in inventory.keys():
+        raise RuntimeError('cannot select')
+      option_list = inventory[node_type]
+
+      if len(option_list) == 1:
+        topology.nodes[name] = option_list[0]
+        continue
+
+      for i, node in enumerate(option_list):
+        print(
+            f' {i} - instance {node.topology.name} ({node.topology.path}) : {node.name}')
+
+      while True:  # blame on me
+        choose = int(input('your choice: '))
+        if choose in range(len(option_list)):
+          print(f'chosen {choose}')
+          topology.nodes[name] = option_list[choose]
+          break
+        else:
+          print('please, choose correct option')
+
+    root.dump_graphviz('test')
+
     # instance_models[root].deploy()
   except RuntimeError as err:
     print(err.args[0])

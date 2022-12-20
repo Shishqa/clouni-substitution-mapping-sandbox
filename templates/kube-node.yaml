@@ -48,16 +48,6 @@ topology_template:
         - ca: kubernetes_ca_hosted
         - cert: kubelet_cert_hosted
 
-    kube_local_cluster:
-      type: kubetos.nodes.Kubernetes.Cluster
-      capabilities:
-        cluster:
-          properties:
-            name: test-cluster
-      attributes:
-        apiserver_address: 127.0.0.1
-      requirements:
-        - ca: kubernetes_ca
 
     kubelet_kubeconfig_hosted:
       type: kubetos.nodes.Artifact.Kubeconfig
@@ -70,7 +60,7 @@ topology_template:
     kubelet_kubeconfig:
       type: kubetos.nodes.Kubeconfig
       requirements:
-        - cluster: kube_local_cluster
+        - cluster: cluster
         - user: kubelet_user
 
     kubelet_user:
@@ -111,14 +101,18 @@ topology_template:
         cert_path: /etc/kubernetes/pki/ca.crt
         key_path: /etc/kubernetes/pki/ca.pem
       requirements:
-        - cert: kubernetes_ca
+        - cert: cluster
         - host: compute
+
+    cluster:
+      type: kubetos.nodes.Kubernetes.Cluster
+      directives:
+        - select
 
     kubernetes_ca:
       type: kubetos.nodes.CertificateAuthority
-      properties:
-        common_name: kubernetes-ca
-        organisation: kubernetes
+      directives:
+        - select
 
     cri:
       type: kubetos.nodes.Abstract.CRI

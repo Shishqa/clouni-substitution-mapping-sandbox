@@ -107,8 +107,10 @@ node_types:
     properties:
       common_name:
         type: string
+        required: false
       organisation:
         type: string
+        required: false
     attributes:
       cert:
         type: string
