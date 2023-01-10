@@ -90,9 +90,9 @@ node_types:
               ca_key:
                 value: { get_attribute: [ SELF, ca, key ] }
                 type: string
-            # outputs:
-            #   cert: [ SELF, cert ]
-            #   key: [ SELF, key ]
+            outputs:
+              cert: [ SELF, cert ]
+              key: [ SELF, key ]
             implementation:
               primary: ./ansible/cert--create.yaml
               dependencies:
@@ -128,9 +128,9 @@ node_types:
               organisation:
                 value: { get_property: [ SELF, organisation ] }
                 type: string
-            # outputs:
-            #   cert: [ SELF, cert ]
-            #   key: [ SELF, key ]
+            outputs:
+              cert: [ SELF, cert ]
+              key: [ SELF, key ]
             implementation:
               primary: ./ansible/ca--create.yaml
               dependencies:

@@ -29,6 +29,8 @@ node_types:
         type: list
         entry_schema:
           type: string
+      id:
+        type: string
     capabilities:
       resource:
         type: Resource

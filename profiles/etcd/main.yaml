@@ -60,8 +60,8 @@ relationship_types:
                   peer_address: { get_attribute: [ SOURCE, host, private_address ] }
                   peer_port: { get_property: [ SOURCE, peer_address, port ] }
                 type: kubetos.datatypes.Etcd.PeerSpec
-            # outputs:
-            #   new_list: [ TARGET, peers ]
+            outputs:
+              new_list: [ TARGET, peers ]
             implementation: ../../utils/add-to-list.yaml
 
 node_types:

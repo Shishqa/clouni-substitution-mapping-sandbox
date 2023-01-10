@@ -50,8 +50,8 @@ relationship_types:
               new_item:
                 value: { get_property: [ TARGET, oci, spec ] }
                 type: kubetos.datatypes.OCI.RuntimeSpec
-            # outputs:
-            #   new_list: [ SOURCE, runtimes ]
+            outputs:
+              new_list: [ SOURCE, runtimes ]
             implementation: ../../utils/add-to-list.yaml
 
 node_types:
