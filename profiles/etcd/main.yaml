@@ -78,7 +78,7 @@ node_types:
           capability: kubetos.capabilities.Etcd.Endpoint.Peer
           node: kubetos.nodes.Etcd
           relationship: kubetos.relationships.EtcdPeer
-          occurrences: [ 1, UNBOUNDED ]
+          occurrences: [ 0, UNBOUNDED ]
 
   kubetos.nodes.Etcd:
     derived_from: tosca.nodes.SoftwareComponent

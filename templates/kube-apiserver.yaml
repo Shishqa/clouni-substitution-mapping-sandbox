@@ -52,6 +52,7 @@ topology_template:
         - cert: kube_apiserver_cert_hosted
         - kubelet_client_cert: kube_apiserver_client_cert_hosted
         - service_account_cert: service_account_cert_hosted
+        - etcd: etcd_cluster
 
     kube_apiserver_cert_hosted:
       type: kubetos.nodes.Artifact.Certificate
@@ -131,6 +132,11 @@ topology_template:
       directives:
         - select
 
+    etcd_cluster:
+      type: kubetos.nodes.Etcd.Cluster
+      directives:
+        - select
+
   substitution_mappings:
     node_type: kubetos.nodes.Abstract.Kube.APIServer
     capabilities:
@@ -149,5 +155,3 @@ topology_template:
     #   networks: [ kube_node, networks ]
     #   ports: [ kube_node, ports ]
     #   tosca_name: [ kube_node, tosca_name ]
-    requirements:
-      etcd: [ apiserver, etcd ]

@@ -290,27 +290,32 @@ node_types:
         default: 1.21.0
       service_cidr:
         type: string
+    # requirements:
+    #   - etcd:
+    #       capability: tosca.capabilities.Node
+    #       node: kubetos.nodes.Etcd.Cluster
+    #       relationship: tosca.relationships.DependsOn
+    #       occurrences: [ 1, UNBOUNDED ]
+
+  kubetos.nodes.Kube.APIServer:
+    derived_from: kubetos.nodes.Abstract.Kube.APIServer
     requirements:
       - etcd:
           capability: tosca.capabilities.Node
           node: kubetos.nodes.Etcd.Cluster
           relationship: tosca.relationships.DependsOn
           occurrences: [ 1, UNBOUNDED ]
-
-  kubetos.nodes.Kube.APIServer:
-    derived_from: kubetos.nodes.Abstract.Kube.APIServer
-    requirements:
       - ca:
-          capability: tosca.capabilities.Node
+          capability: kubetos.capabilities.Certificate
           node: kubetos.nodes.Artifact.Certificate
       - cert:
-          capability: tosca.capabilities.Node
+          capability: kubetos.capabilities.Certificate
           node: kubetos.nodes.Artifact.Certificate
       - kubelet_client_cert:
-          capability: tosca.capabilities.Node
+          capability: kubetos.capabilities.Certificate
           node: kubetos.nodes.Artifact.Certificate
       - service_account_cert:
-          capability: tosca.capabilities.Node
+          capability: kubetos.capabilities.Certificate
           node: kubetos.nodes.Artifact.Certificate
       - host:
           capability: kubetos.capabilities.Kubelet
@@ -335,7 +340,7 @@ node_types:
             value: { get_property: [ SELF, service_account_cert, key_path ] }
             type: string
           kubelet_client_cert_path:
-            value: { get_property: [ SELF, kubelet_client_cert_path] }
+            value: { get_property: [ SELF, kubelet_client_cert, cert_path ] }
             type: string
           kubelet_client_key_path:
             value: { get_property: [ SELF, kubelet_client_cert, key_path ] }

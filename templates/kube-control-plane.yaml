@@ -63,8 +63,6 @@ topology_template:
       properties:
         component_version: { get_input: [ kubernetes_version ] }
         service_cidr: { get_input: [ service_cidr ] }
-      requirements:
-        - etcd: etcd_cluster
       directives:
         - substitute
 
@@ -102,11 +100,6 @@ topology_template:
         access_address:
           attributes:
             ip_address: 127.0.0.1
-
-    etcd_cluster:
-      type: kubetos.nodes.Etcd.Cluster
-      directives:
-        - substitute
 
   substitution_mappings:
     node_type: kubetos.nodes.Abstract.ControlPlane

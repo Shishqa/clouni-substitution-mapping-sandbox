@@ -19,10 +19,15 @@ topology_template:
           properties:
             binary_dir: /opt/cni/bin
             config_dir: /etc/cni/net.d
+      requirements:
+       - host: compute
+
+    compute:
+      type: tosca.nodes.Compute
+      directives:
+        - select
 
   substitution_mappings:
     node_type: kubetos.nodes.Abstract.CNI
     capabilities:
       cni: [ cni, cni ]
-    requirements:
-      host: [ cni, host ]
