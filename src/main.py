@@ -1,13 +1,14 @@
 import argparse
 
-from orchestrator import Orchestrator
+from compositor import compose
+from parser import parse
 
 
 def main():
   args = parse_arguments()
   try:
-    orchestrator = Orchestrator(args.root_path)
-    orchestrator.init()
+    clout = parse(args.template)
+    compose(clout)
   except RuntimeError as err:
     print(err.args[0])
 
