@@ -8,9 +8,9 @@ import io
 
 PUCCINI_CMD = 'puccini-tosca parse'
 
-def parse(path):
+def parse(path, phases=5):
   pipe = sp.Popen(
-      f'{PUCCINI_CMD} {path}',
+      f'{PUCCINI_CMD} -s {phases} {path}',
       shell=True,
       stdout=sp.PIPE,
       stderr=sp.PIPE
