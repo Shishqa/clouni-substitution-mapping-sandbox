@@ -2,73 +2,80 @@ import copy
 import uuid
 
 
-def create_value(node, type_def, definition):
+def create_value(node, meta, primitive):
   # print(definition)
+  print(meta)
+  print(primitive)
 
-  if '$functionCall' in definition.keys():
-    return create_function(node, type_def, definition)
+  # if '$functionCall' in definition.keys():
+  #   return create_function(node, type_def, definition)
 
-  if '$list' in definition or type_def['name'] == 'list':
-    return List(node, type_def, definition)
+  # if '$list' in definition or type_def['name'] == 'list':
+  #   return List(node, type_def, definition)
 
-  if '$map' in definition.keys() or type_def['name'] == 'map':
-    return Map(node, type_def, definition)
+  if meta['type'] == 'map':
+    return Map(node, meta, primitive)
 
-  if type_def['name'] == 'version':
-    return Version(node, type_def, definition['$value'])
+  if meta['type'] == 'version':
+    return Version(node, meta, primitive)
 
-  if type_def['name'] == 'scalar-unit.time':
-    return ScalarUnitTime(node, type_def, definition['$value'])
+  # if type_def['name'] == 'scalar-unit.time':
+  #   return ScalarUnitTime(node, type_def, definition['$value'])
 
-  if type_def['name'] == 'scalar-unit.size':
-    return ScalarUnitSize(node, type_def, definition['$value'])
+  if meta['type'] == 'scalar-unit.size':
+    return ScalarUnitSize(node, meta, primitive)
 
-  return String(node, type_def, definition['$value'])
+  if meta['type'] in {'integer', 'string', 'boolean'}:
+    return Primitive(node, meta, primitive)
+
+  raise RuntimeError('unknown primitive')
+  #return String(node, type_def, definition['$value'])
 
 
-def create_function(node, type_def, definition):
-  func = definition['$functionCall']
+def create_function(node, meta, function_call):
+  print(meta)
+  print(function_call)
 
-  if func['name'] == 'tosca.function.get_input':
-    return GetInput(node, type_def, func['arguments'])
+  if function_call['name'] == 'tosca.function.get_input':
+    return GetInput(node, meta, function_call['arguments'])
 
-  if func['name'] == 'tosca.function.get_property':
-    return GetProperty(node, type_def, func['arguments'])
+  if function_call['name'] == 'tosca.function.get_property':
+    return GetProperty(node, meta, function_call['arguments'])
 
-  if func['name'] == 'tosca.function.get_attribute':
-    return GetAttribute(node, type_def, func['arguments'])
+  if function_call['name'] == 'tosca.function.get_attribute':
+    return GetAttribute(node, meta, function_call['arguments'])
 
-  if func['name'] == 'tosca.function.concat':
-    return Concat(node, type_def, func['arguments'])
+  if function_call['name'] == 'tosca.function.concat':
+    return Concat(node, meta, function_call['arguments'])
 
   raise RuntimeError('unknown function')
 
 
 class ValueInstance:
-  def __init__(self, node, type_def):
+  def __init__(self, node, meta):
     self.node = node
-    self.type = type_def
+    self.meta = meta
 
   def get(self):
     raise RuntimeError('Unimplemented get')
 
 
-class String(ValueInstance):
-  def __init__(self, node, type_def, value):
-    super().__init__(node, type_def)
-    self.value = value
+class Primitive(ValueInstance):
+  """
+  Represents string, boolean
+  """
+  def __init__(self, node, meta, primitive):
+    super().__init__(node, meta)
+    self.value = primitive
 
   def get(self):
     return self.value
 
 
 class Version(ValueInstance):
-  def __init__(self, node, type_def, value):
-    super().__init__(node, type_def)
-    if value is None:
-      self.value = None
-      return
-    self.value = value['$string']
+  def __init__(self, node, meta, primitive):
+    super().__init__(node, meta)
+    self.value = primitive['$string']
 
   def get(self):
     return self.value
@@ -87,12 +94,9 @@ class ScalarUnitTime(ValueInstance):
 
 
 class ScalarUnitSize(ValueInstance):
-  def __init__(self, node, type_def, value):
-    super().__init__(node, type_def)
-    if value is None:
-      self.value = None
-      return
-    self.value = value['$string']
+  def __init__(self, node, meta, primitive):
+    super().__init__(node, meta)
+    self.value = primitive['$number']
 
   def get(self):
     return self.value
@@ -119,10 +123,10 @@ class List(ValueInstance):
 
 
 class Map(ValueInstance):
-  def __init__(self, node, type_def, definition):
-    super().__init__(node, type_def)
+  def __init__(self, node, meta, primitive):
+    super().__init__(node, meta)
 
-    if '$value' in definition.keys() and definition['$value'] is None:
+    if primitive is None:
       self.values = None
       return
 
@@ -136,23 +140,23 @@ class Map(ValueInstance):
       return None
     values = dict()
     for key, value in self.values.items():
-      values = value.get()
+      values[key] = value.get()
     return values
 
 
 class GetInput(ValueInstance):
-  def __init__(self, node, type_def, args):
-    super().__init__(node, type_def)
-    self.input_name = args[0]['$value']
+  def __init__(self, node, meta, args):
+    super().__init__(node, meta)
+    self.input_name = args[0]['$primitive']
 
   def get(self):
     return self.node.topology.get_input(self.input_name)
 
 
 class GetProperty(ValueInstance):
-  def __init__(self, node, type_def, args):
-    super().__init__(node, type_def)
-    self.args = [e['$value'] for e in args]
+  def __init__(self, node, meta, args):
+    super().__init__(node, meta)
+    self.args = [e['$primitive'] for e in args]
 
   def get(self):
     print('GETPROP', self.args)
@@ -164,9 +168,9 @@ class GetProperty(ValueInstance):
 
 
 class GetAttribute(ValueInstance):
-  def __init__(self, node, type_def, args):
-    super().__init__(node, type_def)
-    self.args = [e['$value'] for e in args]
+  def __init__(self, node, meta, args):
+    super().__init__(node, meta)
+    self.args = [e['$primitive'] for e in args]
 
   def get(self):
     print('GETATTR', self.args)
@@ -192,25 +196,29 @@ class Concat(ValueInstance):
     return ''.join(strings)
 
 
-class PropertyInstance:
-  def __init__(self, node, definition):
-    self.node = node
-    self.definition = copy.deepcopy(definition)
-
-    self.type = self.definition['$information']['type']
-    self.value = create_value(node, self.type, self.definition)
-
-  def get(self):
-    return self.value.get()
-
-
 class AttributeInstance:
-  def __init__(self, node, definition):
+  def __init__(self, node, definition, is_property=False):
     self.node = node
+    self.is_property = is_property
     self.definition = copy.deepcopy(definition)
 
-    self.type = self.definition['$information']['type']
-    self.value = create_value(node, self.type, self.definition)
+    self.value = None
+    if '$primitive' in self.definition.keys():
+      self.value = create_value(
+        node,
+        self.definition['$meta'],
+        self.definition['$primitive']
+      )
+      return
+    elif '$functionCall' in self.definition.keys():
+      self.value = create_function(
+        node,
+        self.definition['$meta'],
+        self.definition['$functionCall']
+      )
+      return
+    
+    raise RuntimeError(f'unknown attribute definition: {self.definition}')
 
   def get(self):
     return self.value.get()
@@ -227,15 +235,20 @@ class CapabilityInstance:
     self.definition = copy.deepcopy(definition)
     self.find_type()
 
-    self.properties = {}
-    for prop_name in self.definition['properties'].keys():
-      self.properties[prop_name] = PropertyInstance(
-          self.node, self.definition['properties'][prop_name])
-
     self.attributes = {}
-    for attr_name in self.definition['attributes'].keys():
+
+    for prop_name, prop_def in self.definition['properties'].items():
+      self.attributes[prop_name] = AttributeInstance(
+        self.node,
+        prop_def,
+        is_property=True
+      )
+
+    for attr_name, attr_def in self.definition['attributes'].items():
       self.attributes[attr_name] = AttributeInstance(
-          self.node, self.definition['attributes'][attr_name])
+        self.node,
+        attr_def
+      )
 
   def find_type(self):
     seen = set(self.definition['types'].keys())
@@ -246,8 +259,11 @@ class CapabilityInstance:
 
   def get_property(self, args):
     path = args[0]
-    if path in self.properties.keys():
-      return self.properties[path].get()
+    if path in self.attributes.keys():
+      attr = self.attributes[path]
+      if not attr.is_property:
+        raise RuntimeError(f'there is the attribute with name {path}, but it is not a property')
+      return attr.get()
     raise RuntimeError('no property')
 
   def get_attribute(self, args):
@@ -268,11 +284,11 @@ class RelationshipInstance:
     self.types = copy.deepcopy(self.definition['types'])
     self.find_type()
 
-    self.properties = {}
-    for prop_name, prop_def in self.definition['properties'].items():
-      self.properties[prop_name] = PropertyInstance(self, prop_def)
-
     self.attributes = {}
+
+    for prop_name, prop_def in self.definition['properties'].items():
+      self.attributes[prop_name] = AttributeInstance(self, prop_def, is_property=True)
+
     for attr_name, attr_def in self.definition['attributes'].items():
       self.attributes[attr_name] = AttributeInstance(self, attr_def)
 
@@ -297,11 +313,11 @@ class NodeInstance:
 
     self.directives = copy.deepcopy(self.definition['directives'])
 
-    self.properties = {}
-    for prop_name, prop_def in self.definition['properties'].items():
-      self.properties[prop_name] = PropertyInstance(self, prop_def)
-
     self.attributes = {}
+
+    for prop_name, prop_def in self.definition['properties'].items():
+      self.attributes[prop_name] = AttributeInstance(self, prop_def, is_property=True)
+
     for attr_name, attr_def in self.definition['attributes'].items():
       self.attributes[attr_name] = AttributeInstance(self, attr_def)
 
@@ -326,10 +342,13 @@ class NodeInstance:
     self.type = seen.pop()
 
   def substitute_with(self, topology):
-    for prop_name, mapping in topology.definition['substitution']['propertyMappings'].items():
+    print(topology.definition['substitution']['inputPointers'])
+
+
+    for prop_name, mapping in topology.definition['substitution']['propertyPointers'].items():
       print(mapping)
 
-    for attr_name, mapping in topology.definition['substitution']['attributeMappings'].items():
+    for attr_name, mapping in topology.definition['substitution']['attributePointers'].items():
       print(mapping)
       if attr_name == 'tosca_name':
         # XXX: only name should be propagated forwards?
@@ -342,7 +361,7 @@ class NodeInstance:
           .nodes[mapping['nodeTemplateName']]\
           .attributes[mapping['target']]
 
-    for cap_name, mapping in topology.definition['substitution']['capabilityMappings'].items():
+    for cap_name, mapping in topology.definition['substitution']['capabilityPointers'].items():
       print(mapping)
       topology\
         .nodes[mapping['nodeTemplateName']]\
@@ -495,8 +514,11 @@ class NodeInstance:
     path = args[0]
     rest = args[1:]
 
-    if path in self.properties.keys():
-      return self.properties[path].get()
+    if path in self.attributes.keys():
+      attr = self.attributes[path]
+      if not attr.is_property:
+        raise RuntimeError(f'there is the attribute with name {path}, but it is not a property')
+      return attr.get()
 
     if path in self.capabilities.keys():
       return self.capabilities[path].get_property(rest)
@@ -530,16 +552,21 @@ class TopologyTemplateInstance:
     self.definition = copy.deepcopy(definition)
 
     self.inputs = {}
-    for input_name in self.definition['inputs'].keys():
-      self.inputs[input_name] = PropertyInstance(
-          self, self.definition['inputs'][input_name])
+    for input_name, input_def in self.definition['inputs'].items():
+      self.inputs[input_name] = AttributeInstance(
+        self,
+        input_def,
+        is_property=True
+      )
 
     self.nodes = {}
     for node_name, node_def in self.definition["nodeTemplates"].items():
       node = NodeInstance(node_name, self, node_def)
-      node.attributes['tosca_name'].set(String(self, {}, node_name))
-      node.attributes['tosca_id'].set(String(self, {}, uuid.uuid4().hex))
+      node.attributes['tosca_name'].set(Primitive(self, {'type': 'string'}, node_name))
+      node.attributes['tosca_id'].set(Primitive(self, {'type': 'string'}, uuid.uuid4().hex))
       self.nodes[node_name] = node
 
   def get_input(self, input_name):
+    if input_name not in self.inputs.keys():
+      raise RuntimeError(f'no input named {input_name}')
     return self.inputs[input_name].get()
