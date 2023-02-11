@@ -1,0 +1,32 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- namespace_prefix: openstack
+  file: ../profiles/openstack/main.yaml
+
+topology_template:
+
+  node_templates:
+
+    os_floating_ip:
+      type: openstack:neutron.FloatingIp
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                floating_ip_pool:
+                  value: { get_property: [ SELF, endpoint, network_name ] }
+                  type: string
+                server_id:
+                  value: { get_attribute: [ SELF, nova_server, server, openstack_id ] }
+                  type: string
+              implementation: artifacts/os_floating_ip_create.yaml
+
+  substitution_mappings:
+    node_type: openstack:neutron.FloatingIp
+    capabilities:
+      endpoint: [ os_floating_ip, endpoint ]
+    requirements:
+      nova_server: [ os_floating_ip, nova_server ]

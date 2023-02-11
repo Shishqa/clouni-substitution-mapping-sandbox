@@ -1,0 +1,49 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- ../profiles/pki/main.yaml
+
+topology_template:
+
+  inputs:
+
+    common_name:
+      type: string
+    organisation:
+      type: string
+
+  node_templates:
+
+    certificate_authority:
+      type: kubetos.nodes.CertificateAuthority
+      properties:
+        common_name: { get_input: [ common_name ] }
+        organisation: { get_input: [ organisation ] }
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                common_name:
+                  value: { get_property: [ SELF, common_name ] }
+                  type: string
+                organisation:
+                  value: { get_property: [ SELF, organisation ] }
+                  type: string
+              outputs:
+                cert: [ SELF, ca, data ]
+                key: [ SELF, key, data ]
+              implementation:
+                primary: ./ansible/ca--create.yaml
+                dependencies:
+                  - ./ansible/files/csr.json.j2
+
+  substitution_mappings:
+    node_type: kubetos.nodes.CertificateAuthority
+    capabilities:
+      key: [ certificate_authority, key ]
+      ca: [ certificate_authority, ca ]
+    properties:
+      common_name: [ certificate_authority, common_name ]
+      organisation: [ certificate_authority, organisation ]

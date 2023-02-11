@@ -1,0 +1,57 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- ../profiles/cri/main.yaml
+
+topology_template:
+
+  inputs:
+
+    component_version:
+      type: version
+
+  node_templates:
+
+    crio:
+      type: kubetos.nodes.CRI-O
+      interfaces:
+        Standard:
+          inputs:
+            crio_version: { get_property: [ SELF, component_version ] }
+          operations:
+            configure:
+              inputs:
+                crio_runtimes:
+                  value: { get_attribute: [ SELF, runtimes ] }
+                  type: list
+                  entry_schema:
+                    type: kubetos.datatypes.OCI.RuntimeSpec
+                cni_bin_dir:
+                  value: { get_property: [ SELF, cni, cni, binary_dir ] }
+                  type: string
+                cni_conf_dir:
+                  value: { get_property: [ SELF, cni, cni, config_dir ] }
+                  type: string
+              implementation:
+                primary: ansible/cri-o--configure.yaml
+                dependencies:
+                  - crio_role
+      artifacts:
+        crio_role:
+          file: ansible/roles/cri-o
+          type: tosca.artifacts.File
+          deploy_path: roles/cri-o
+
+  substitution_mappings:
+    node_type: kubetos.nodes.CRI-O
+    attributes:
+      runtimes: [ crio, runtimes ]
+    capabilities:
+      cri: [ crio, cri ]
+    properties:
+      component_version: [ crio, component_version ]
+    requirements:
+      host: [ crio, host ]
+      cni: [ crio, cni ]
+      oci_runtime: [ crio, oci_runtime ]

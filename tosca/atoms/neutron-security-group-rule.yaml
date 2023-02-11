@@ -1,0 +1,64 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- namespace_prefix: openstack
+  file: ../profiles/openstack/main.yaml
+
+topology_template:
+
+  inputs:
+
+    direction:
+      type: string
+      constraints:
+      - valid_values: [ ingress, egress ]
+    port_range_max:
+      type: integer
+      required: false
+    port_range_min:
+      type: integer
+      required: false
+    ethertype:
+      type: string
+      constraints:
+      - valid_values: [ IPv4, IPv6 ]
+    protocol:
+      type: string
+      constraints:
+      - valid_values: [ tcp, udp, icmp ]
+    remote_ip_prefix:
+      type: string
+
+  node_templates:
+
+    os_security_group_rule:
+      type: openstack:neutron.SecurityGroupRule
+      properties:
+        direction: { get_input: [ direction ] }
+        port_range_max: { get_input: [ port_range_max ] }
+        port_range_min: { get_input: [ port_range_min ] }
+        ethertype: { get_input: [ ethertype ] }
+        protocol: { get_input: [ protocol ] }
+        remote_ip_prefix: { get_input: [ remote_ip_prefix ] }
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                name:
+                  value: { get_property: [ SELF, security_group, name ] }
+                  type: string
+              implementation: artifacts/os_security_group_create.yaml
+
+  substitution_mappings:
+    node_type: openstack:neutron.SecurityGroupRule
+    properties:
+      direction: [ direction ]
+      port_range_max: [ port_range_max ]
+      port_range_min: [ port_range_min ]
+      ethertype: [ ethertype ]
+      protocol: [ protocol ]
+      remote_ip_prefix: [ remote_ip_prefix ]
+    requirements:
+      security_group: [ os_security_group_rule, security_group ]

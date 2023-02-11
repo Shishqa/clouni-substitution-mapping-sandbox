@@ -1,0 +1,58 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+  - ../dynamic-artifacts/main.yaml
+
+capability_types:
+
+  kubetos.capabilities.PrivateKey:
+    derived_from: kubetos.capabilities.DynamicArtifact
+
+  kubetos.capabilities.Certificate:
+    derived_from: kubetos.capabilities.DynamicArtifact
+
+  kubetos.capabilities.CertificateAuthority:
+    derived_from: kubetos.capabilities.Certificate
+
+  # kubetos.capabilities.Certificate:
+  #   derived_from: tosca.capabilities.Root
+  #   # FIXME: xopera does not support property assignments with
+  #   # intrinsic functions in it. Move cert properties here when
+  #   # this problem is solved
+
+
+
+node_types:
+
+  kubetos.nodes.Certificate:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      key: kubetos.capabilities.PrivateKey
+      cert: kubetos.capabilities.Certificate
+    properties:
+      common_name:
+        type: string
+      organisation:
+        type: string
+      hostnames:
+        type: list
+        entry_schema:
+          type: string
+        default: []
+    requirements:
+      - ca:
+          capability: kubetos.capabilities.CertificateAuthority
+          relationship: tosca.relationships.DependsOn
+
+  kubetos.nodes.CertificateAuthority:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      key: kubetos.capabilities.PrivateKey
+      ca: kubetos.capabilities.CertificateAuthority
+    properties:
+      common_name:
+        type: string
+        required: false
+      organisation:
+        type: string
+        required: false

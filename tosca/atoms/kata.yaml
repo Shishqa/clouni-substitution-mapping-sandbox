@@ -1,0 +1,58 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- ../profiles/cri/main.yaml
+
+topology_template:
+
+  inputs:
+
+    component_version:
+      type: version
+
+  node_templates:
+
+    kata:
+      type: kubetos.nodes.Kata
+      # capabilities:
+      #   oci:
+      #     properties:
+      #       spec:
+      #         name: kata
+      #         path: /opt/kata/bin/kata-runtime
+      #         root: /run/kata-containers
+      interfaces:
+        Standard:
+          inputs:
+            kata_containers_version: { get_property: [ SELF, component_version ] }
+          operations:
+            create:
+              implementation:
+                primary: ansible/kata--create.yaml
+                dependencies:
+                  - kata_role
+                  - download_role
+            configure:
+              implementation:
+                primary: ansible/kata--configure.yaml
+                dependencies:
+                  - kata_role
+      artifacts:
+        kata_role:
+          file: ansible/roles/kata
+          type: tosca.artifacts.File
+          deploy_path: roles/kata
+        download_role:
+          file: ../../utils/roles/download
+          type: tosca.artifacts.File
+          deploy_path: roles/download
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Kata
+    capabilities:
+      oci: [ kata, oci ]
+    properties:
+      component_version: [ kata, component_version ]
+    requirements:
+      host: [ kata, host ]

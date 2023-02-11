@@ -1,0 +1,183 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+capability_types:
+
+  nova.Server:
+    derived_from: tosca.capabilities.Root
+    attributes:
+      openstack_id:
+        type: string
+
+  nova.KeyPair:
+    derived_from: tosca.capabilities.Root
+    properties:
+      name:
+        type: string
+        required: false
+
+  nova.Flavor:
+    derived_from: tosca.capabilities.Compute
+    attributes:
+      openstack_id:
+        type: string
+
+  neutron.FloatingIp:
+    derived_from: tosca.capabilities.Endpoint
+
+  neutron.SecurityGroup:
+    derived_from: tosca.capabilities.Root
+    properties:
+      name:
+        type: string
+        required: false
+
+  glance.WebImage:
+    derived_from: tosca.capabilities.OperatingSystem
+    attributes:
+      openstack_id:
+        type: string
+
+relationship_types:
+
+  ComputeToSecurityGroup:
+    derived_from: tosca.relationships.DependsOn
+    interfaces:
+      Configure:
+        operations:
+          pre_configure_source:
+            inputs:
+              list: 
+                value: { get_attribute: [ SOURCE, security_groups ] }
+                type: list
+                entry_schema:
+                  type: string
+              new_item:
+                value: { get_property: [ TARGET, name ] }
+                type: string
+            outputs:
+              new_list: [ SOURCE, security_groups ]
+            implementation: artifacts/add_to_list.yaml
+
+  FloatingIpToCompute:
+    derived_from: tosca.relationships.DependsOn
+    interfaces:
+      Configure:
+        operations:
+          pre_configure_source:
+            # same with passing [ TARGET, endpoint, ip_address ]
+            # and output is [ SOURCE, networks ] with new ip
+            implementation: artifacts/add_to_list.yaml
+
+node_types:
+
+  # https://docs.openstack.org/heat/wallaby/template_guide/openstack.html#OS::Nova::Server
+  nova.Server:
+    derived_from: tosca.nodes.Root
+    attributes:
+      private_address:
+        type: string
+      public_address:
+        type: string
+      networks:
+        type: map
+        entry_schema:
+          type: tosca.datatypes.network.NetworkInfo
+      ports:
+        type: map
+        entry_schema:
+          type: tosca.datatypes.network.PortInfo
+      security_groups:
+        type: list
+        entry_schema:
+          type: string
+    capabilities:
+      server:
+        type: nova.Server
+      scalable:
+        type: tosca.capabilities.Scalable
+      binding:
+        type: tosca.capabilities.network.Bindable
+      private_endpoint:
+        type: tosca.capabilities.Endpoint
+    requirements:
+    - image:
+        capability: glance.WebImage
+        relationship: tosca.relationships.DependsOn
+        occurrences: [ 1, 1 ]
+    - flavor:
+        capability: nova.Flavor
+        relationship: tosca.relationships.DependsOn
+        occurrences: [ 1, 1 ]
+    - key_pair:
+        capability: nova.KeyPair
+        relationship: tosca.relationships.DependsOn
+        occurrences: [ 1, 1 ]
+    - security_group:
+        capability: neutron.SecurityGroup
+        relationship: ComputeToSecurityGroup
+        occurrences: [ 0, UNBOUNDED ]
+
+  nova.Flavor:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      flavor:
+        type: nova.Flavor
+
+  nova.KeyPair:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      key_pair:
+        type: nova.KeyPair
+
+  neutron.FloatingIp:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      endpoint:
+        type: neutron.FloatingIp
+    requirements:
+    - nova_server:
+        capability: nova.Server
+        relationship: FloatingIpToCompute
+        occurrences: [ 1, 1 ]
+
+  neutron.SecurityGroup:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      security_group:
+        type: neutron.SecurityGroup
+
+  neutron.SecurityGroupRule:
+    derived_from: tosca.nodes.Root
+    properties:
+      direction:
+        type: string
+        constraints:
+        - valid_values: [ ingress, egress ]
+      port_range_max:
+        type: integer
+        required: false
+      port_range_min:
+        type: integer
+        required: false
+      ethertype:
+        type: string
+        constraints:
+        - valid_values: [ IPv4, IPv6 ]
+      protocol:
+        type: string
+        constraints:
+        - valid_values: [ tcp, udp, icmp ]
+      remote_ip_prefix:
+        type: string
+    requirements:
+    - security_group:
+        capability: neutron.SecurityGroup
+        relationship: tosca.relationships.DependsOn
+        occurrences: [ 1, 1 ]
+
+  glance.WebImage:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      image:
+        type: glance.WebImage
+

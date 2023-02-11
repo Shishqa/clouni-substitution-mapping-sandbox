@@ -1,0 +1,78 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: "kubetos"
+  template_author: "shishqa"
+  template_version: "1.0"
+
+imports:
+  - profiles/etcd/main.yaml
+  - profiles/cri/main.yaml
+  - profiles/cni/main.yaml
+  - profiles/kubernetes/main.yaml
+
+topology_template:
+
+  inputs:
+
+    kubernetes_version:
+      type: version
+      default: 1.21.0
+
+    cluster_name:
+      type: string
+      default: kubernetes-cluster
+
+    pod_cidr:
+      type: string
+      default: 10.233.0.0/16
+
+    service_cidr:
+      type: string
+      default: 10.32.0.0/16
+
+    dns_ip:
+      type: string
+      default: 10.32.0.3
+
+  node_templates:
+
+    apiserver-manifest:
+      type: kubetos.nodes.Kube.APIServer.Manifest
+      requirements:
+        - apiserver: apiserver
+      capabilities:
+        access_address:
+          properties:
+            port: 6443
+      properties:
+        component_version: { get_input: [ kubernetes_version ] }
+        service_cidr: { get_input: [ service_cidr ] }
+      requirements:
+        - host: kube_node
+
+    manifest -> container -> app
+
+    kube_node:
+      type: kubetos.nodes.Abstract.KubeNode
+      directives:
+        - select
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Abstract.Kube.APIServer
+    capabilities:
+      access_address: [ apiserver, access_address ]
+      # host: [ kube_node, host ]
+      # os: [ kube_node, os ]
+      # endpoint: [ kube_node, endpoint ]
+      # scalable: [ kube_node, scalable ]
+      # binding: [ kube_node, binding ]
+    properties:
+      component_version: [ kubernetes_version ]
+      service_cidr: [ service_cidr ]
+    # attributes:
+    #   private_address: [ kube_node, private_address ]
+    #   public_address: [ kube_node, public_address ]
+    #   networks: [ kube_node, networks ]
+    #   ports: [ kube_node, ports ]
+    #   tosca_name: [ kube_node, tosca_name ]

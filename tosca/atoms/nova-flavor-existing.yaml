@@ -1,0 +1,32 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- namespace_prefix: openstack
+  file: ../profiles/openstack/main.yaml
+
+topology_template:
+
+  node_templates:
+
+    os_flavor:
+      type: openstack:nova.Flavor
+      interfaces:
+        Standard:
+          operations:
+            configure:
+              inputs:
+                required_ram:
+                  value: { get_property: [ SELF, flavor, mem_size ] }
+                  type: string
+                required_vcups:
+                  value: { get_property: [ SELF, flavor, num_cpus ] }
+                  type: string
+              outputs:
+                id: [ SELF, flavor, openstack_id ]
+              implementation: artifacts/os_flavor_find.yaml
+
+  substitution_mappings:
+    node_type: openstack:nova.Flavor
+    capabilities:
+      flavor: [ os_flavor, flavor ]

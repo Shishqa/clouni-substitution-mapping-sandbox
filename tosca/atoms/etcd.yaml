@@ -1,0 +1,78 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- ../profiles/etcd/main.yaml
+
+topology_template:
+
+  inputs:
+
+    component_version:
+      type: version
+
+  node_templates:
+
+    etcd:
+      type: kubetos.nodes.Etcd
+      capabilities:
+        access_address:
+          properties:
+            port: 2379
+            api_version: v2
+        peer_address:
+          properties:
+            port: 2380
+      interfaces:
+        Standard:
+          inputs:
+            etcd_version:
+              value: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
+              type: string
+          operations:
+            create:
+              implementation:
+                primary: ansible/etcd--create.yaml
+                dependencies:
+                  - etcd_role
+                  - download_role
+            configure:
+              inputs:
+                etcd_address: { value: { get_attribute: [ SELF, host, private_address ] }, type: string }
+                etcd_peer_port: { value: { get_property: [ SELF, peer_address, port ] }, type: integer }
+                etcd_access_address: { value: { get_attribute: [ SELF, host, private_address ] }, type: string }
+                etcd_access_port: { value: { get_property: [ SELF, access_address, port ] }, type: integer }
+                etcd_member_name: { value: { get_attribute: [ SELF, name ] }, type: string }
+                etcd_peers:
+                  value: { get_attribute: [ SELF, peers ] }
+                  type: list
+                  entry_schema:
+                    type: kubetos.datatypes.Etcd.PeerSpec
+              implementation:
+                primary: ansible/etcd--configure.yaml
+                dependencies:
+                  - etcd_role
+            start:
+              implementation:
+                primary: ansible/etcd--start.yaml
+                dependencies:
+                  - etcd_role
+      artifacts:
+        etcd_role:
+          file: ansible/roles/etcd
+          type: tosca.artifacts.File
+          deploy_path: roles/etcd
+        download_role:
+          file: ../../utils/roles/download
+          type: tosca.artifacts.File
+          deploy_path: roles/download
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Etcd
+    capabilities:
+      peer_address: [ etcd, peer_address ]
+      access_address: [ etcd, access_address ]
+    properties:
+      component_version: [ etcd, component_version ]
+    requirements:
+      host: [ etcd, host ]

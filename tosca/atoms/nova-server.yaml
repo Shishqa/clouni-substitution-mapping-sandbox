@@ -1,0 +1,57 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- namespace_prefix: openstack
+  file: ../profiles/openstack/main.yaml
+
+topology_template:
+
+  node_templates:
+
+    os_server:
+      type: openstack:nova.Server
+      interfaces:
+        Standard:
+          operations:
+            configure:
+              inputs:
+                server_name:
+                  value: { get_attribute: [ SELF, tosca_name ] }
+                  type: string
+                server_image:
+                  value: { get_attribute: [ SELF, image, id ] }
+                  type: string
+                server_flavor:
+                  value: { get_attribute: [ SELF, flavor, id ] }
+                  type: string
+                server_keypair:
+                  value: { get_property: [ SELF, key_pair, name ] }
+                  type: string
+                server_network:
+                  value: { get_property: [ SELF, private_endpoint, network_name ] }
+                  type: string
+              outputs:
+                public_address: [ SELF, public_address ]
+                private_address: [ SELF, private_address ]
+                id: [ SELF, id ]
+              implementation: artifacts/os_server_create.yaml
+
+  substitution_mappings:
+    node_type: openstack:nova.Server
+    attributes:
+      private_address: [ os_server, private_address ]
+      public_address: [ os_server, public_address ]
+      networks: [ os_server, networks ]
+      ports: [ os_server, ports ]
+      security_groups: [ os_server, security_groups ]
+    capabilities:
+      server: [ os_server, server ]
+      scalable: [ os_server, scalable ]
+      binding: [ os_server, binding ]
+      private_endpoint: [ os_server, private_endpoint ]
+    requirements:
+      image: [ os_server, image ]
+      flavor: [ os_server, flavor ]
+      key_pair: [ os_server, key_pair ]
+      security_group: [ os_server, security_group ]
