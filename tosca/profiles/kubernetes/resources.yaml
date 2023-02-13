@@ -1,0 +1,20 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+  - ../cri/main.yaml
+  - ../etcd/main.yaml
+  - ../pki/main.yaml
+
+node_types:
+
+  kubetos.nodes.Kubernetes.Pod:
+    derived_from: tosca.nodes.Root
+    
+  kubetos.nodes.Kubernetes.StaticPod:
+    derived_from: kubetos.nodes.Kubernetes.Pod
+    requirements:
+      - host:
+          capability: kubetos.capabilities.Kubelet
+          relationship: kubetos.relationships.HostedOn
+      
+    

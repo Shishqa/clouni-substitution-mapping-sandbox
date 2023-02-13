@@ -8,20 +8,12 @@ capability_types:
       data:
         type: string
 
-  kubetos.capabilities.DynamicArtifactHosted:
-    derived_from: tosca.capabilities.Root
+relationship_types:
+
+  kubetos.relationships.GetArtifact:
+    derived_from: tosca.relationships.DependsOn
     properties:
+      artifact_name:
+        type: string
       path:
         type: string
-
-node_types:
-
-  kubetos.nodes.DynamicArtifactHosted:
-    derived_from: tosca.nodes.SoftwareComponent
-    capabilities:
-      file:
-        type: kubetos.capabilities.DynamicArtifactHosted
-    requirements:
-      - artifact:
-          capability: kubetos.capabilities.DynamicArtifact
-          relationship: tosca.relationships.DependsOn

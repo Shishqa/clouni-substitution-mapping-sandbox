@@ -57,19 +57,19 @@ topology_template:
         - ca: kubernetes_ca
 
     control_plane:
-      type: kubetos.nodes.Abstract.ControlPlane
+      type: kubetos.nodes.Kubernetes.ControlPlane
       properties:
-        component_version: { get_input: [ kubernetes_version ] }
+        kubernetes_version: { get_input: [ kubernetes_version ] }
         cluster_cidr: { get_input: [ cluster_cidr ] }
         service_cidr: { get_input: [ service_cidr ] }
       directives:
         - substitute
 
-    kubernetes_ca:
-      type: kubetos.nodes.CertificateAuthority
-      properties:
-        common_name: kubernetes-ca
-        organisation: kubernetes
+    # kubernetes_ca:
+    #   type: kubetos.nodes.CertificateAuthority
+    #   properties:
+    #     common_name: kubernetes-ca
+    #     organisation: kubernetes
 
   substitution_mappings:
     node_type: kubetos.nodes.Abstract.Cluster
