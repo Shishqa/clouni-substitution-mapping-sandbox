@@ -6,10 +6,8 @@ metadata:
   template_version: "1.0"
 
 imports:
-  - profiles/etcd/main.yaml
-  - profiles/cri/main.yaml
-  - profiles/cni/main.yaml
-  - profiles/kubernetes/main.yaml
+  #- ../profiles/etcd/main.yaml
+  - ../profiles/kubernetes/cluster.yaml
 
 topology_template:
 
@@ -17,13 +15,11 @@ topology_template:
 
     kubernetes_version:
       type: version
-      default: 1.21.0
 
     cluster_name:
       type: string
-      default: kubernetes-cluster
 
-    cluster_cidr:
+    pod_cidr:
       type: string
       default: 10.233.0.0/16
 
@@ -38,45 +34,26 @@ topology_template:
   node_templates:
 
     worker:
-      type: kubetos.nodes.Abstract.KubeNode
+      type: kubetos.nodes.Kubernetes.Worker
+      directives: [ substitute ]
       properties:
-        component_version: { get_input: [ kubernetes_version ] }
-        pod_cidr: { get_input: [ cluster_cidr ] }
-        dns_ip: { get_input: [ dns_ip ] }
-      directives:
-        - substitute
-
-    kube_cluster:
-      type: kubetos.nodes.Kubernetes.Cluster
-      capabilities:
-        cluster:
-          properties:
-            name: test-cluster
+        kubernetes_version: { get_input: [ kubernetes_version ] }
       requirements:
         - apiserver: control_plane
-        - ca: kubernetes_ca
 
     control_plane:
       type: kubetos.nodes.Kubernetes.ControlPlane
+      directives: [ substitute ]
       properties:
         kubernetes_version: { get_input: [ kubernetes_version ] }
-        cluster_cidr: { get_input: [ cluster_cidr ] }
+        cluster_name: { get_input: [ cluster_name ] }
         service_cidr: { get_input: [ service_cidr ] }
-      directives:
-        - substitute
-
-    # kubernetes_ca:
-    #   type: kubetos.nodes.CertificateAuthority
-    #   properties:
-    #     common_name: kubernetes-ca
-    #     organisation: kubernetes
+        pod_cidr: { get_input: [ pod_cidr ] }
 
   substitution_mappings:
-    node_type: kubetos.nodes.Abstract.Cluster
+    node_type: kubetos.nodes.Kubernetes.Cluster
     capabilities:
       access_address: [ control_plane, access_address ]
     properties:
-      component_version: [ kubernetes_version ]
-      cluster_cidr: [ cluster_cidr ]
-      service_cidr: [ service_cidr ]
-      dns_ip: [ dns_ip ]
+      kubernetes_version: [ kubernetes_version ]
+      cluster_name: [ cluster_name ]

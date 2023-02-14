@@ -15,6 +15,11 @@ topology_template:
 
     cni:
       type: kubetos.nodes.CNI
+      capabilities:
+        cni:
+          properties:
+            binary_dir: /opt/cni/bin
+            config_dir: /etc/cni/net.d
       interfaces:
         Standard:
           operations:
@@ -49,6 +54,6 @@ topology_template:
     capabilities:
       cni: [ cni, cni ]
     properties:
-      component_version: [ cni, component_version ]
+      component_version: [ component_version ]
     requirements:
       host: [ cni, host ]

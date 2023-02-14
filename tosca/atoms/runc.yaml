@@ -15,6 +15,8 @@ topology_template:
 
     runc:
       type: kubetos.nodes.Runc
+      properties:
+        component_version: { get_input: [ component_version ] }
       interfaces:
         Standard:
           operations:
@@ -30,6 +32,6 @@ topology_template:
     capabilities:
       oci: [ runc, oci ]
     properties:
-      component_version: [ runc, component_version ]
+      component_version: [ component_version ]
     requirements:
       host: [ runc, host ]

@@ -50,7 +50,7 @@ topology_template:
     capabilities:
       cri: [ crio, cri ]
     properties:
-      component_version: [ crio, component_version ]
+      component_version: [ component_version ]
     requirements:
       host: [ crio, host ]
       cni: [ crio, cni ]

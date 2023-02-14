@@ -53,6 +53,6 @@ topology_template:
     capabilities:
       oci: [ kata, oci ]
     properties:
-      component_version: [ kata, component_version ]
+      component_version: [ component_version ]
     requirements:
       host: [ kata, host ]

@@ -17,8 +17,8 @@ data_types:
 
 capability_types:
 
-  kubetos.capabilities.OCI.Plugin:
-    derived_from: tosca.capabilities.Node
+  kubetos.capabilities.OCI.Runtime:
+    derived_from: tosca.capabilities.Root
     properties:
       spec:
         type: kubetos.datatypes.OCI.RuntimeSpec
@@ -57,26 +57,26 @@ relationship_types:
 
 node_types:
 
-  kubetos.nodes.Abstract.OCI:
+  kubetos.nodes.OCI.Runtime:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
-      oci: kubetos.capabilities.OCI.Plugin
+      oci: kubetos.capabilities.OCI.Runtime
 
   kubetos.nodes.Runc:
-    derived_from: kubetos.nodes.Abstract.OCI
+    derived_from: kubetos.nodes.OCI.Runtime
     properties:
       component_version:
         type: version
         default: 1.1.1
 
   kubetos.nodes.Kata:
-    derived_from: kubetos.nodes.Abstract.OCI
+    derived_from: kubetos.nodes.OCI.Runtime
     properties:
       component_version:
         type: version
         default: 2.1.0
 
-  kubetos.nodes.Abstract.CRI:
+  kubetos.nodes.CRI:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
       cri: kubetos.capabilities.CRI
@@ -87,7 +87,7 @@ node_types:
           type: kubetos.datatypes.OCI.RuntimeSpec
     requirements:
       - oci_runtime:
-          capability: kubetos.capabilities.OCI.Plugin
+          capability: kubetos.capabilities.OCI.Runtime
           relationship: kubetos.relationships.OCI.Plugin
           occurrences: [ 1, UNBOUNDED ]
       - cni:
@@ -95,7 +95,7 @@ node_types:
           relationship: tosca.relationships.DependsOn
 
   kubetos.nodes.CRI-O:
-    derived_from: kubetos.nodes.Abstract.CRI
+    derived_from: kubetos.nodes.CRI
     properties:
       component_version:
         type: version

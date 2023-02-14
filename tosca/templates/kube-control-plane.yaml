@@ -10,6 +10,36 @@ imports:
   - ../profiles/cri/main.yaml
   - ../profiles/cni/main.yaml
   - ../profiles/kubernetes/cluster.yaml
+  - ../profiles/kubernetes/resources.yaml
+
+node_types:
+
+  kubetos.nodes.Kubernetes.APIServer.StaticPod:
+    derived_from: kubetos.nodes.Kubernetes.StaticPod
+    capabilities:
+      access_address:
+        type: tosca.capabilities.Endpoint
+    requirements:
+      - etcd:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, UNBOUNDED ]
+
+  kubetos.nodes.Kubernetes.ControllerManager.StaticPod:
+    derived_from: kubetos.nodes.Kubernetes.StaticPod
+    requirements:
+      - apiserver:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, 1 ]
+
+  kubetos.nodes.Kubernetes.Scheduler.StaticPod:
+    derived_from: kubetos.nodes.Kubernetes.StaticPod
+    requirements:
+      - apiserver:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, 1 ]
 
 topology_template:
 
@@ -33,223 +63,288 @@ topology_template:
 
   node_templates:
 
-    scheduler:
-      type: kubetos.nodes.Kubernetes.Scheduler
+    kube_apiserver_pod:
+      type: kubetos.nodes.Kubernetes.APIServer.StaticPod
+      requirements:
+        - host: kubelet
+        - etcd: etcd
+
+    kube_controller_manager_pod:
+      type: kubetos.nodes.Kubernetes.ControllerManager.StaticPod
+      requirements:
+        - host: kubelet
+
+    kube_scheduler_pod:
+      type: kubetos.nodes.Kubernetes.Scheduler.StaticPod
+      requirements:
+        - host: kubelet
+
+
+    # scheduler:
+    #   type: kubetos.nodes.Kubernetes.Scheduler
+    #   directives: [ substitute ]
+    #   properties:
+    #     config_path: /etc/kubernetes/kube-scheduler.yaml
+    #   requirements:
+    #     - host: compute
+    #     - apiserver: apiserver
+
+        # - kubeconfig:
+        #     node: scheduler_kubeconfig
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: kubeconfig
+        #         path: /etc/kubernetes/scheduler.conf
+
+    # scheduler_kubeconfig:
+    #   type: kubetos.nodes.Kubeconfig
+    #   properties:
+    #     user: default-scheduler
+    #   requirements:
+    #     - apiserver: apiserver
+    #     - user_cert:
+    #         node: kube_scheduler_cert
+    #         relationship:
+    #           type: kubetos.relationships.GetArtifact
+    #           properties:
+    #             artifact_name: cert
+    #             path: user.crt
+    #     - user_key:
+    #         node: kube_scheduler_cert
+    #         relationship:
+    #           type: kubetos.relationships.GetArtifact
+    #           properties:
+    #             artifact_name: key
+    #             path: user.key
+
+    # controller_manager:
+    #   type: kubetos.nodes.Kubernetes.ControllerManager
+    #   directives: [ substitute ]
+    #   properties:
+    #     pod_cidr: { get_input: [ pod_cidr ] }
+    #     service_cidr: { get_input: [ service_cidr ] }
+    #   requirements:
+    #     - host: compute
+    #     - apiserver: apiserver
+        # - kubeconfig:
+        #     node: controller_manager_kubeconfig
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: kubeconfig
+        #         path: /etc/kubernetes/controller-manager.conf
+        # - service_account_key:
+        #     node: service_account_cert
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: key
+        #         path: /etc/kubernetes/pki/sa.key
+        # - ca:
+        #     node: root_ca
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: ca
+        #         path: /etc/kubernetes/pki/ca.crt
+        # - ca_key:
+        #     node: root_ca
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: key
+        #         path: /etc/kubernetes/pki/ca.key
+
+    # controller_manager_kubeconfig:
+    #   type: kubetos.nodes.Kubeconfig
+    #   properties:
+    #     user: default-controller-manager
+    #   requirements:
+    #     - apiserver: apiserver
+    #     - user_cert:
+    #         node: kube_controller_manager_cert
+    #         relationship:
+    #           type: kubetos.relationships.GetArtifact
+    #           properties:
+    #             artifact_name: cert
+    #             path: user.crt
+    #     - user_key:
+    #         node: kube_controller_manager_cert
+    #         relationship:
+    #           type: kubetos.relationships.GetArtifact
+    #           properties:
+    #             artifact_name: key
+    #             path: user.key
+
+    # apiserver:
+    #   type: kubetos.nodes.Kubernetes.APIServer
+    #   directives: [ substitute ]
+    #   properties:
+    #     service_cidr: { get_input: [ service_cidr ] }
+    #   requirements:
+    #     - host: compute
+    #     - etcd: etcd
+        # - ca:
+        #     node: root_ca
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: ca
+        #         path: /etc/kubernetes/pki/ca.crt
+        # - kubelet_client_cert:
+        #     node: kubelet_client_cert
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: cert
+        #         path: /etc/kubernetes/pki/apiserver-kubelet-client.crt
+        # - kubelet_client_key:
+        #     node: kubelet_client_cert
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: key
+        #         path: /etc/kubernetes/pki/apiserver-kubelet-client.key
+        # - service_account_cert: 
+        #     node: service_account_cert
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: cert
+        #         path: /etc/kubernetes/pki/sa.crt
+        # - service_account_key: 
+        #     node: service_account_cert
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: key
+        #         path: /etc/kubernetes/pki/sa.key
+        # - tls_cert: 
+        #     node: kube_apiserver_cert
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: cert
+        #         path: /etc/kubernetes/pki/apiserver.crt
+        # - tls_key: 
+        #     node: kube_apiserver_cert
+        #     relationship:
+        #       type: kubetos.relationships.GetArtifact
+        #       properties:
+        #         artifact_name: key
+        #         path: /etc/kubernetes/pki/apiserver.key
+
+    kubelet:
+      type: kubetos.nodes.Kubernetes.Kubelet
       directives: [ substitute ]
       properties:
-        config_path: /etc/kubernetes/kube-scheduler.yaml
+        component_version: { get_input: [ kubernetes_version ] }
       requirements:
+        - apiserver: kube_apiserver_pod
+        - cri_runtime: cri
         - host: compute
-        - kubeconfig:
-            node: scheduler_kubeconfig
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: kubeconfig
-                path: /etc/kubernetes/scheduler.conf
 
-    scheduler_kubeconfig:
-      type: kubetos.nodes.Kubeconfig
-      properties:
-        user: default-scheduler
-      requirements:
-        - apiserver: apiserver
-        - user_cert:
-            node: kube_scheduler_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: cert
-                path: user.crt
-        - user_key:
-            node: kube_scheduler_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: key
-                path: user.key
-
-    controller_manager:
-      type: kubetos.nodes.Kubernetes.ControllerManager
+    cri:
+      type: kubetos.nodes.CRI
       directives: [ substitute ]
-      properties:
-        cluster_cidr: { get_input: [ pod_cidr ] }
-        service_cidr: { get_input: [ service_cidr ] }
       requirements:
         - host: compute
-        - kubeconfig:
-            node: controller_manager_kubeconfig
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: kubeconfig
-                path: /etc/kubernetes/controller-manager.conf
-        - service_account_key:
-            node: service_account_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: key
-                path: /etc/kubernetes/pki/sa.key
-        - ca:
-            node: root_ca
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: ca
-                path: /etc/kubernetes/pki/ca.crt
-        - ca_key:
-            node: root_ca
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: key
-                path: /etc/kubernetes/pki/ca.key
+        - cni: cni
+        - oci_runtime: oci_runtime
 
-    controller_manager_kubeconfig:
-      type: kubetos.nodes.Kubeconfig
-      properties:
-        user: default-controller-manager
-      requirements:
-        - apiserver: apiserver
-        - user_cert:
-            node: kube_controller_manager_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: cert
-                path: user.crt
-        - user_key:
-            node: kube_controller_manager_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: key
-                path: user.key
-
-    apiserver:
-      type: kubetos.nodes.Kubernetes.APIServer
+    oci_runtime:
+      type: kubetos.nodes.OCI.Runtime
       directives: [ substitute ]
-      properties:
-        service_cidr: { get_input: [ service_cidr ] }
       requirements:
         - host: compute
-        - ca:
-            node: root_ca
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: ca
-                path: /etc/kubernetes/pki/ca.crt
-        - kubelet_client_cert:
-            node: kubelet_client_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: cert
-                path: /etc/kubernetes/pki/apiserver-kubelet-client.crt
-        - kubelet_client_key:
-            node: kubelet_client_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: key
-                path: /etc/kubernetes/pki/apiserver-kubelet-client.key
-        - service_account_cert: 
-            node: service_account_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: cert
-                path: /etc/kubernetes/pki/sa.crt
-        - service_account_key: 
-            node: service_account_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: key
-                path: /etc/kubernetes/pki/sa.key
-        - tls_cert: 
-            node: kube_apiserver_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: cert
-                path: /etc/kubernetes/pki/apiserver.crt
-        - tls_key: 
-            node: kube_apiserver_cert
-            relationship:
-              type: kubetos.relationships.GetArtifact
-              properties:
-                artifact_name: key
-                path: /etc/kubernetes/pki/apiserver.key
+
+    cni:
+      type: kubetos.nodes.CNI
+      directives: [ substitute ]
+      requirements:
+        - host: compute
+
+    etcd:
+      type: kubetos.nodes.Etcd
+      directives: [ substitute ]
+      capabilities:
+        access_address:
+          properties:
+            port: 2379
+            api_version: v2
+        peer_address:
+          properties:
+            port: 2380
+      requirements:
+        - host: compute
 
     compute:
       type: tosca.nodes.Compute
       directives: [ substitute ]
 
-    kube_scheduler_cert:
-      type: kubetos.nodes.Certificate
-      properties:
-        common_name: system:kube-scheduler
-        organisation: system:kube-scheduler
-      requirements:
-        - ca: root_ca
+    # kube_scheduler_cert:
+    #   type: kubetos.nodes.Certificate
+    #   properties:
+    #     common_name: system:kube-scheduler
+    #     organisation: system:kube-scheduler
+    #   requirements:
+    #     - ca: root_ca
 
-    kube_controller_manager_cert:
-      type: kubetos.nodes.Certificate
-      properties:
-        common_name: system:kube-controller-manager
-        organisation: system:kube-controller-manager
-      requirements:
-        - ca: root_ca
+    # kube_controller_manager_cert:
+    #   type: kubetos.nodes.Certificate
+    #   properties:
+    #     common_name: system:kube-controller-manager
+    #     organisation: system:kube-controller-manager
+    #   requirements:
+    #     - ca: root_ca
 
-    kube_apiserver_cert:
-      type: kubetos.nodes.Certificate
-      properties:
-        common_name: kubernetes
-        organisation: kubernetes
-        hostnames:
-          - { get_attribute: [ compute, tosca_name ] }
-          - { get_attribute: [ compute, private_address ] }
-          - { get_attribute: [ compute, public_address ] }
-          - 10.32.0.1
-          - 127.0.0.1
-      requirements:
-        - ca: root_ca
+    # kube_apiserver_cert:
+    #   type: kubetos.nodes.Certificate
+    #   properties:
+    #     common_name: kubernetes
+    #     organisation: kubernetes
+    #     hostnames:
+    #       - { get_attribute: [ compute, tosca_name ] }
+    #       - { get_attribute: [ compute, private_address ] }
+    #       - { get_attribute: [ compute, public_address ] }
+    #       - 10.32.0.1
+    #       - 127.0.0.1
+    #   requirements:
+    #     - ca: root_ca
 
-    kubelet_client_cert:
-      type: kubetos.nodes.Certificate
-      properties:
-        common_name: kubernetes
-        organisation: system:masters
-      requirements:
-        - ca: root_ca
+    # kubelet_client_cert:
+    #   type: kubetos.nodes.Certificate
+    #   properties:
+    #     common_name: kubernetes
+    #     organisation: system:masters
+    #   requirements:
+    #     - ca: root_ca
 
-    service_account_cert:
-      type: kubetos.nodes.Certificate
-      properties:
-        common_name: service-accounts
-        organisation: kubernetes
-      requirements:
-        - ca: root_ca
+    # service_account_cert:
+    #   type: kubetos.nodes.Certificate
+    #   properties:
+    #     common_name: service-accounts
+    #     organisation: kubernetes
+    #   requirements:
+    #     - ca: root_ca
 
-    root_ca:
-      type: kubetos.nodes.CertificateAuthority
-      directives: [ substitute ]
-      properties:
-        common_name: kubernetes-ca
-        organisation: kubernetes
+    # root_ca:
+    #   type: kubetos.nodes.CertificateAuthority
+    #   directives: [ substitute ]
+    #   properties:
+    #     common_name: kubernetes-ca
+    #     organisation: kubernetes
 
   substitution_mappings:
     node_type: kubetos.nodes.Kubernetes.ControlPlane
     capabilities:
-      access_address: [ apiserver, access_address ]
+      access_address: [ kube_apiserver_pod, access_address ]
       scalable: [ compute, scalable ]
     properties:
       kubernetes_version: [ kubernetes_version ]
       cluster_name: [ cluster_name ]
       pod_cidr: [ pod_cidr ]
       service_cidr: [ service_cidr ]
-    requirements:
-      etcd: [ apiserver, etcd ]
+    # requirements:
+    #   etcd: [ apiserver, etcd ]

@@ -7,13 +7,3 @@ capability_types:
     attributes:
       data:
         type: string
-
-relationship_types:
-
-  kubetos.relationships.GetArtifact:
-    derived_from: tosca.relationships.DependsOn
-    properties:
-      artifact_name:
-        type: string
-      path:
-        type: string
