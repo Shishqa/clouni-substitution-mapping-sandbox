@@ -4,11 +4,25 @@ import parser
 
 substitutions = {}
 
-def init_substitution_database():
+def init_database():
+  if not os.path.exists('tosca'):
+    os.makedirs('tosca')
+
+  if not os.path.exists('tosca/templates'):
+    os.makedirs('tosca/templates')
+
+  if not os.path.exists('tosca/atoms'):
+    os.makedirs('tosca/atoms')
+  
+  init_substitution_database('tosca/atoms')
+  init_substitution_database('tosca/templates')
+  
+
+def init_substitution_database(template_root):
   global substitutions
 
-  for filename in os.listdir('templates'):
-    path = os.path.join('templates', filename)
+  for filename in os.listdir(template_root):
+    path = os.path.join(template_root, filename)
 
     normalized_template = parser.parse(path, phases=2)
     substitution = normalized_template['substitution']

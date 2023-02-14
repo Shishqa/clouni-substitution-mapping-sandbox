@@ -115,7 +115,7 @@ node_types:
     - security_group:
         capability: neutron.SecurityGroup
         relationship: ComputeToSecurityGroup
-        occurrences: [ 0, UNBOUNDED ]
+        occurrences: [ 1, UNBOUNDED ]
 
   nova.Flavor:
     derived_from: tosca.nodes.Root

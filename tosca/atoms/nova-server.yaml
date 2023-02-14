@@ -34,7 +34,7 @@ topology_template:
               outputs:
                 public_address: [ SELF, public_address ]
                 private_address: [ SELF, private_address ]
-                id: [ SELF, id ]
+                id: [ SELF, server, openstack_id ]
               implementation: artifacts/os_server_create.yaml
 
   substitution_mappings:

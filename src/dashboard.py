@@ -110,23 +110,6 @@ def node_graphviz(cluster_prefix, node):
     "node_{subgraph_name}" [shape=point, style=invis];
   '''
 
-  if len(node.properties) > 0:
-    res += f'''
-    subgraph {subgraph_name}_properties {{
-      penwidth=1;
-      color = black;
-      graph [rankdir = "LR"];
-      rank = same;
-      label = "properties";
-    '''
-    for p_name, p_body in node.properties.items():
-      res += f'''
-      "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
-      '''
-    res += '''
-    }
-    '''
-
   if len(node.attributes) > 0:
     res += f'''
     subgraph {subgraph_name}_attributes {{
@@ -194,18 +177,18 @@ def capability_graphviz(cluster_prefix, capability):
     "cap_{subgraph_name}" [shape=point,style=invis];
   '''
 
-  if len(capability.properties) > 0:
+  if len(capability.attributes) > 0:
     res += f'''
-    subgraph {subgraph_name}_properties {{
+    subgraph {subgraph_name}_attributes {{
       color = black;
       graph [rankdir = "LR"];
       rank = same;
-      label = "properties";
+      label = "attributes";
       rank = same;
     '''
-    for p_name, p_body in capability.properties.items():
+    for a_name, a_body in capability.attributes.items():
       res += f'''
-      "{subgraph_name}_prop_{p_name}" [label="{p_name} = {p_body.get()}"];
+      "{subgraph_name}_attr_{a_name}" [label="{a_name} = {a_body.get()}"];
       '''
     res += '''
     }

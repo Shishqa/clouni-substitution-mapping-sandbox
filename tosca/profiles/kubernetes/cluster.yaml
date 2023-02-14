@@ -53,27 +53,27 @@ relationship_types:
 
 node_types:
 
-  kubetos.nodes.Kubeconfig:
-    derived_from: tosca.nodes.Root
-    capabilities:
-      kubeconfig:
-        type: kubetos.capabilities.Kubeconfig
-    properties:
-      user:
-        type: string
-    requirements:
-      - apiserver:
-          capability: tosca.capabilities.Endpoint
-          relationship: tosca.relationships.ConnectsTo
-          occurrences: [ 1, 1 ]
-      - user_cert:
-          capability: kubetos.capabilities.Certificate
-          relationship: kubetos.relationships.GetArtifact
-          occurrences: [ 1, 1 ]
-      - user_key:
-          capability: kubetos.capabilities.PrivateKey
-          relationship: kubetos.relationships.GetArtifact
-          occurrences: [ 1, 1 ]
+  # kubetos.nodes.Kubeconfig:
+  #   derived_from: tosca.nodes.Root
+  #   capabilities:
+  #     kubeconfig:
+  #       type: kubetos.capabilities.Kubeconfig
+  #   properties:
+  #     user:
+  #       type: string
+  #   requirements:
+  #     - apiserver:
+  #         capability: tosca.capabilities.Endpoint
+  #         relationship: tosca.relationships.ConnectsTo
+  #         occurrences: [ 1, 1 ]
+  #     - user_cert:
+  #         capability: kubetos.capabilities.Certificate
+  #         relationship: kubetos.relationships.GetArtifact
+  #         occurrences: [ 1, 1 ]
+  #     - user_key:
+  #         capability: kubetos.capabilities.PrivateKey
+  #         relationship: kubetos.relationships.GetArtifact
+  #         occurrences: [ 1, 1 ]
 
   kubetos.nodes.Kubernetes.Root:
     derived_from: tosca.nodes.Root
@@ -399,26 +399,26 @@ node_types:
   #       type: string
   #       required: false
 
-  kubetos.nodes.Kubelet:
-    derived_from: tosca.nodes.SoftwareComponent
-    capabilities:
-      kubelet: kubetos.capabilities.Kubelet
-    properties:
-      component_version:
-        type: version
-        default: 1.21.0
-        required: false
-      pod_cidr:
-        type: string
-        required: false
-      dns_ip:
-        type: string
-        required: false
-    requirements:
-      - apiserver:
-          capability: tosca.capabilities.Endpoint
-          relationship: tosca.relationships.ConnectsTo
-          occurrences: [ 1, 1 ]
+  # kubetos.nodes.Kubelet:
+  #   derived_from: tosca.nodes.SoftwareComponent
+  #   capabilities:
+  #     kubelet: kubetos.capabilities.Kubelet
+  #   properties:
+  #     component_version:
+  #       type: version
+  #       default: 1.21.0
+  #       required: false
+  #     pod_cidr:
+  #       type: string
+  #       required: false
+  #     dns_ip:
+  #       type: string
+  #       required: false
+  #   requirements:
+  #     - apiserver:
+  #         capability: tosca.capabilities.Endpoint
+  #         relationship: tosca.relationships.ConnectsTo
+  #         occurrences: [ 1, 1 ]
       # - ca:
       #     capability: tosca.capabilities.Node
       #     node: kubetos.nodes.Artifact.Certificate
@@ -428,9 +428,9 @@ node_types:
       # - kubeconfig:
       #     capability: tosca.capabilities.Node
       #     node: kubetos.nodes.Artifact.Kubeconfig
-      - cri_runtime:
-          capability: kubetos.capabilities.CRI
-          relationship: kubetos.relationships.Kubelet.UsesRuntime
+      # - cri_runtime:
+      #     capability: kubetos.capabilities.CRI
+      #     relationship: kubetos.relationships.Kubelet.UsesRuntime
     # interfaces:
     #   Standard:
     #     type: tosca.interfaces.node.lifecycle.Standard

@@ -18,7 +18,7 @@ data_types:
 capability_types:
 
   kubetos.capabilities.OCI.Runtime:
-    derived_from: tosca.capabilities.Root
+    derived_from: tosca.capabilities.Node
     properties:
       spec:
         type: kubetos.datatypes.OCI.RuntimeSpec

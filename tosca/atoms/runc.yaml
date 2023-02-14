@@ -28,7 +28,7 @@ topology_template:
               implementation: ansible/runc--create.yaml
 
   substitution_mappings:
-    node_type: kubetos.nodes.Runc
+    node_type: kubetos.nodes.OCI.Runtime
     capabilities:
       oci: [ runc, oci ]
     properties:

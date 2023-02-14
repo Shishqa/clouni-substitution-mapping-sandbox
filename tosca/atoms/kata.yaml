@@ -49,7 +49,7 @@ topology_template:
           deploy_path: roles/download
 
   substitution_mappings:
-    node_type: kubetos.nodes.Kata
+    node_type: kubetos.nodes.OCI.Runtime
     capabilities:
       oci: [ kata, oci ]
     properties:

@@ -44,7 +44,7 @@ topology_template:
           deploy_path: roles/cri-o
 
   substitution_mappings:
-    node_type: kubetos.nodes.CRI-O
+    node_type: kubetos.nodes.CRI
     attributes:
       runtimes: [ crio, runtimes ]
     capabilities:

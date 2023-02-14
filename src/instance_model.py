@@ -19,13 +19,10 @@ def create_value(node, meta, primitive):
   if meta['type'] == 'version':
     return Version(node, meta, primitive)
 
-  # if type_def['name'] == 'scalar-unit.time':
-  #   return ScalarUnitTime(node, type_def, definition['$value'])
+  if meta['type'] in {'scalar-unit.time', 'scalar-unit.size'}:
+    return ScalarUnit(node, meta, primitive)
 
-  if meta['type'] == 'scalar-unit.size':
-    return ScalarUnitSize(node, meta, primitive)
-
-  if meta['type'] in {'integer', 'string', 'boolean'}:
+  if meta['type'] in {'integer', 'string', 'boolean', 'tosca::PortDef'}:
     return Primitive(node, meta, primitive)
 
   raise RuntimeError('unknown primitive')
@@ -81,19 +78,7 @@ class Version(ValueInstance):
     return self.value
 
 
-class ScalarUnitTime(ValueInstance):
-  def __init__(self, node, type_def, value):
-    super().__init__(node, type_def)
-    if value is None:
-      self.value = None
-      return
-    self.value = value['$string']
-
-  def get(self):
-    return self.value
-
-
-class ScalarUnitSize(ValueInstance):
+class ScalarUnit(ValueInstance):
   def __init__(self, node, meta, primitive):
     super().__init__(node, meta)
     self.value = primitive['$number']
@@ -204,6 +189,9 @@ class AttributeInstance:
 
     self.value = None
     if '$primitive' in self.definition.keys():
+      if self.definition['$primitive'] is None:
+        self.value = Primitive(node, {}, None)
+        return
       self.value = create_value(
         node,
         self.definition['$meta'],
@@ -326,13 +314,6 @@ class NodeInstance:
       self.capabilities[cap_name] = CapabilityInstance(cap_name, self, cap_def)
 
     self.requirements = []
-    for req_def in self.definition['requirements']:
-      self.requirements.append(RelationshipInstance(
-        req_def['name'],
-        self,
-        self.topology.nodes[req_def['nodeTemplateName']],
-        req_def['relationship']
-      ))
 
   def find_type(self):
     seen = set(self.types.keys())
@@ -340,35 +321,6 @@ class NodeInstance:
       if 'parent' in type_body.keys():
         seen.remove(type_body['parent'])
     self.type = seen.pop()
-
-  def substitute_with(self, topology):
-    print(topology.definition['substitution']['inputPointers'])
-
-
-    for prop_name, mapping in topology.definition['substitution']['propertyPointers'].items():
-      print(mapping)
-
-    for attr_name, mapping in topology.definition['substitution']['attributePointers'].items():
-      print(mapping)
-      if attr_name == 'tosca_name':
-        # XXX: only name should be propagated forwards?
-        topology\
-          .nodes[mapping['nodeTemplateName']]\
-          .attributes[mapping['target']] = self.attributes[attr_name]
-        continue
-
-      self.attributes[attr_name] = topology\
-          .nodes[mapping['nodeTemplateName']]\
-          .attributes[mapping['target']]
-
-    for cap_name, mapping in topology.definition['substitution']['capabilityPointers'].items():
-      print(mapping)
-      topology\
-        .nodes[mapping['nodeTemplateName']]\
-        .capabilities[mapping['target']] = self.capabilities[cap_name]
-
-    for req_instance in self.definition['requirements']:
-      print(req_instance.definition)
 
     # self.attributes = {}
     # for attr_name in self.definition['attributes'].keys():
@@ -565,6 +517,18 @@ class TopologyTemplateInstance:
       node.attributes['tosca_name'].set(Primitive(self, {'type': 'string'}, node_name))
       node.attributes['tosca_id'].set(Primitive(self, {'type': 'string'}, uuid.uuid4().hex))
       self.nodes[node_name] = node
+
+    for node_name, node in self.nodes.items():
+      for req_def in node.definition['requirements']:
+        print(f"{node_name} - {req_def['name']}")
+        if req_def['nodeTemplateName'] == '':
+          continue
+        node.requirements.append(RelationshipInstance(
+          req_def['name'],
+          node,
+          self.nodes[req_def['nodeTemplateName']],
+          req_def['relationship']
+        ))
 
   def get_input(self, input_name):
     if input_name not in self.inputs.keys():

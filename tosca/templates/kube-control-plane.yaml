@@ -72,11 +72,13 @@ topology_template:
     kube_controller_manager_pod:
       type: kubetos.nodes.Kubernetes.ControllerManager.StaticPod
       requirements:
+        - apiserver: kube_apiserver_pod
         - host: kubelet
 
     kube_scheduler_pod:
       type: kubetos.nodes.Kubernetes.Scheduler.StaticPod
       requirements:
+        - apiserver: kube_apiserver_pod
         - host: kubelet
 
 

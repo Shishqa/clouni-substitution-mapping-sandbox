@@ -55,4 +55,35 @@ def substitute(node):
   normalized_template = parser.parse(chosen_substitution)
   topology = compose(normalized_template, f'{node.topology.name}_sub_{node.name}')
 
-  node.substitute_with(topology)
+  map_node(node, topology)
+
+
+def map_node(node, topology):
+  print(topology.definition['substitution'])
+
+  for prop_name, mapping in topology.definition['substitution']['inputPointers'].items():
+    if prop_name not in node.attributes.keys():
+      continue
+    topology.inputs[mapping['target']] = node.attributes[prop_name]
+
+  for attr_name, mapping in topology.definition['substitution']['attributePointers'].items():
+    print(mapping)
+    if attr_name == 'tosca_name':
+      # XXX: only name should be propagated forwards?
+      topology\
+        .nodes[mapping['nodeTemplateName']]\
+        .attributes[mapping['target']] = node.attributes[attr_name]
+      continue
+
+    node.attributes[attr_name] = topology\
+        .nodes[mapping['nodeTemplateName']]\
+        .attributes[mapping['target']]
+
+  for cap_name, mapping in topology.definition['substitution']['capabilityPointers'].items():
+    print(mapping)
+    topology\
+      .nodes[mapping['nodeTemplateName']]\
+      .capabilities[mapping['target']] = node.capabilities[cap_name]
+
+  for req_name, mapping in topology.definition['substitution']['requirementPointers'].items():
+    print(mapping)

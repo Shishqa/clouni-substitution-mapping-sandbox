@@ -23,7 +23,7 @@ def display(args):
 def main():
   args = parse_arguments()
   try:
-    tosca_repository.init_substitution_database()
+    tosca_repository.init_database()
     instance_storage.init_database()
 
     if args.subcommand == 'create':

@@ -1,0 +1,79 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- ../profiles/kubernetes/cluster.yaml
+
+topology_template:
+
+  inputs:
+
+    component_version:
+      type: version
+
+    dns_ip:
+      type: string
+
+    pod_cidr:
+      type: string
+
+  node_templates:
+
+    kubelet:
+      type: kubetos.nodes.Kubernetes.Kubelet
+      properties:
+        component_version: { get_input: [ component_version ] }
+      interfaces:
+        Standard:
+          inputs:
+            kubelet_version:
+              value: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
+              type: string
+          operations:
+            create:
+              implementation:
+                primary: ./ansible/kubelet--create.yaml
+                dependencies:
+                  - kubelet_role
+                  - download_role
+            configure:
+              inputs:
+                ip: { value: { get_attribute: [ SELF, host, private_address ] }, type: string }
+                cri_socket: { value: { get_property: [ SELF, cri_runtime, cri, url_path ] }, type: string }
+                kubelet_static_pod_path: { value: { get_property: [ SELF, kubelet, static_pod_path ] }, type: string }
+                cert_path: { value: { get_property: [ SELF, cert, cert_path ] }, type: string }
+                key_path: { value: { get_property: [ SELF, cert, key_path ] }, type: string }
+                ca_cert_path: { value: { get_property: [ SELF, ca, cert_path ] }, type: string }
+                kubeconfig_path: { value: { get_property: [ SELF, kubeconfig, path ] }, type: string }
+                dns_ip: { value: { get_property: [ SELF, dns_ip ] }, type: string }
+                pod_cidr: { value: { get_property: [ SELF, pod_cidr ] }, type: string }
+              implementation:
+                primary: ./ansible/kubelet--configure.yaml
+                dependencies:
+                  - kubelet_role
+            start:
+              implementation:
+                primary: ./ansible/kubelet--start.yaml
+                dependencies:
+                  - kubelet_role
+      artifacts:
+        kubelet_role:
+          file: ./ansible/roles/kubelet
+          type: tosca.artifacts.File
+          deploy_path: roles/kubelet
+        download_role:
+          file: utils/roles/download
+          type: tosca.artifacts.File
+          deploy_path: roles/download
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Kubernetes.Kubelet
+    capabilities:
+      kubelet: [ kubelet, kubelet ]
+    properties:
+      component_version: [ component_version ]
+      pod_cidr: [ pod_cidr ]
+      dns_ip: [ dns_ip ]
+    requirements:
+      apiserver: [ kubelet, apiserver ]
+      cri_runtime: [ kubelet, cri_runtime ]
