@@ -1,0 +1,159 @@
+
+  test: "Topology test" {
+  
+  inputs {
+    shape: class
+  
+    \#cluster_name: "None"
+    
+    \#dns_ip: "10.32.0.3"
+    
+    \#kubernetes_version: "None"
+    
+    \#pod_cidr: "10.233.0.0/16"
+    
+    \#service_cidr: "10.32.0.0/16"
+    
+  }
+  
+  node_control_plane: "control_plane\n(kubetos.nodes.Kubernetes.ControlPlane)" {
+  
+    link: "./test_sub_control_plane.svg"
+    
+  attributes {
+    shape: class
+  
+    \#cluster_name: "None"
+    
+    \#kubernetes_version: "None"
+    
+    \#pod_cidr: "10.233.0.0/16"
+    
+    \#service_cidr: "10.32.0.0/16"
+    
+    +state: "initial"
+    
+    +tosca_id: "95cd471431bd43019e52c41006c73a3c"
+    
+    +tosca_name: "control_plane"
+    
+  }
+  
+  access_address: "access_address\n(tosca::Endpoint)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  scalable: "scalable\n(tosca::Scalable)" {
+  
+  attributes {
+    shape: class
+  
+    \#max_instances: "1"
+    
+    \#min_instances: "1"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_worker: "worker\n(kubetos.nodes.Kubernetes.Worker)" {
+  
+    link: "./test_sub_worker.svg"
+    
+  attributes {
+    shape: class
+  
+    \#kubernetes_version: "None"
+    
+    +state: "initial"
+    
+    +tosca_id: "5ed85ace428e43549ff8d32f050c9022"
+    
+    +tosca_name: "worker"
+    
+  }
+  
+  endpoint: "endpoint\n(tosca::Endpoint)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  kubelet: "kubelet\n(kubetos.capabilities.Kubelet)" {
+  
+  }
+  
+  scalable: "scalable\n(tosca::Scalable)" {
+  
+  attributes {
+    shape: class
+  
+    \#max_instances: "1"
+    
+    \#min_instances: "1"
+    
+  }
+  
+  }
+  
+  rel_apiserver: "apiserver\n(tosca::ConnectsTo)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      test { link: "./test.svg" }
+      test.node_worker.rel_apiserver -> test.node_control_plane
+      

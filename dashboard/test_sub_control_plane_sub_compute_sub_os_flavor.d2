@@ -1,0 +1,43 @@
+
+  test_sub_control_plane_sub_compute_sub_os_flavor: "Topology test_sub_control_plane_sub_compute_sub_os_flavor" {
+  
+  node_os_flavor: "os_flavor\n(nova.Flavor)" {
+  
+    style { fill: green }
+    
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "2aad3e9b2dd24f5c9c85e8d466590d45"
+    
+    +tosca_name: "os_flavor"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  flavor: "flavor\n(nova.Flavor)" {
+  
+  attributes {
+    shape: class
+  
+    +openstack_id: "None"
+    
+    \#disk_size: "10737418240"
+    
+    \#mem_size: "1073741824"
+    
+    \#num_cpus: "1"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  

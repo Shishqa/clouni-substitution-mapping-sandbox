@@ -1,0 +1,113 @@
+
+  test_sub_control_plane_sub_cri: "Topology test_sub_control_plane_sub_cri" {
+  
+  inputs {
+    shape: class
+  
+    \#component_version: "None"
+    
+  }
+  
+  node_crio: "crio\n(kubetos.nodes.CRI-O)" {
+  
+    style { fill: green }
+    
+  attributes {
+    shape: class
+  
+    \#component_version: "1.21"
+    
+    +runtimes: "None"
+    
+    +state: "initial"
+    
+    +tosca_id: "80d119cd4a664f0b8a0c3a1ab38bf738"
+    
+    +tosca_name: "crio"
+    
+  }
+  
+  cri: "cri\n(kubetos.capabilities.CRI)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#protocol: "rpc"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  rel_cni: "cni\n(tosca::DependsOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_oci_runtime: "oci_runtime\n(kubetos.relationships.OCI.Plugin)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      test_sub_control_plane { link: "./test_sub_control_plane.svg" }
+      test_sub_control_plane_sub_cri.node_crio.rel_cni -> test_sub_control_plane.node_cni
+      
+      test_sub_control_plane { link: "./test_sub_control_plane.svg" }
+      test_sub_control_plane_sub_cri.node_crio.rel_host -> test_sub_control_plane.node_compute
+      
+      test_sub_control_plane { link: "./test_sub_control_plane.svg" }
+      test_sub_control_plane_sub_cri.node_crio.rel_oci_runtime -> test_sub_control_plane.node_oci_runtime
+      

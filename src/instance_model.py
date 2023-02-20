@@ -144,7 +144,7 @@ class GetProperty(ValueInstance):
     self.args = [e['$primitive'] for e in args]
 
   def get(self):
-    print('GETPROP', self.args)
+    # print('GETPROP', self.args)
     start = self.args[0]
     if start == 'SELF':
       return self.node.get_property(self.args[1:])
@@ -158,7 +158,7 @@ class GetAttribute(ValueInstance):
     self.args = [e['$primitive'] for e in args]
 
   def get(self):
-    print('GETATTR', self.args)
+    # print('GETATTR', self.args)
     start = self.args[0]
     if start == 'SELF':
       return self.node.get_attribute(self.args[1:])
@@ -174,7 +174,7 @@ class Concat(ValueInstance):
       if '$primitive' in arg.keys():
         self.args.append(Primitive(node, {}, arg['$primitive']))
       else:
-        print(arg)
+        # print(arg)
         self.args.append(create_function(node, {}, arg['$functionCall']))
 
   def get(self):
@@ -265,7 +265,11 @@ class CapabilityInstance:
 class OperationInstance:
   def __init__(self, node, definition):
     self.definition = copy.deepcopy(definition)
+    self.implementation = None
     self.node = node
+
+    if self.definition['implementation'] != '':
+      self.implementation = self.definition['implementation']
 
     self.inputs = {}
     for input_name, input_def in self.definition['inputs'].items():
@@ -275,6 +279,7 @@ class OperationInstance:
 class InterfaceInstance:
   def __init__(self, node, definition):
     self.definition = copy.deepcopy(definition)
+    self.abstract = True
     self.node = node
 
     self.inputs = {}
@@ -284,6 +289,8 @@ class InterfaceInstance:
     self.operations = {}
     for op_name, op_def in self.definition['operations'].items():
       self.operations[op_name] = OperationInstance(node, op_def)
+      if self.operations[op_name].implementation is not None:
+        self.abstract = False
 
 
 class RelationshipInstance:
@@ -321,6 +328,7 @@ class NodeInstance:
   def __init__(self, name, topology, definition):
     self.name = copy.deepcopy(name)
     self.topology = topology
+    self.abstract = True
     self.substitution = None
 
     self.definition = copy.deepcopy(definition)
@@ -345,6 +353,8 @@ class NodeInstance:
     self.interfaces = {}
     for interface_name, interface_def in self.definition['interfaces'].items():
       self.interfaces[interface_name] = InterfaceInstance(self, interface_def)
+      if not self.interfaces[interface_name].abstract:
+        self.abstract = False
 
     self.requirements = []
 

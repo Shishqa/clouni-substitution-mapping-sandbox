@@ -1,0 +1,67 @@
+
+  test_sub_control_plane_sub_cni: "Topology test_sub_control_plane_sub_cni" {
+  
+  inputs {
+    shape: class
+  
+    \#component_version: "1.0.1"
+    
+  }
+  
+  node_cni: "cni\n(kubetos.nodes.CNI)" {
+  
+    style { fill: green }
+    
+  attributes {
+    shape: class
+  
+    \#component_version: "1.0.1"
+    
+    +state: "initial"
+    
+    +tosca_id: "e19bb47716ab4efcadb99f032d4577ee"
+    
+    +tosca_name: "cni"
+    
+  }
+  
+  cni: "cni\n(kubetos.capabilities.CNI)" {
+  
+  attributes {
+    shape: class
+  
+    \#binary_dir: "/opt/cni/bin"
+    
+    \#config_dir: "/etc/cni/net.d"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      test_sub_control_plane { link: "./test_sub_control_plane.svg" }
+      test_sub_control_plane_sub_cni.node_cni.rel_host -> test_sub_control_plane.node_compute
+      

@@ -1,30 +1,32 @@
 import os
-import parser
+import argparse
+import subprocess as sp
+import yaml
+import copy
+import uuid
+import io
 
 
+templates = {}
 substitutions = {}
 
+
 def init_database():
+  global templates
+  global substitutions
+
   if not os.path.exists('tosca'):
     os.makedirs('tosca')
 
   if not os.path.exists('tosca/templates'):
     os.makedirs('tosca/templates')
 
-  if not os.path.exists('tosca/atoms'):
-    os.makedirs('tosca/atoms')
-  
-  init_substitution_database('tosca/atoms')
-  init_substitution_database('tosca/templates')
-  
+  for filename in os.listdir('tosca/templates'):
+    path = os.path.join('tosca/templates', filename)
 
-def init_substitution_database(template_root):
-  global substitutions
+    normalized_template = parse(path)
+    templates[filename] = normalized_template
 
-  for filename in os.listdir(template_root):
-    path = os.path.join(template_root, filename)
-
-    normalized_template = parser.parse(path, phases=2)
     substitution = normalized_template['substitution']
     if substitution is None:
       continue
@@ -33,7 +35,27 @@ def init_substitution_database(template_root):
     if substitution_type not in substitutions:
       substitutions[substitution_type] = []
 
-    substitutions[substitution_type].append({'file': path})
+    substitutions[substitution_type].append({'file': filename})
+
+
+def parse(path, phases=5):
+  PUCCINI_CMD = 'puccini-tosca parse'
+  pipe = sp.Popen(
+      f'{PUCCINI_CMD} -s {phases} {path}',
+      shell=True,
+      stdout=sp.PIPE,
+      stderr=sp.PIPE
+    )
+  res = pipe.communicate()
+
+  if pipe.returncode != 0:
+    raise RuntimeError(res[1].decode())
+
+  return yaml.safe_load(res[0])
+
+
+def get_template(path):
+  return templates[path]
 
 
 def get_substitutions_for_type(node_type):

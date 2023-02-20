@@ -1,0 +1,116 @@
+
+  mycluster_sub_worker_sub_etcd: "Topology mycluster_sub_worker_sub_etcd" {
+  
+  inputs {
+    shape: class
+  
+    \#component_version: "3.4.13"
+    
+  }
+  
+  node_etcd: "etcd\n(kubetos.nodes.Etcd)" {
+  
+    style { fill: honeydew }
+    
+  attributes {
+    shape: class
+  
+    \#backup_retention_count: "-1"
+    
+    \#component_version: "3.4.13"
+    
+    \#election_timeout: "5"
+    
+    \#heartbeat_interval: "0.25"
+    
+    \#max_snapshots: "0"
+    
+    \#max_wals: "0"
+    
+    \#quota_backend_bytes: "2147483648"
+    
+    \#snapshot_count: "10000"
+    
+    +name: "6cfc26b289cd4bd3b0e1b49e084ba778"
+    
+    +peers: "None"
+    
+    +state: "started"
+    
+    +tosca_id: "6cfc26b289cd4bd3b0e1b49e084ba778"
+    
+    +tosca_name: "etcd"
+    
+  }
+  
+  access_address: "access_address\n(kubetos.capabilities.Etcd.Endpoint.Access)" {
+  
+  attributes {
+    shape: class
+  
+    \#api_version: "v2"
+    
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#port: "2379"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  peer_address: "peer_address\n(kubetos.capabilities.Etcd.Endpoint.Peer)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#port: "2380"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      mycluster_sub_worker { link: "./mycluster_sub_worker.svg" }
+      mycluster_sub_worker_sub_etcd.node_etcd.rel_host -> mycluster_sub_worker.node_compute
+      

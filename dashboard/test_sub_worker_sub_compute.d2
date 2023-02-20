@@ -1,0 +1,290 @@
+
+  test_sub_worker_sub_compute: "Topology test_sub_worker_sub_compute" {
+  
+  inputs {
+    shape: class
+  
+    \#key_name: ""
+    
+  }
+  
+  node_os_flavor: "os_flavor\n(nova.Flavor)" {
+  
+    link: "./test_sub_worker_sub_compute_sub_os_flavor.svg"
+    
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "595cd4d3642f48728aa12cfd1bc2ea73"
+    
+    +tosca_name: "os_flavor"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  flavor: "flavor\n(nova.Flavor)" {
+  
+  attributes {
+    shape: class
+  
+    +openstack_id: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_os_image: "os_image\n(glance.WebImage)" {
+  
+    link: "./test_sub_worker_sub_compute_sub_os_image.svg"
+    
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "0e009f38413c42f8bb01f0b97801e69b"
+    
+    +tosca_name: "os_image"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  image: "image\n(glance.WebImage)" {
+  
+  attributes {
+    shape: class
+  
+    +openstack_id: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_os_key_pair: "os_key_pair\n(nova.KeyPair)" {
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "bd0aa679f0724b3496c4e21ebbe73bb6"
+    
+    +tosca_name: "os_key_pair"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  key_pair: "key_pair\n(nova.KeyPair)" {
+  
+  attributes {
+    shape: class
+  
+    \#name: ""
+    
+  }
+  
+  }
+  
+  }
+  
+  node_os_security_group_default: "os_security_group_default\n(neutron.SecurityGroup)" {
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "79953b99b8f9419e888354b4ad876565"
+    
+    +tosca_name: "os_security_group_default"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  security_group: "security_group\n(neutron.SecurityGroup)" {
+  
+  attributes {
+    shape: class
+  
+    \#name: "default"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_os_server: "os_server\n(nova.Server)" {
+  
+    link: "./test_sub_worker_sub_compute_sub_os_server.svg"
+    
+  attributes {
+    shape: class
+  
+    +networks: "None"
+    
+    +ports: "None"
+    
+    +private_address: "None"
+    
+    +public_address: "None"
+    
+    +security_groups: "None"
+    
+    +state: "initial"
+    
+    +tosca_id: "863921a77a4d46cea56dad644e8a7701"
+    
+    +tosca_name: "os_server"
+    
+  }
+  
+  binding: "binding\n(tosca::Bindable)" {
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  private_endpoint: "private_endpoint\n(tosca::Endpoint)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  scalable: "scalable\n(tosca::Scalable)" {
+  
+  attributes {
+    shape: class
+  
+    \#max_instances: "1"
+    
+    \#min_instances: "1"
+    
+  }
+  
+  }
+  
+  server: "server\n(nova.Server)" {
+  
+  attributes {
+    shape: class
+  
+    +openstack_id: "None"
+    
+  }
+  
+  }
+  
+  rel_image: "image\n(tosca::DependsOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_flavor: "flavor\n(tosca::DependsOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_key_pair: "key_pair\n(tosca::DependsOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_security_group: "security_group\n(ComputeToSecurityGroup)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      test_sub_worker_sub_compute { link: "./test_sub_worker_sub_compute.svg" }
+      test_sub_worker_sub_compute.node_os_server.rel_image -> test_sub_worker_sub_compute.node_os_image
+      
+      test_sub_worker_sub_compute { link: "./test_sub_worker_sub_compute.svg" }
+      test_sub_worker_sub_compute.node_os_server.rel_flavor -> test_sub_worker_sub_compute.node_os_flavor
+      
+      test_sub_worker_sub_compute { link: "./test_sub_worker_sub_compute.svg" }
+      test_sub_worker_sub_compute.node_os_server.rel_key_pair -> test_sub_worker_sub_compute.node_os_key_pair
+      
+      test_sub_worker_sub_compute { link: "./test_sub_worker_sub_compute.svg" }
+      test_sub_worker_sub_compute.node_os_server.rel_security_group -> test_sub_worker_sub_compute.node_os_security_group_default
+      

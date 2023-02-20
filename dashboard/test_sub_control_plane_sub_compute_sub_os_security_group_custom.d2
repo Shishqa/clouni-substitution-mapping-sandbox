@@ -1,0 +1,37 @@
+
+  test_sub_control_plane_sub_compute_sub_os_security_group_custom: "Topology test_sub_control_plane_sub_compute_sub_os_security_group_custom" {
+  
+  node_os_security_group: "os_security_group\n(neutron.SecurityGroup)" {
+  
+    style { fill: green }
+    
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "2e2297390fad4a0291a2db441613f513"
+    
+    +tosca_name: "os_security_group"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  security_group: "security_group\n(neutron.SecurityGroup)" {
+  
+  attributes {
+    shape: class
+  
+    \#name: "os_server-security-group"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  

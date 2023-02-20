@@ -1,0 +1,161 @@
+
+  mycluster_sub_control_plane_sub_compute_sub_os_server: "Topology mycluster_sub_control_plane_sub_compute_sub_os_server" {
+  
+  node_os_server: "os_server\n(nova.Server)" {
+  
+    style { fill: honeydew }
+    
+  attributes {
+    shape: class
+  
+    +networks: "None"
+    
+    +ports: "None"
+    
+    +private_address: "None"
+    
+    +public_address: "None"
+    
+    +security_groups: "None"
+    
+    +state: "started"
+    
+    +tosca_id: "f264a3d146dd486db7026183d4fc025a"
+    
+    +tosca_name: "os_server"
+    
+  }
+  
+  binding: "binding\n(tosca::Bindable)" {
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  private_endpoint: "private_endpoint\n(tosca::Endpoint)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "net-for-intra-sandbox"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "True"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  scalable: "scalable\n(tosca::Scalable)" {
+  
+  attributes {
+    shape: class
+  
+    \#max_instances: "1"
+    
+    \#min_instances: "1"
+    
+    \#default_instances: "1"
+    
+  }
+  
+  }
+  
+  server: "server\n(nova.Server)" {
+  
+  attributes {
+    shape: class
+  
+    +openstack_id: "None"
+    
+  }
+  
+  }
+  
+  rel_flavor: "flavor\n(tosca::DependsOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_image: "image\n(tosca::DependsOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_key_pair: "key_pair\n(tosca::DependsOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_security_group: "security_group\n(ComputeToSecurityGroup)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      mycluster_sub_control_plane_sub_compute { link: "./mycluster_sub_control_plane_sub_compute.svg" }
+      mycluster_sub_control_plane_sub_compute_sub_os_server.node_os_server.rel_flavor -> mycluster_sub_control_plane_sub_compute.node_os_flavor
+      
+      mycluster_sub_control_plane_sub_compute { link: "./mycluster_sub_control_plane_sub_compute.svg" }
+      mycluster_sub_control_plane_sub_compute_sub_os_server.node_os_server.rel_image -> mycluster_sub_control_plane_sub_compute.node_os_image
+      
+      mycluster_sub_control_plane_sub_compute { link: "./mycluster_sub_control_plane_sub_compute.svg" }
+      mycluster_sub_control_plane_sub_compute_sub_os_server.node_os_server.rel_key_pair -> mycluster_sub_control_plane_sub_compute.node_os_key_pair
+      
+      mycluster_sub_control_plane_sub_compute { link: "./mycluster_sub_control_plane_sub_compute.svg" }
+      mycluster_sub_control_plane_sub_compute_sub_os_server.node_os_server.rel_security_group -> mycluster_sub_control_plane_sub_compute.node_os_security_group_default
+      

@@ -28,8 +28,8 @@ def traverse(topology_status):
     if node.substitution is not None:
       for sub_node in traverse(topology_status['subtopologies'][node.substitution]):
         yield sub_node
-    else:
-      yield node
+    
+    yield node
 
 
 def update_node_state(node, new_state):
@@ -41,28 +41,31 @@ def deploy(topology_status):
   topology = topology_status['topology']
 
   for node in traverse(topology_status):
-    print(node.name)
+    # print(node.name)
     update_node_state(node, 'creating')
 
-    op = node.interfaces['Standard'].operations['create']
-    print(op.definition)
-    inputs = { name: inp.get() for name, inp in op.inputs.items() }
-    print(inputs)
+    print(f'creating {node.name}')
+    # op = node.interfaces['Standard'].operations['create']
+    # print(op.definition)
+    # inputs = { name: inp.get() for name, inp in op.inputs.items() }
+    # print(inputs)
 
     update_node_state(node, 'created')
     update_node_state(node, 'configuring')
 
-    op = node.interfaces['Standard'].operations['configure']
-    print(op.definition)
-    inputs = { name: inp.get() for name, inp in op.inputs.items() }
-    print(inputs)
+    print(f'configuring {node.name}')
+    # op = node.interfaces['Standard'].operations['configure']
+    # print(op.definition)
+    # inputs = { name: inp.get() for name, inp in op.inputs.items() }
+    # print(inputs)
 
     update_node_state(node, 'configured')
     update_node_state(node, 'starting')
 
-    op = node.interfaces['Standard'].operations['start']
-    print(op.definition)
-    inputs = { name: inp.get() for name, inp in op.inputs.items() }
-    print(inputs)
+    print(f'starting {node.name}')
+    # op = node.interfaces['Standard'].operations['start']
+    # print(op.definition)
+    # inputs = { name: inp.get() for name, inp in op.inputs.items() }
+    # print(inputs)
 
     update_node_state(node, 'started')

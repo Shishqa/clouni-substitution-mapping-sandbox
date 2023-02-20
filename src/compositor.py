@@ -2,12 +2,11 @@ import copy
 
 import instance_model
 import instance_storage
-import parser
 import tosca_repository
 
 
 def instantiate(normalized_template, topology_name):
-  print(f'composing {topology_name}')
+  # print(f'composing {topology_name}')
 
   topology = instance_model.TopologyTemplateInstance(
     topology_name,
@@ -55,7 +54,7 @@ def fulfill(topology_name, actions):
 
   for action in actions:
     if action['type'] == 'substitute':
-      normalized_template = parser.parse(action['template'])
+      normalized_template = tosca_repository.get_template(action['template'])
       substitution = instantiate(
         normalized_template,
         f'{topology_name}_sub_{action["target"]}'
@@ -73,7 +72,7 @@ def update(topology):
 
 
 def map_node(node, topology):
-  print(topology.definition['substitution'])
+  # print(topology.definition['substitution'])
 
   for prop_name, mapping in topology.definition['substitution']['inputPointers'].items():
     if prop_name not in node.attributes.keys():
@@ -82,13 +81,13 @@ def map_node(node, topology):
     topology.inputs[mapping['target']] = node.attributes[prop_name]
 
   for attr_name, mapping in topology.definition['substitution']['attributePointers'].items():
-    print(mapping)
+    # print(mapping)
     node.attributes[attr_name] = topology\
         .nodes[mapping['nodeTemplateName']]\
         .attributes[mapping['target']]
 
   for cap_name, mapping in topology.definition['substitution']['capabilityPointers'].items():
-    print(mapping)
+    # print(mapping)
     abstract_capability = node.capabilities[cap_name]
     topology_capability = topology\
       .nodes[mapping['nodeTemplateName']]\
@@ -106,8 +105,8 @@ def map_node(node, topology):
     #   .capabilities[mapping['target']] = node.capabilities[cap_name]
 
   for req_name, mapping in topology.definition['substitution']['requirementPointers'].items():
-    print('REQUIREMENTS')
-    print(mapping)
+    # print('REQUIREMENTS')
+    # print(mapping)
     nodeTarget = topology.nodes[mapping['nodeTemplateName']]
     reqTargetId = None
     for i in range(len(nodeTarget.requirements)):

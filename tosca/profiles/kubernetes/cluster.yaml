@@ -36,6 +36,34 @@ capability_types:
 
 relationship_types:
 
+  kubetos.relationships.ConnectsWithKubeconfig:
+    derived_from: tosca.relationships.ConnectsTo
+    properties:
+      user:
+        type: string
+        required: false
+    attributes:
+      cert:
+        type: string
+      key:
+        type: string
+      ca_key:
+        type: string
+      
+
+    interfaces:
+      Configure:
+        operations:
+          pre_configure_target:
+            # inputs:
+            #   dns_ip:
+            #     value: { get_property: [ SOURCE, dns_ip ] }
+            #     type: string
+            implementation:
+              primary: ./ansible/kubelet-to-runtime--pre-configure-target.yaml
+              dependencies:
+                - ./ansible/files/resolved.conf.j2
+
   kubetos.relationships.Kubelet.UsesRuntime:
     derived_from: tosca.relationships.HostedOn
     interfaces:
@@ -107,7 +135,7 @@ node_types:
           occurrences: [ 1, 1 ]
       # - kubeconfig:
       #     capability: kubetos.capabilities.Kubeconfig
-      #     relationship: kubetos.relationships.GetArtifact
+      #     relationship: tosca.relationships.DependsOn
       #     occurrences: [ 1, 1 ]
 
   kubetos.nodes.Kubernetes.Kubelet:

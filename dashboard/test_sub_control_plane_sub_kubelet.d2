@@ -1,0 +1,100 @@
+
+  test_sub_control_plane_sub_kubelet: "Topology test_sub_control_plane_sub_kubelet" {
+  
+  inputs {
+    shape: class
+  
+    \#component_version: "None"
+    
+    \#dns_ip: "None"
+    
+    \#pod_cidr: "None"
+    
+  }
+  
+  node_kubelet: "kubelet\n(kubetos.nodes.Kubernetes.Kubelet)" {
+  
+    style { fill: green }
+    
+  attributes {
+    shape: class
+  
+    \#component_version: "None"
+    
+    +state: "initial"
+    
+    +tosca_id: "0e27a394c23c4a84b3fd0439fe6107cf"
+    
+    +tosca_name: "kubelet"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  kubelet: "kubelet\n(kubetos.capabilities.Kubelet)" {
+  
+  }
+  
+  rel_apiserver: "apiserver\n(tosca::ConnectsTo)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_cri_runtime: "cri_runtime\n(kubetos.relationships.Kubelet.UsesRuntime)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      test_sub_control_plane { link: "./test_sub_control_plane.svg" }
+      test_sub_control_plane_sub_kubelet.node_kubelet.rel_apiserver -> test_sub_control_plane.node_compute
+      
+      test_sub_control_plane { link: "./test_sub_control_plane.svg" }
+      test_sub_control_plane_sub_kubelet.node_kubelet.rel_cri_runtime -> test_sub_control_plane.node_cri
+      
+      test_sub_control_plane { link: "./test_sub_control_plane.svg" }
+      test_sub_control_plane_sub_kubelet.node_kubelet.rel_host -> test_sub_control_plane.node_compute
+      

@@ -1,0 +1,58 @@
+
+  test_sub_control_plane_sub_oci_runtime: "Topology test_sub_control_plane_sub_oci_runtime" {
+  
+  inputs {
+    shape: class
+  
+    \#component_version: "None"
+    
+  }
+  
+  node_kata: "kata\n(kubetos.nodes.Kata)" {
+  
+    style { fill: green }
+    
+  attributes {
+    shape: class
+  
+    \#component_version: "2.1.0"
+    
+    +state: "initial"
+    
+    +tosca_id: "00c51784a8744a9da878d6b19b088122"
+    
+    +tosca_name: "kata"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  oci: "oci\n(kubetos.capabilities.OCI.Runtime)" {
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      test_sub_control_plane { link: "./test_sub_control_plane.svg" }
+      test_sub_control_plane_sub_oci_runtime.node_kata.rel_host -> test_sub_control_plane.node_compute
+      

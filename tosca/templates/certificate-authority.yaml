@@ -10,8 +10,10 @@ topology_template:
 
     common_name:
       type: string
+      default: ""
     organisation:
       type: string
+      default: ""
 
   node_templates:
 

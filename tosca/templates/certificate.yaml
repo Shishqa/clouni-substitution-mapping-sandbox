@@ -51,8 +51,8 @@ topology_template:
       key: [ certificate, key ]
       cert: [ certificate, cert ]
     properties:
-      common_name: [ certificate, common_name ]
-      organisation: [ certificate, organisation ]
-      hostnames: [ certificate, hostnames ]
+      common_name: [ common_name ]
+      organisation: [ organisation ]
+      hostnames: [ hostnames ]
     requirements:
       ca: [ certificate, ca ]

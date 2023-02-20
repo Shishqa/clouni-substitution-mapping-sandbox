@@ -1,0 +1,113 @@
+
+  mycluster_sub_control_plane_sub_cri: "Topology mycluster_sub_control_plane_sub_cri" {
+  
+  inputs {
+    shape: class
+  
+    \#component_version: "None"
+    
+  }
+  
+  node_crio: "crio\n(kubetos.nodes.CRI-O)" {
+  
+    style { fill: honeydew }
+    
+  attributes {
+    shape: class
+  
+    \#component_version: "1.21"
+    
+    +runtimes: "None"
+    
+    +state: "started"
+    
+    +tosca_id: "7eea6a73aeaa481ba872e38d45a1ef6f"
+    
+    +tosca_name: "crio"
+    
+  }
+  
+  cri: "cri\n(kubetos.capabilities.CRI)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#protocol: "rpc"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  rel_cni: "cni\n(tosca::DependsOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_oci_runtime: "oci_runtime\n(kubetos.relationships.OCI.Plugin)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane_sub_cri.node_crio.rel_cni -> mycluster_sub_control_plane.node_cni
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane_sub_cri.node_crio.rel_host -> mycluster_sub_control_plane.node_compute
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane_sub_cri.node_crio.rel_oci_runtime -> mycluster_sub_control_plane.node_oci_runtime
+      

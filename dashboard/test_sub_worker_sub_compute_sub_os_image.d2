@@ -1,0 +1,37 @@
+
+  test_sub_worker_sub_compute_sub_os_image: "Topology test_sub_worker_sub_compute_sub_os_image" {
+  
+  node_os_image: "os_image\n(glance.WebImage)" {
+  
+    style { fill: green }
+    
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "1d1b5fdd33f849cea44248866482dc6a"
+    
+    +tosca_name: "os_image"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  image: "image\n(glance.WebImage)" {
+  
+  attributes {
+    shape: class
+  
+    +openstack_id: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  

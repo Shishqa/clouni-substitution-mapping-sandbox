@@ -4,31 +4,30 @@ import compositor
 import dashboard
 import instance_storage
 import tosca_repository
-import parser
 import orchestrator
 
 
 def create(args):
-  normalized_template = parser.parse(args.template)
+  print(f'instantiating topology {args.name}')
+  normalized_template = tosca_repository.get_template(args.template)
   topology_status = compositor.instantiate(normalized_template, args.name)
   if not topology_status['fulfilled']:
     fulfill(topology_status)
 
 
 def fulfill(topology_status):
-  print(f'FULFILLING {topology_status["name"]}')
+  print(f'fulfilling {topology_status["name"]}')
   actions = []
   for issue in topology_status['issues']:
     if issue['type'] == 'substitute':
-      print(f'please choose desired substitution for node {issue["target"]}')
       options = issue['options']
-
       substitution_template = None
       while substitution_template is None:
         if len(options) == 1:
           substitution_template = options[0]["file"]
           break
 
+        print(f'please choose desired substitution for node {issue["target"]} in {topology_status["name"]}')
         for i, item in enumerate(options):
           print(f' {i} - {item["file"]}')
 
@@ -38,6 +37,8 @@ def fulfill(topology_status):
           substitution_template = options[choose]["file"]
         else:
           print('please, choose correct option')
+
+      print(f'- substituting {issue["target"]} -> {substitution_template}')
 
       actions.append({
         'type': 'substitute',

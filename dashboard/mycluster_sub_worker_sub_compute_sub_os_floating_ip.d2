@@ -1,0 +1,64 @@
+
+  mycluster_sub_worker_sub_compute_sub_os_floating_ip: "Topology mycluster_sub_worker_sub_compute_sub_os_floating_ip" {
+  
+  node_os_floating_ip: "os_floating_ip\n(neutron.FloatingIp)" {
+  
+    style { fill: honeydew }
+    
+  attributes {
+    shape: class
+  
+    +state: "started"
+    
+    +tosca_id: "112140fe531846b9a16e4a1e50a2130b"
+    
+    +tosca_name: "os_floating_ip"
+    
+  }
+  
+  endpoint: "endpoint\n(neutron.FloatingIp)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: ""
+    
+    \#protocol: "tcp"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  rel_nova_server: "nova_server\n(FloatingIpToCompute)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      mycluster_sub_worker_sub_compute { link: "./mycluster_sub_worker_sub_compute.svg" }
+      mycluster_sub_worker_sub_compute_sub_os_floating_ip.node_os_floating_ip.rel_nova_server -> mycluster_sub_worker_sub_compute.node_os_server
+      

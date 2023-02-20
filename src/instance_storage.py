@@ -16,7 +16,7 @@ def init_database():
     path = os.path.join('instances', filename)
     with open(path, 'rb') as file:
       topology_name = os.path.splitext(os.path.basename(path))[0]
-      print(topology_name)
+      # print(topology_name)
       topology = pickle.load(file)
       topologies[topology_name] = topology
 

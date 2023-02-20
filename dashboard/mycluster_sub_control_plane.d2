@@ -1,0 +1,691 @@
+
+  mycluster_sub_control_plane: "Topology mycluster_sub_control_plane" {
+  
+  inputs {
+    shape: class
+  
+    \#cluster_name: "None"
+    
+    \#kubernetes_version: "None"
+    
+    \#pod_cidr: "10.233.0.0/16"
+    
+    \#service_cidr: "10.32.0.0/16"
+    
+  }
+  
+  node_cni: "cni\n(kubetos.nodes.CNI)" {
+  
+    link: "./mycluster_sub_control_plane_sub_cni.svg"
+    
+  attributes {
+    shape: class
+  
+    \#component_version: "1.0.1"
+    
+    +state: "started"
+    
+    +tosca_id: "d020cc873d6d4c798fc52078bbe7e428"
+    
+    +tosca_name: "cni"
+    
+  }
+  
+  cni: "cni\n(kubetos.capabilities.CNI)" {
+  
+  attributes {
+    shape: class
+  
+    \#binary_dir: "/opt/cni/bin"
+    
+    \#config_dir: "/etc/cni/net.d"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_compute: "compute\n(tosca::Compute)" {
+  
+    link: "./mycluster_sub_control_plane_sub_compute.svg"
+    
+  attributes {
+    shape: class
+  
+    +networks: "None"
+    
+    +ports: "None"
+    
+    +private_address: "None"
+    
+    +public_address: "None"
+    
+    +state: "started"
+    
+    +tosca_id: "3537660fbcc843608d3122de08fd2cff"
+    
+    +tosca_name: "os_server"
+    
+  }
+  
+  binding: "binding\n(tosca::Bindable)" {
+  
+  }
+  
+  endpoint: "endpoint\n(tosca::Endpoint.Admin)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "net-for-intra-sandbox"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "True"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  host: "host\n(tosca::Compute)" {
+  
+  attributes {
+    shape: class
+  
+    \#disk_size: "10737418240"
+    
+    \#mem_size: "1073741824"
+    
+    \#num_cpus: "1"
+    
+  }
+  
+  }
+  
+  os: "os\n(tosca::OperatingSystem)" {
+  
+  attributes {
+    shape: class
+  
+    \#architecture: "x86_64"
+    
+    \#distribution: "ubuntu"
+    
+    \#version: "20.04"
+    
+  }
+  
+  }
+  
+  scalable: "scalable\n(tosca::Scalable)" {
+  
+  attributes {
+    shape: class
+  
+    \#default_instances: "1"
+    
+    \#max_instances: "1"
+    
+    \#min_instances: "1"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_cri: "cri\n(kubetos.nodes.CRI)" {
+  
+    link: "./mycluster_sub_control_plane_sub_cri.svg"
+    
+  attributes {
+    shape: class
+  
+    +runtimes: "None"
+    
+    +state: "started"
+    
+    +tosca_id: "64415bbcaf7f42c58944ad3901a7b089"
+    
+    +tosca_name: "cri"
+    
+  }
+  
+  cri: "cri\n(kubetos.capabilities.CRI)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#protocol: "rpc"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_cni: "cni\n(tosca::DependsOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_oci_runtime: "oci_runtime\n(kubetos.relationships.OCI.Plugin)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_etcd: "etcd\n(kubetos.nodes.Etcd)" {
+  
+    link: "./mycluster_sub_control_plane_sub_etcd.svg"
+    
+  attributes {
+    shape: class
+  
+    \#backup_retention_count: "-1"
+    
+    \#component_version: "3.4.13"
+    
+    \#election_timeout: "5"
+    
+    \#heartbeat_interval: "0.25"
+    
+    \#max_snapshots: "0"
+    
+    \#max_wals: "0"
+    
+    \#quota_backend_bytes: "2147483648"
+    
+    \#snapshot_count: "10000"
+    
+    +name: "2d0dd7b9afb04f19a22305dc5a4268ca"
+    
+    +peers: "None"
+    
+    +state: "started"
+    
+    +tosca_id: "2d0dd7b9afb04f19a22305dc5a4268ca"
+    
+    +tosca_name: "etcd"
+    
+  }
+  
+  access_address: "access_address\n(kubetos.capabilities.Etcd.Endpoint.Access)" {
+  
+  attributes {
+    shape: class
+  
+    \#api_version: "v2"
+    
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#port: "2379"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  peer_address: "peer_address\n(kubetos.capabilities.Etcd.Endpoint.Peer)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#port: "2380"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_kube_apiserver_pod: "kube_apiserver_pod\n(kubetos.nodes.Kubernetes.APIServer.StaticPod)" {
+  
+  attributes {
+    shape: class
+  
+    +state: "started"
+    
+    +tosca_id: "dd6749aba93547e0b4fcae0745982b14"
+    
+    +tosca_name: "kube_apiserver_pod"
+    
+  }
+  
+  access_address: "access_address\n(tosca::Endpoint)" {
+  
+  attributes {
+    shape: class
+  
+    \#initiator: "source"
+    
+    \#network_name: "PRIVATE"
+    
+    \#protocol: "tcp"
+    
+    \#secure: "False"
+    
+    +ip_address: "None"
+    
+  }
+  
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_etcd: "etcd\n(tosca::ConnectsTo)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_kube_controller_manager_pod: "kube_controller_manager_pod\n(kubetos.nodes.Kubernetes.ControllerManager.StaticPod)" {
+  
+  attributes {
+    shape: class
+  
+    +state: "started"
+    
+    +tosca_id: "747736b6742d4d798f091c464ba01a68"
+    
+    +tosca_name: "kube_controller_manager_pod"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  rel_apiserver: "apiserver\n(tosca::ConnectsTo)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_kube_scheduler_pod: "kube_scheduler_pod\n(kubetos.nodes.Kubernetes.Scheduler.StaticPod)" {
+  
+  attributes {
+    shape: class
+  
+    +state: "started"
+    
+    +tosca_id: "d55ab600a6294a2789e74aece2c1cf82"
+    
+    +tosca_name: "kube_scheduler_pod"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  rel_apiserver: "apiserver\n(tosca::ConnectsTo)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_kubelet: "kubelet\n(kubetos.nodes.Kubernetes.Kubelet)" {
+  
+    link: "./mycluster_sub_control_plane_sub_kubelet.svg"
+    
+  attributes {
+    shape: class
+  
+    \#component_version: "None"
+    
+    +state: "started"
+    
+    +tosca_id: "af8610ff257740c9915752337c4a77d4"
+    
+    +tosca_name: "kubelet"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  kubelet: "kubelet\n(kubetos.capabilities.Kubelet)" {
+  
+  }
+  
+  rel_apiserver: "apiserver\n(tosca::ConnectsTo)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_cri_runtime: "cri_runtime\n(kubetos.relationships.Kubelet.UsesRuntime)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  node_oci_runtime: "oci_runtime\n(kubetos.nodes.OCI.Runtime)" {
+  
+    link: "./mycluster_sub_control_plane_sub_oci_runtime.svg"
+    
+  attributes {
+    shape: class
+  
+    +state: "started"
+    
+    +tosca_id: "94fc7dd750914fa3b5497897944e2536"
+    
+    +tosca_name: "oci_runtime"
+    
+  }
+  
+  feature: "feature\n(tosca::Node)" {
+  
+  }
+  
+  oci: "oci\n(kubetos.capabilities.OCI.Runtime)" {
+  
+  }
+  
+  rel_host: "host\n(tosca::HostedOn)" {
+    shape: parallelogram
+  
+  attributes {
+    shape: class
+  
+    +state: "initial"
+    
+    +tosca_id: "None"
+    
+    +tosca_name: "None"
+    
+  }
+  
+  }
+  
+  }
+  
+  }
+  
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_cni.rel_host -> mycluster_sub_control_plane.node_compute
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_cri.rel_host -> mycluster_sub_control_plane.node_compute
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_cri.rel_cni -> mycluster_sub_control_plane.node_cni
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_cri.rel_oci_runtime -> mycluster_sub_control_plane.node_oci_runtime
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_etcd.rel_host -> mycluster_sub_control_plane.node_compute
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_kube_apiserver_pod.rel_host -> mycluster_sub_control_plane.node_kubelet
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_kube_apiserver_pod.rel_etcd -> mycluster_sub_control_plane.node_etcd
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_kube_controller_manager_pod.rel_apiserver -> mycluster_sub_control_plane.node_kube_apiserver_pod
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_kube_controller_manager_pod.rel_host -> mycluster_sub_control_plane.node_kubelet
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_kube_scheduler_pod.rel_apiserver -> mycluster_sub_control_plane.node_kube_apiserver_pod
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_kube_scheduler_pod.rel_host -> mycluster_sub_control_plane.node_kubelet
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_kubelet.rel_apiserver -> mycluster_sub_control_plane.node_compute
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_kubelet.rel_cri_runtime -> mycluster_sub_control_plane.node_cri
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_kubelet.rel_host -> mycluster_sub_control_plane.node_compute
+      
+      mycluster_sub_control_plane { link: "./mycluster_sub_control_plane.svg" }
+      mycluster_sub_control_plane.node_oci_runtime.rel_host -> mycluster_sub_control_plane.node_compute
+      

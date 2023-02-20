@@ -14,6 +14,8 @@ def display_topology(name):
 
 def display(topology_status):
   topology_name = topology_status['name']
+  print(f'displaying {topology_name}')
+
   res = dump_topology(topology_status['topology'])
 
   f = open(f'dashboard/{topology_name}.d2', "w")
@@ -84,6 +86,10 @@ def dump_node(node):
   if node.substitution is not None:
     res += f'''
     link: "./{node.substitution}.svg"
+    '''
+  if not node.abstract:
+    res += '''
+    style { fill: honeydew }
     '''
   if len(node.attributes) > 0:
     res += dump_attributes(node.attributes, 'attributes')
