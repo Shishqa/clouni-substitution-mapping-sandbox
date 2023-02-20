@@ -4,8 +4,8 @@ import uuid
 
 def create_value(node, meta, primitive):
   # print(definition)
-  print(meta)
-  print(primitive)
+  # print(meta)
+  # print(primitive)
 
   # if '$functionCall' in definition.keys():
   #   return create_function(node, type_def, definition)
@@ -30,8 +30,8 @@ def create_value(node, meta, primitive):
 
 
 def create_function(node, meta, function_call):
-  print(meta)
-  print(function_call)
+   #print(meta)
+  # print(function_call)
 
   if function_call['name'] == 'tosca.function.get_input':
     return GetInput(node, meta, function_call['arguments'])
@@ -171,10 +171,11 @@ class Concat(ValueInstance):
     super().__init__(node, type_def)
     self.args = []
     for arg in args:
-      if '$value' in arg.keys():
-        self.args.append(String(node, {}, arg['$value']))
+      if '$primitive' in arg.keys():
+        self.args.append(Primitive(node, {}, arg['$primitive']))
       else:
-        self.args.append(create_function(node, {}, arg))
+        print(arg)
+        self.args.append(create_function(node, {}, arg['$functionCall']))
 
   def get(self):
     strings = [a.get() for a in self.args]
@@ -201,7 +202,7 @@ class AttributeInstance:
     elif '$functionCall' in self.definition.keys():
       self.value = create_function(
         node,
-        self.definition['$meta'],
+        {},
         self.definition['$functionCall']
       )
       return
@@ -261,6 +262,29 @@ class CapabilityInstance:
     raise RuntimeError('no attribute')
 
 
+class OperationInstance:
+  def __init__(self, node, definition):
+    self.definition = copy.deepcopy(definition)
+    self.node = node
+
+    self.inputs = {}
+    for input_name, input_def in self.definition['inputs'].items():
+      self.inputs[input_name] = AttributeInstance(node, input_def, is_property=True)
+
+
+class InterfaceInstance:
+  def __init__(self, node, definition):
+    self.definition = copy.deepcopy(definition)
+    self.node = node
+
+    self.inputs = {}
+    for input_name, input_def in self.definition['inputs'].items():
+      self.inputs[input_name] = AttributeInstance(node, input_def, is_property=True)
+
+    self.operations = {}
+    for op_name, op_def in self.definition['operations'].items():
+      self.operations[op_name] = OperationInstance(node, op_def)
+
 
 class RelationshipInstance:
   def __init__(self, name, source, target, definition):
@@ -280,6 +304,10 @@ class RelationshipInstance:
     for attr_name, attr_def in self.definition['attributes'].items():
       self.attributes[attr_name] = AttributeInstance(self, attr_def)
 
+    self.interfaces = {}
+    for interface_name, interface_def in self.definition['interfaces'].items():
+      self.interfaces[interface_name] = InterfaceInstance(self, interface_def)
+
 
   def find_type(self):
     seen = set(self.types.keys())
@@ -293,6 +321,7 @@ class NodeInstance:
   def __init__(self, name, topology, definition):
     self.name = copy.deepcopy(name)
     self.topology = topology
+    self.substitution = None
 
     self.definition = copy.deepcopy(definition)
 
@@ -313,6 +342,10 @@ class NodeInstance:
     for cap_name, cap_def in self.definition['capabilities'].items():
       self.capabilities[cap_name] = CapabilityInstance(cap_name, self, cap_def)
 
+    self.interfaces = {}
+    for interface_name, interface_def in self.definition['interfaces'].items():
+      self.interfaces[interface_name] = InterfaceInstance(self, interface_def)
+
     self.requirements = []
 
   def find_type(self):
@@ -321,146 +354,6 @@ class NodeInstance:
       if 'parent' in type_body.keys():
         seen.remove(type_body['parent'])
     self.type = seen.pop()
-
-    # self.attributes = {}
-    # for attr_name in self.definition['attributes'].keys():
-    #   self.attributes[attr_name] = AttributeInstance(
-    #       self, self.definition['attributes'][attr_name])
-
-    #   if attr_name == 'tosca_name':
-    #     self.attributes[attr_name].set(String(self, {}, self.name))
-    #   elif attr_name == 'tosca_id':
-    #     self.attributes[attr_name].set(String(self, {}, uuid.uuid4().hex))
-
-    #   if attr_name in ['state', 'tosca_id', 'tosca_name'] and attr_name not in self.substitution.definition['substitution']['attributeMappings'].keys():
-    #     continue
-
-    #   mapping = self.substitution.definition['substitution']['attributeMappings'][attr_name]
-
-    #   if attr_name == 'tosca_name':
-    #     # XXX: only name should be propagated forwards?
-    #     self.substitution\
-    #         .nodes[mapping['nodeTemplateName']]\
-    #         .attributes[mapping['target']] = self.attributes[attr_name]
-    #     continue
-
-    #   self.attributes[attr_name] = self.substitution\
-    #       .nodes[mapping['nodeTemplateName']]\
-    #       .attributes[mapping['target']]
-
-    # self.capabilities = {}
-    # for cap_name in self.definition['capabilities'].keys():
-    #   self.capabilities[cap_name] = CapabilityInstance(cap_name, self)
-    #   if cap_name in ['feature']:
-    #     continue
-    #   mapping = self.substitution.definition['substitution']['capabilityMappings'][cap_name]
-    #   self.substitution\
-    #       .nodes[mapping['nodeTemplateName']]\
-    #       .capabilities[mapping['target']] = self.capabilities[cap_name]
-
-    # self.requirements = {}
-
-
-  
-
-  # def init(self):
-  #   self.properties = {}
-  #   for prop_name in self.definition['properties'].keys():
-  #     self.properties[prop_name] = PropertyInstance(
-  #         self, self.definition['properties'][prop_name])
-
-  #   self.attributes = {}
-  #   for attr_name in self.definition['attributes'].keys():
-  #     self.attributes[attr_name] = AttributeInstance(
-  #         self, self.definition['attributes'][attr_name])
-
-  #     if attr_name == 'tosca_name':
-  #       self.attributes[attr_name].set(String(self, {}, self.name))
-  #     elif attr_name == 'tosca_id':
-  #       self.attributes[attr_name].set(String(self, {}, uuid.uuid4().hex))
-
-  #   self.capabilities = {}
-  #   for cap_name in self.definition['capabilities'].keys():
-  #     self.capabilities[cap_name] = CapabilityInstance(cap_name, self)
-
-  #   self.requirements = []
-  #   for i in range(len(self.definition['requirements'])):
-  #     self.requirements.append(RequirementInstance(i, self))
-
-  # def init_substitution(self):
-  #   self.select_substitution()
-
-  #   self.properties = {}
-  #   for prop_name in self.definition['properties'].keys():
-  #     self.properties[prop_name] = PropertyInstance(
-  #         self, self.definition['properties'][prop_name])
-
-  #   self.attributes = {}
-  #   for attr_name in self.definition['attributes'].keys():
-  #     self.attributes[attr_name] = AttributeInstance(
-  #         self, self.definition['attributes'][attr_name])
-
-  #     if attr_name == 'tosca_name':
-  #       self.attributes[attr_name].set(String(self, {}, self.name))
-  #     elif attr_name == 'tosca_id':
-  #       self.attributes[attr_name].set(String(self, {}, uuid.uuid4().hex))
-
-  #     if attr_name in ['state', 'tosca_id', 'tosca_name'] and attr_name not in self.substitution.definition['substitution']['attributeMappings'].keys():
-  #       continue
-
-  #     mapping = self.substitution.definition['substitution']['attributeMappings'][attr_name]
-
-  #     if attr_name == 'tosca_name':
-  #       # XXX: only name should be propagated forwards?
-  #       self.substitution\
-  #           .nodes[mapping['nodeTemplateName']]\
-  #           .attributes[mapping['target']] = self.attributes[attr_name]
-  #       continue
-
-  #     self.attributes[attr_name] = self.substitution\
-  #         .nodes[mapping['nodeTemplateName']]\
-  #         .attributes[mapping['target']]
-
-  #   self.capabilities = {}
-  #   for cap_name in self.definition['capabilities'].keys():
-  #     self.capabilities[cap_name] = CapabilityInstance(cap_name, self)
-  #     if cap_name in ['feature']:
-  #       continue
-  #     mapping = self.substitution.definition['substitution']['capabilityMappings'][cap_name]
-  #     self.substitution\
-  #         .nodes[mapping['nodeTemplateName']]\
-  #         .capabilities[mapping['target']] = self.capabilities[cap_name]
-
-  #   self.requirements = {}
-
-  # def select_substitution(self):
-  #   print(
-  #       f'\nnode {self.name} is marked substitutable\nin {self.topology.name}\n└({self.topology.path})\n')
-  #   print('please choose desired substitution')
-
-  #   if self.type not in substitutions.keys():
-  #     raise RuntimeError('cannot substitute')
-  #   option_list = substitutions[self.type]
-
-  #   if len(option_list) == 1:
-  #     self.substitution = instantiate_template(
-  #         f'{self.topology.name}_{self.name}', option_list[0]["file"])
-  #     return
-
-  #   for i, item in enumerate(option_list):
-  #     print(f' {i} - {item["file"]}')
-
-  #   while True:  # blame on me
-  #     choose = int(input('your choice: '))
-  #     if choose in range(len(option_list)):
-  #       print(f'chosen {option_list[choose]["file"]}')
-
-  #       self.substitution = instantiate_template(
-  #           f'{self.topology.name}_{self.name}', option_list[choose]["file"])
-  #       break
-
-  #     else:
-  #       print('please, choose correct option')
 
   def get_property(self, args):
     path = args[0]
@@ -477,7 +370,7 @@ class NodeInstance:
 
     for r in self.requirements:
       if r.name == path:
-        return self.topology.nodes[r.definition['nodeTemplateName']].get_property(rest)
+        return r.target.get_attribute(rest)
 
     raise RuntimeError('no property')
 
@@ -493,7 +386,7 @@ class NodeInstance:
 
     for r in self.requirements:
       if r.name == path:
-        return self.topology.nodes[r.definition['nodeTemplateName']].get_attribute(rest)
+        return r.target.get_attribute(rest)
 
     raise RuntimeError('no attribute')
 
@@ -520,13 +413,14 @@ class TopologyTemplateInstance:
 
     for node_name, node in self.nodes.items():
       for req_def in node.definition['requirements']:
-        print(f"{node_name} - {req_def['name']}")
-        if req_def['nodeTemplateName'] == '':
-          continue
+        # print(f"{node_name} - {req_def['name']}")
+        target = None
+        if req_def['nodeTemplateName'] != '':
+          target = self.nodes[req_def['nodeTemplateName']]
         node.requirements.append(RelationshipInstance(
           req_def['name'],
           node,
-          self.nodes[req_def['nodeTemplateName']],
+          target,
           req_def['relationship']
         ))
 

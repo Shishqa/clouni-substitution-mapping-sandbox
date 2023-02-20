@@ -243,7 +243,7 @@ topology_template:
       properties:
         component_version: { get_input: [ kubernetes_version ] }
       requirements:
-        - apiserver: kube_apiserver_pod
+        - apiserver: compute
         - cri_runtime: cri
         - host: compute
 
@@ -284,6 +284,25 @@ topology_template:
     compute:
       type: tosca.nodes.Compute
       directives: [ substitute ]
+      capabilities:
+        host:
+          properties:
+            num_cpus: 1
+            disk_size: 10 GiB
+            mem_size: 1 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: x86_64
+            distribution: ubuntu
+            version: "20.04"
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 5
+            default_instances: 1
 
     # kube_scheduler_cert:
     #   type: kubetos.nodes.Certificate

@@ -26,9 +26,7 @@ topology_template:
       interfaces:
         Standard:
           inputs:
-            kubelet_version:
-              value: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
-              type: string
+            kubelet_version: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
           operations:
             create:
               implementation:
@@ -38,15 +36,15 @@ topology_template:
                   - download_role
             configure:
               inputs:
-                ip: { value: { get_attribute: [ SELF, host, private_address ] }, type: string }
-                cri_socket: { value: { get_property: [ SELF, cri_runtime, cri, url_path ] }, type: string }
-                kubelet_static_pod_path: { value: { get_property: [ SELF, kubelet, static_pod_path ] }, type: string }
-                cert_path: { value: { get_property: [ SELF, cert, cert_path ] }, type: string }
-                key_path: { value: { get_property: [ SELF, cert, key_path ] }, type: string }
-                ca_cert_path: { value: { get_property: [ SELF, ca, cert_path ] }, type: string }
-                kubeconfig_path: { value: { get_property: [ SELF, kubeconfig, path ] }, type: string }
-                dns_ip: { value: { get_property: [ SELF, dns_ip ] }, type: string }
-                pod_cidr: { value: { get_property: [ SELF, pod_cidr ] }, type: string }
+                ip: { get_attribute: [ SELF, host, private_address ] }
+                cri_socket: { get_property: [ SELF, cri_runtime, cri, url_path ] }
+                kubelet_static_pod_path: { get_property: [ SELF, kubelet, static_pod_path ] }
+                cert_path: { get_property: [ SELF, cert, cert_path ] }
+                key_path: { get_property: [ SELF, cert, key_path ] }
+                ca_cert_path: { get_property: [ SELF, ca, cert_path ] }
+                kubeconfig_path: { get_property: [ SELF, kubeconfig, path ] }
+                dns_ip: { get_property: [ SELF, dns_ip ] }
+                pod_cidr: { get_property: [ SELF, pod_cidr ] }
               implementation:
                 primary: ./ansible/kubelet--configure.yaml
                 dependencies:
@@ -77,3 +75,4 @@ topology_template:
     requirements:
       apiserver: [ kubelet, apiserver ]
       cri_runtime: [ kubelet, cri_runtime ]
+      host: [ kubelet, host ]

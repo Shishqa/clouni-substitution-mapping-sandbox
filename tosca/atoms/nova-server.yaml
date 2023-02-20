@@ -16,21 +16,11 @@ topology_template:
           operations:
             configure:
               inputs:
-                server_name:
-                  value: { get_attribute: [ SELF, tosca_name ] }
-                  type: string
-                server_image:
-                  value: { get_attribute: [ SELF, image, id ] }
-                  type: string
-                server_flavor:
-                  value: { get_attribute: [ SELF, flavor, id ] }
-                  type: string
-                server_keypair:
-                  value: { get_property: [ SELF, key_pair, name ] }
-                  type: string
-                server_network:
-                  value: { get_property: [ SELF, private_endpoint, network_name ] }
-                  type: string
+                server_name: { get_attribute: [ SELF, tosca_name ] }
+                server_image: { get_attribute: [ SELF, image, image, openstack_id ] }
+                server_flavor: { get_attribute: [ SELF, flavor, flavor, openstack_id ] }
+                server_keypair: { get_property: [ SELF, key_pair, key_pair, name ] }
+                server_network: { get_property: [ SELF, private_endpoint, network_name ] }
               outputs:
                 public_address: [ SELF, public_address ]
                 private_address: [ SELF, private_address ]

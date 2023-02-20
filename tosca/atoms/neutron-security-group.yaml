@@ -16,9 +16,7 @@ topology_template:
           operations:
             create:
               inputs:
-                name:
-                  value: { get_property: [ SELF, security_group, name ] }
-                  type: string
+                name: { get_property: [ SELF, security_group, name ] }
               implementation: artifacts/os_security_group_create.yaml
 
   substitution_mappings:

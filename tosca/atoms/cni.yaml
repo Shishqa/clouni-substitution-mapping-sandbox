@@ -25,15 +25,9 @@ topology_template:
           operations:
             create:
               inputs:
-                cni_binary_dir:
-                  value: { get_property: [ SELF, cni, binary_dir ] }
-                  type: string
-                cni_config_dir:
-                  value: { get_property: [ SELF, cni, config_dir ] }
-                  type: string
-                cni_version:
-                  value: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
-                  type: string
+                cni_binary_dir: { get_property: [ SELF, cni, binary_dir ] }
+                cni_config_dir: { get_property: [ SELF, cni, config_dir ] }
+                cni_version: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
               implementation:
                 primary: ansible/cni--create.yaml
                 dependencies:

@@ -25,12 +25,8 @@ topology_template:
           operations:
             create:
               inputs:
-                common_name:
-                  value: { get_property: [ SELF, common_name ] }
-                  type: string
-                organisation:
-                  value: { get_property: [ SELF, organisation ] }
-                  type: string
+                common_name: { get_property: [ SELF, common_name ] }
+                organisation: { get_property: [ SELF, organisation ] }
               outputs:
                 cert: [ SELF, ca, data ]
                 key: [ SELF, key, data ]

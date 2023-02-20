@@ -28,9 +28,7 @@ topology_template:
       interfaces:
         Standard:
           inputs:
-            etcd_version:
-              value: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
-              type: string
+            etcd_version: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
           operations:
             create:
               implementation:
@@ -40,16 +38,12 @@ topology_template:
                   - download_role
             configure:
               inputs:
-                etcd_address: { value: { get_attribute: [ SELF, host, private_address ] }, type: string }
-                etcd_peer_port: { value: { get_property: [ SELF, peer_address, port ] }, type: integer }
-                etcd_access_address: { value: { get_attribute: [ SELF, host, private_address ] }, type: string }
-                etcd_access_port: { value: { get_property: [ SELF, access_address, port ] }, type: integer }
-                etcd_member_name: { value: { get_attribute: [ SELF, name ] }, type: string }
-                etcd_peers:
-                  value: { get_attribute: [ SELF, peers ] }
-                  type: list
-                  entry_schema:
-                    type: kubetos.datatypes.Etcd.PeerSpec
+                etcd_address: { get_attribute: [ SELF, host, private_address ] }
+                etcd_peer_port: { get_property: [ SELF, peer_address, port ] }
+                etcd_access_address: { get_attribute: [ SELF, host, private_address ] }
+                etcd_access_port: { get_property: [ SELF, access_address, port ] }
+                etcd_member_name: { get_attribute: [ SELF, name ] }
+                etcd_peers: { get_attribute: [ SELF, peers ] }
               implementation:
                 primary: ansible/etcd--configure.yaml
                 dependencies:

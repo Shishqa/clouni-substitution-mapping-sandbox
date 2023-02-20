@@ -20,10 +20,8 @@ topology_template:
           operations:
             create:
               inputs:
-                crictl_version:
-                  value: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
-                  type: string
-                cri_socket: { value: { get_property: [ SELF, cri_runtime, cri, url_path ] }, type: string }
+                crictl_version: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
+                cri_socket: { get_property: [ SELF, cri_runtime, cri, url_path ] }
               implementation:
                 primary: ansible/crictl--create.yaml
                 dependencies:

@@ -16,12 +16,8 @@ topology_template:
           operations:
             create:
               inputs:
-                floating_ip_pool:
-                  value: { get_property: [ SELF, endpoint, network_name ] }
-                  type: string
-                server_id:
-                  value: { get_attribute: [ SELF, nova_server, server, openstack_id ] }
-                  type: string
+                floating_ip_pool: { get_property: [ SELF, endpoint, network_name ] }
+                server_id: { get_attribute: [ SELF, nova_server, server, openstack_id ] }
               implementation: artifacts/os_floating_ip_create.yaml
 
   substitution_mappings:

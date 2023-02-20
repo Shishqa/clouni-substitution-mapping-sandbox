@@ -31,23 +31,11 @@ topology_template:
           operations:
             create:
               inputs:
-                common_name:
-                  value: { get_property: [ SELF, common_name ] }
-                  type: string
-                organisation:
-                  value: { get_property: [ SELF, organisation ] }
-                  type: string
-                hostnames:
-                  value: { get_property: [ SELF, hostnames ] }
-                  type: list
-                  entry_schema:
-                    type: string
-                ca_cert:
-                  value: { get_attribute: [ SELF, ca, cert ] }
-                  type: string
-                ca_key:
-                  value: { get_attribute: [ SELF, ca, key ] }
-                  type: string
+                common_name: { get_property: [ SELF, common_name ] }
+                organisation: { get_property: [ SELF, organisation ] }
+                hostnames: { get_property: [ SELF, hostnames ] }
+                ca_cert: { get_attribute: [ SELF, ca, cert ] }
+                ca_key: { get_attribute: [ SELF, ca, key ] }
               outputs:
                 cert: [ SELF, cert, data ]
                 key: [ SELF, key, data ]

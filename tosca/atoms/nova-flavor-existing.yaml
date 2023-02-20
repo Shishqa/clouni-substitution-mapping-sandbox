@@ -16,12 +16,8 @@ topology_template:
           operations:
             configure:
               inputs:
-                required_ram:
-                  value: { get_property: [ SELF, flavor, mem_size ] }
-                  type: string
-                required_vcups:
-                  value: { get_property: [ SELF, flavor, num_cpus ] }
-                  type: string
+                required_ram: { get_property: [ SELF, flavor, mem_size ] }
+                required_vcups: { get_property: [ SELF, flavor, num_cpus ] }
               outputs:
                 id: [ SELF, flavor, openstack_id ]
               implementation: artifacts/os_flavor_find.yaml

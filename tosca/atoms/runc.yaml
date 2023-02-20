@@ -22,9 +22,7 @@ topology_template:
           operations:
             create:
               inputs:
-                runc_version:
-                  value: { get_property: [ SELF, component_version ] }
-                  type: string
+                runc_version: { get_property: [ SELF, component_version ] }
               implementation: ansible/runc--create.yaml
 
   substitution_mappings:

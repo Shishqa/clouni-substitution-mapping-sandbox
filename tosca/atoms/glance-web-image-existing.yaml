@@ -16,15 +16,9 @@ topology_template:
           operations:
             configure:
               inputs:
-                required_distro:
-                  value: { get_property: [ SELF, image, distribution ] }
-                  type: string
-                required_arch:
-                  value: { get_property: [ SELF, image, architecture ] }
-                  type: string
-                required_version:
-                  value: { get_property: [ SELF, image, version ] }
-                  type: string
+                required_distro: { get_property: [ SELF, image, distribution ] }
+                required_arch: { get_property: [ SELF, image, architecture ] }
+                required_version: { get_property: [ SELF, image, version ] }
               outputs:
                 id: [ SELF, image, openstack_id ]
               implementation: artifacts/os_image_find.yaml
