@@ -4,6 +4,7 @@ import pickle
 import instance_model
 
 topologies = {}
+nodes = {}
 
 
 def init_database():
@@ -18,7 +19,7 @@ def init_database():
       topology_name = os.path.splitext(os.path.basename(path))[0]
       # print(topology_name)
       topology = pickle.load(file)
-      topologies[topology_name] = topology
+      add_topology(topology)
 
 
 def dump_database():
@@ -30,7 +31,12 @@ def dump_database():
 
 def add_topology(topology: instance_model.TopologyTemplateInstance):
   global topologies
+  global nodes
   topologies[topology.name] = topology
+  for node_name, node in topology.nodes.items():
+    if node.type not in nodes.keys():
+      nodes[node.type] = {}
+    nodes[node.type][topology.name + '$' + node_name] = node
 
 
 def get_topology(name):
@@ -39,3 +45,7 @@ def get_topology(name):
 
 def list_topologies():
   return topologies.keys()
+
+
+def get_nodes_of_type(node_type):
+  return list(nodes[node_type].values())

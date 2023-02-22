@@ -2,6 +2,40 @@ import copy
 import uuid
 
 
+def create_value_atom(node, definition):
+  # print(definition)
+
+  meta = None
+  if '$meta' in definition.keys():
+    meta = definition['$meta']
+
+  if '$functionCall' in definition.keys():
+    return create_function(
+      node,
+      meta,
+      definition['$functionCall']
+    )
+
+  if '$primitive' in definition.keys() and definition['$primitive'] is None:
+    return Primitive(
+      node,
+      meta,
+      definition['$primitive']
+    )
+
+  if meta is not None and meta['type'] == 'map':
+    return Map(node, meta, definition['$primitive'])
+
+  if meta is not None and meta['type'] == 'list':
+    return List(node, meta, definition['$list'])
+
+  return create_value(
+    node,
+    meta,
+    definition['$primitive']
+  )
+
+
 def create_value(node, meta, primitive):
   # print(definition)
   # print(meta)
@@ -13,8 +47,8 @@ def create_value(node, meta, primitive):
   # if '$list' in definition or type_def['name'] == 'list':
   #   return List(node, type_def, definition)
 
-  if meta['type'] == 'map':
-    return Map(node, meta, primitive)
+  if meta is None:
+    return Primitive(node, {}, primitive)
 
   if meta['type'] == 'version':
     return Version(node, meta, primitive)
@@ -88,23 +122,19 @@ class ScalarUnit(ValueInstance):
 
 
 class List(ValueInstance):
-  def __init__(self, node, type_def, definition):
-    super().__init__(node, type_def)
+  def __init__(self, node, meta, list_primitives):
+    super().__init__(node, meta)
 
-    if '$value' in definition.keys() and definition['$value'] is None:
+    if list_primitives is None:
       self.values = None
       return
 
-    self.entry_type = definition['$information']['entry']
-    self.values = [create_value(node, self.entry_type, entry)
-                   for entry in definition['$list']]
+    self.values = [ create_value_atom(node, e) for e in list_primitives ]
 
   def get(self):
     if self.values is None:
       return None
-
-    values = [v.get() for v in self.values]
-    return values
+    return [ v.get() for v in self.values ]
 
 
 class Map(ValueInstance):
@@ -187,27 +217,7 @@ class AttributeInstance:
     self.node = node
     self.is_property = is_property
     self.definition = copy.deepcopy(definition)
-
-    self.value = None
-    if '$primitive' in self.definition.keys():
-      if self.definition['$primitive'] is None:
-        self.value = Primitive(node, {}, None)
-        return
-      self.value = create_value(
-        node,
-        self.definition['$meta'],
-        self.definition['$primitive']
-      )
-      return
-    elif '$functionCall' in self.definition.keys():
-      self.value = create_function(
-        node,
-        {},
-        self.definition['$functionCall']
-      )
-      return
-    
-    raise RuntimeError(f'unknown attribute definition: {self.definition}')
+    self.value = create_value_atom(node, self.definition)
 
   def get(self):
     return self.value.get()

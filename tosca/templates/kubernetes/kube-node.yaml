@@ -6,8 +6,8 @@ metadata:
   template_version: "1.0"
 
 imports:
-  - ../profiles/cri/main.yaml
-  - ../profiles/kubernetes/cluster.yaml
+  - ../../profiles/cri/main.yaml
+  - ../../profiles/kubernetes/cluster.yaml
 
 topology_template:
 
@@ -25,53 +25,32 @@ topology_template:
         component_version: { get_input: [ kubelet_version ] }
       requirements:
         - cri_runtime: cri
-        - host: compute
+        - host: host
 
     cri:
       type: kubetos.nodes.CRI
       directives: [ substitute ]
       requirements:
-        - host: compute
+        - host: host
         - cni: cni
-        - oci_runtime: oci_runtime
-
-    oci_runtime:
-      type: kubetos.nodes.OCI.Runtime
-      directives: [ substitute ]
-      requirements:
-        - host: compute
 
     cni:
       type: kubetos.nodes.CNI
       directives: [ substitute ]
       requirements:
-        - host: compute
+        - host: host
 
-    etcd:
-      type: kubetos.nodes.Etcd
-      directives: [ substitute ]
-      capabilities:
-        access_address:
-          properties:
-            port: 2379
-            api_version: v2
-        peer_address:
-          properties:
-            port: 2380
-      requirements:
-        - host: compute
-
-    compute:
+    host:
       type: tosca.nodes.Compute
-      directives: [ substitute ]
+      directives: [ requirement ]
 
   substitution_mappings:
-    node_type: kubetos.nodes.Kubernetes.Worker
+    node_type: kubetos.nodes.Kubernetes.Node
     capabilities:
       kubelet: [ kubelet, kubelet ]
-      scalable: [ compute, scalable ]
-      endpoint: [ compute, endpoint ]
+      endpoint: [ host, endpoint ]
+      client_cert: [ kubelet, client_cert ]
     properties:
-      kubernetes_version: [ kubelet_version ]
+      component_version: [ kubelet_version ]
     requirements:
       apiserver: [ kubelet, apiserver ]

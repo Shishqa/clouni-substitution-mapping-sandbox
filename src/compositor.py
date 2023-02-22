@@ -44,6 +44,15 @@ def query(topology_name):
         result['fulfilled'] = False
 
     elif 'select' in node.directives:
+      options = instance_storage.get_nodes_of_type(node.type)
+      options = [ op for op in options if 'select' not in op.directives or op.substitution is not None ]
+      print(f'SELECT {node.topology.name} - {node.name}')
+      print(options)
+      result['issues'].append({
+        'type': 'select',
+        'target': node_name,
+        'options': options
+      })
       result['fulfilled'] = False
 
   return result

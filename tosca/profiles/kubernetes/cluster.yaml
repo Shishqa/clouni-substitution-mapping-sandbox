@@ -24,9 +24,6 @@ data_types:
 
 capability_types:
 
-  kubetos.capabilities.Kubeconfig:
-    derived_from: kubetos.capabilities.DynamicArtifact
-
   kubetos.capabilities.Kubelet:
     derived_from: tosca.capabilities.Container
     properties:
@@ -38,19 +35,6 @@ relationship_types:
 
   kubetos.relationships.ConnectsWithKubeconfig:
     derived_from: tosca.relationships.ConnectsTo
-    properties:
-      user:
-        type: string
-        required: false
-    attributes:
-      cert:
-        type: string
-      key:
-        type: string
-      ca_key:
-        type: string
-      
-
     interfaces:
       Configure:
         operations:
@@ -133,15 +117,47 @@ node_types:
           capability: tosca.capabilities.Endpoint
           relationship: tosca.relationships.ConnectsTo
           occurrences: [ 1, 1 ]
-      # - kubeconfig:
-      #     capability: kubetos.capabilities.Kubeconfig
-      #     relationship: tosca.relationships.DependsOn
-      #     occurrences: [ 1, 1 ]
+
+  kubetos.nodes.Kubernetes.Node:
+    derived_from: tosca.nodes.SoftwareComponent
+    capabilities:
+      client_cert:
+        type: kubetos.capabilities.Certificate
+      kubelet:
+        type: kubetos.capabilities.Kubelet
+      endpoint:
+        type: tosca.capabilities.Endpoint
+    requirements:
+      - apiserver:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, 1 ]
+
+  # kubetos.nodes.Kubernetes.Worker:
+  #   derived_from: kubetos.nodes.Kubernetes.Root
+  #   capabilities:
+  #     kubelet:
+  #       type: kubetos.capabilities.Kubelet
+  #     endpoint:
+  #       type: tosca.capabilities.Endpoint
+  #     scalable:
+  #       type: tosca.capabilities.Scalable
+  #   requirements:
+  #     - apiserver:
+  #         capability: tosca.capabilities.Endpoint
+  #         relationship: tosca.relationships.ConnectsTo
+  #         occurrences: [ 1, 1 ]
+  #     # - kubeconfig:
+  #     #     capability: kubetos.capabilities.Kubeconfig
+  #     #     relationship: tosca.relationships.DependsOn
+  #     #     occurrences: [ 1, 1 ]
 
   kubetos.nodes.Kubernetes.Kubelet:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
       kubelet: kubetos.capabilities.Kubelet
+      client_cert:
+        type: kubetos.capabilities.Certificate
     properties:
       component_version:
         type: version
@@ -166,6 +182,8 @@ node_types:
   kubetos.nodes.Kubernetes.ControlPlane:
     derived_from: kubetos.nodes.Kubernetes.Root
     capabilities:
+      ca:
+        type: kubetos.capabilities.CertificateAuthority
       access_address:
         type: tosca.capabilities.Endpoint
       scalable:
@@ -177,17 +195,26 @@ node_types:
         type: string
       pod_cidr:
         type: string
-    # requirements:
-    #   - etcd:
-    #       capability: tosca.capabilities.Endpoint
-    #       relationship: tosca.relationships.ConnectsTo
-    #       occurrences: [ 1, UNBOUNDED ]
+
+  kubetos.nodes.Kubernetes.ServiceAccoutIssuer:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      cert:
+        type: kubetos.capabilities.Certificate
+    requirements:
+      - ca:
+          capability: kubetos.capabilities.CertificateAuthority
+          relationship: tosca.relationships.DependsOn
 
   kubetos.nodes.Kubernetes.APIServer:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
       access_address:
         type: tosca.capabilities.Endpoint
+      kubelet_client_cert:
+        type: kubetos.capabilities.Certificate
+      tls_cert:
+        type: kubetos.capabilities.Certificate
     properties:
       component_version:
         type: version
@@ -199,37 +226,20 @@ node_types:
           capability: tosca.capabilities.Endpoint
           relationship: tosca.relationships.ConnectsTo
           occurrences: [ 1, UNBOUNDED ]
-      # - ca:
-      #     capability: kubetos.capabilities.CertificateAuthority
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
-      # - kubelet_client_cert:
-      #     capability: kubetos.capabilities.Certificate
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
-      # - kubelet_client_key:
-      #     capability: kubetos.capabilities.PrivateKey
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
-      # - service_account_cert:
-      #     capability: kubetos.capabilities.Certificate
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
-      # - service_account_key:
-      #     capability: kubetos.capabilities.PrivateKey
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
-      # - tls_cert:
-      #     capability: kubetos.capabilities.Certificate
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
-      # - tls_key:
-      #     capability: kubetos.capabilities.PrivateKey
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
+      - service_account_issuer:
+          capability: kubetos.capabilities.Certificate
+          relationship: tosca.relationships.DependsOn
+          occurrences: [ 1, 1 ]
+      - ca:
+          capability: kubetos.capabilities.CertificateAuthority
+          relationship: tosca.relationships.DependsOn
+          occurrences: [ 1, 1 ]
 
   kubetos.nodes.Kubernetes.Scheduler:
     derived_from: tosca.nodes.SoftwareComponent
+    capabilities:
+      client_cert:
+        type: kubetos.capabilities.Certificate
     properties:
       component_version:
         type: version
@@ -241,13 +251,12 @@ node_types:
           capability: tosca.capabilities.Endpoint
           relationship: tosca.relationships.ConnectsTo
           occurrences: [ 1, 1 ]
-      # - kubeconfig:
-      #     capability: kubetos.capabilities.Kubeconfig
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
 
   kubetos.nodes.Kubernetes.ControllerManager:
     derived_from: tosca.nodes.SoftwareComponent
+    capabilities:
+      client_cert:
+        type: kubetos.capabilities.Certificate
     properties:
       component_version:
         type: version
@@ -261,22 +270,15 @@ node_types:
           capability: tosca.capabilities.Endpoint
           relationship: tosca.relationships.ConnectsTo
           occurrences: [ 1, 1 ]
-      # - kubeconfig:
-      #     capability: kubetos.capabilities.Kubeconfig
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
-      # - service_account_key:
-      #     capability: kubetos.capabilities.PrivateKey
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
-      # - ca:
-      #     capability: kubetos.capabilities.CertificateAuthority
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
-      # - ca_key:
-      #     capability: kubetos.capabilities.PrivateKey
-      #     relationship: kubetos.relationships.GetArtifact
-      #     occurrences: [ 1, 1 ]
+      - service_account_issuer:
+          capability: tosca.capabilities.Node
+          relationship: tosca.relationships.DependsOn
+          occurrences: [ 1, 1 ]
+      - ca:
+          capability: kubetos.capabilities.CertificateAuthority
+          relationship: tosca.relationships.DependsOn
+          occurrences: [ 1, 1 ]
+
 
 
 

@@ -1,0 +1,86 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: "kubetos"
+  template_author: "shishqa"
+  template_version: "1.0"
+
+imports:
+  - ../../profiles/etcd/main.yaml
+  - ../../profiles/cri/main.yaml
+  - ../../profiles/cni/main.yaml
+  - ../../profiles/kubernetes/cluster.yaml
+  - ../../profiles/kubernetes/resources.yaml
+
+node_types:
+
+  kubetos.nodes.Kubernetes.APIServer.StaticPod:
+    derived_from: kubetos.nodes.Kubernetes.StaticPod
+    capabilities:
+      access_address:
+        type: tosca.capabilities.Endpoint
+    requirements:
+      - etcd:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, UNBOUNDED ]
+
+relationship_types:
+
+  kubetos.relationships.ConnectsWithKubeconfig.Ansible:
+    derived_from: kubetos.relationships.ConnectsWithKubeconfig
+    interfaces:
+      Configure:
+        operations:
+          pre_configure_target:
+            # inputs:
+            #   dns_ip:
+            #     value: { get_property: [ SOURCE, dns_ip ] }
+            #     type: string
+            implementation:
+              primary: ./ansible/kubelet-to-runtime--pre-configure-target.yaml
+
+topology_template:
+
+  inputs:
+
+    kubernetes_version:
+      type: version
+      default: 1.21.0
+
+    cluster_name:
+      type: string
+      default: kubernetes-cluster
+
+    pod_cidr:
+      type: string
+      default: 10.233.0.0/16
+
+    service_cidr:
+      type: string
+      default: 10.32.0.0/16
+
+  node_templates:
+
+    kube_apiserver_pod:
+      type: kubetos.nodes.Kubernetes.APIServer.StaticPod
+      requirements:
+        - host: kube_node
+
+    kube_node:
+      type: kubetos.nodes.Kubernetes.Node
+      directives: [ substitute ]
+      properties:
+        component_version: { get_input: [ kubernetes_version ] }
+      requirements:
+        - apiserver: kube_apiserver_pod
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Kubernetes.APIServer
+    capabilities:
+      access_address: [ kube_apiserver_pod, access_address ]
+    properties:
+      component_version: [ kubernetes_version ]
+    requirements:
+      etcd: [ kube_apiserver_pod, etcd ]
+      host: [ kube_node, host ]

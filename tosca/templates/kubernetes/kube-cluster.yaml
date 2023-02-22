@@ -7,7 +7,7 @@ metadata:
 
 imports:
   #- ../profiles/etcd/main.yaml
-  - ../profiles/kubernetes/cluster.yaml
+  - ../../profiles/kubernetes/cluster.yaml
 
 topology_template:
 

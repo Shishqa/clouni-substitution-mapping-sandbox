@@ -2,7 +2,7 @@ tosca_definitions_version: tosca_simple_yaml_1_3
 
 imports:
 
-- ../profiles/etcd/main.yaml
+- ../../profiles/etcd/main.yaml
 
 topology_template:
 

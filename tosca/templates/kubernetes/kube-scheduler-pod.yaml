@@ -1,0 +1,61 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: "kubetos"
+  template_author: "shishqa"
+  template_version: "1.0"
+
+imports:
+  - ../../profiles/etcd/main.yaml
+  - ../../profiles/cri/main.yaml
+  - ../../profiles/cni/main.yaml
+  - ../../profiles/kubernetes/cluster.yaml
+  - ../../profiles/kubernetes/resources.yaml
+
+node_types:
+
+  kubetos.nodes.Kubernetes.Scheduler.StaticPod:
+    derived_from: kubetos.nodes.Kubernetes.StaticPod
+    requirements:
+      - apiserver:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, 1 ]
+
+topology_template:
+
+  inputs:
+
+    kubernetes_version:
+      type: version
+      default: 1.21.0
+
+    cluster_name:
+      type: string
+      default: kubernetes-cluster
+
+    pod_cidr:
+      type: string
+      default: 10.233.0.0/16
+
+    service_cidr:
+      type: string
+      default: 10.32.0.0/16
+
+  node_templates:
+
+    kube_scheduler_pod:
+      type: kubetos.nodes.Kubernetes.Scheduler.StaticPod
+      requirements:
+        - host: kube_node
+
+    kube_node:
+      type: kubetos.nodes.Kubernetes.Node
+      directives: [ select ]
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Kubernetes.Scheduler
+    properties:
+      component_version: [ kubernetes_version ]
+    requirements:
+      apiserver: [ kube_scheduler_pod, apiserver ]

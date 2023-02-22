@@ -1,0 +1,65 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: "kubetos"
+  template_author: "shishqa"
+  template_version: "1.0"
+
+imports:
+  #- ../profiles/etcd/main.yaml
+  - ../../profiles/kubernetes/cluster.yaml
+
+topology_template:
+
+  inputs:
+
+    kubernetes_version:
+      type: version
+
+    pod_cidr:
+      type: string
+      default: 10.233.0.0/16
+
+    service_cidr:
+      type: string
+      default: 10.32.0.0/16
+
+    dns_ip:
+      type: string
+      default: 10.32.0.3
+
+  node_templates:
+
+    kube_node:
+      type: kubetos.nodes.Kubernetes.Node
+      directives: [ substitute ]
+      capabilities:
+        client_cert:
+          properties:
+            common_name:
+              concat:
+                - "system:node:"
+                - { get_attribute: [ compute, tosca_name ] }
+            organisation: system:nodes
+            hostnames:
+              - { get_attribute: [ compute, tosca_name ] }
+              - { get_attribute: [ compute, private_address ] }
+              - { get_attribute: [ compute, public_address ] }
+              - 127.0.0.1
+      properties:
+        component_version: { get_input: [ kubernetes_version ] }
+      requirements:
+        - host: compute
+
+    compute:
+      type: tosca.nodes.Compute
+      directives: [ select ]
+      
+  substitution_mappings:
+    node_type: kubetos.nodes.Kubernetes.Worker
+    capabilities:
+      endpoint: [ kube_node, endpoint ]
+    properties:
+      kubernetes_version: [ kubernetes_version ]
+    requirements:
+      apiserver: [ kube_node, apiserver ]

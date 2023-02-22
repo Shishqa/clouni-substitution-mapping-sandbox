@@ -1,52 +1,34 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
 
-imports:
-  - ../dynamic-artifacts/main.yaml
-
 capability_types:
 
-  kubetos.capabilities.PrivateKey:
-    derived_from: kubetos.capabilities.DynamicArtifact
-
   kubetos.capabilities.Certificate:
-    derived_from: kubetos.capabilities.DynamicArtifact
+    derived_from: tosca.capabilities.Root
+    properties:
+      common_name:
+        type: string
+        required: false
+      organisation:
+        type: string
+        required: false
+      hostnames:
+        type: list
+        entry_schema:
+          type: string
+        default: []
+    attributes:
+      cert:
+        type: string
+      key:
+        type: string
 
   kubetos.capabilities.CertificateAuthority:
     derived_from: kubetos.capabilities.Certificate
 
 node_types:
 
-  kubetos.nodes.Certificate:
-    derived_from: tosca.nodes.Root
-    capabilities:
-      key:
-        type: kubetos.capabilities.PrivateKey
-      cert:
-        type: kubetos.capabilities.Certificate
-    properties:
-      common_name:
-        type: string
-      organisation:
-        type: string
-      hostnames:
-        type: list
-        entry_schema:
-          type: string
-        default: []
-    requirements:
-      - ca:
-          capability: kubetos.capabilities.CertificateAuthority
-          relationship: tosca.relationships.DependsOn
-
   kubetos.nodes.CertificateAuthority:
     derived_from: tosca.nodes.Root
     capabilities:
-      key:
-        type: kubetos.capabilities.PrivateKey
       ca:
         type: kubetos.capabilities.CertificateAuthority
-    properties:
-      common_name:
-        type: string
-      organisation:
-        type: string
