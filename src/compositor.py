@@ -28,22 +28,30 @@ def query(topology_name):
 
   for node_name, node in topology.nodes.items():
     if 'substitute' in node.directives:
-      if node.substitution is None:
-        options = tosca_repository.get_substitutions_for_type(node.type)
-        result['issues'].append({
-          'type': 'substitute',
-          'target': node_name,
-          'options': options
-        })
-        result['fulfilled'] = False
+      if node.substitution is not None:
+        substitution = query(node.substitution)
+        result['subtopologies'][node.substitution] = substitution
+        if not substitution['fulfilled']:
+          result['fulfilled'] = False
         continue
-      
-      substitution = query(node.substitution)
-      result['subtopologies'][node.substitution] = substitution
-      if not substitution['fulfilled']:
-        result['fulfilled'] = False
+
+      options = tosca_repository.get_substitutions_for_type(node.type)
+      result['issues'].append({
+        'type': 'substitute',
+        'target': node_name,
+        'options': options
+      })
+      result['fulfilled'] = False
+      continue
 
     elif 'select' in node.directives:
+      if node.substitution is not None:
+        substitution = query(node.substitution)
+        result['subtopologies'][node.substitution] = substitution
+        if not substitution['fulfilled']:
+          result['fulfilled'] = False
+        continue
+
       options = instance_storage.get_nodes_of_type(node.type)
       options = [ op for op in options if 'select' not in op.directives or op.substitution is not None ]
       print(f'SELECT {node.topology.name} - {node.name}')
@@ -70,7 +78,8 @@ def fulfill(topology_name, actions):
       )
       map_node(topology.nodes[action["target"]], substitution['topology'])
     elif action['type'] == 'select':
-      pass
+      target_topology = instance_storage.get_topology(action["topology"])
+      select_node(topology.nodes[action["target"]], target_topology.nodes[action["node"]])
 
   return query(topology_name)
 
@@ -136,3 +145,79 @@ def map_node(node, topology):
 
   instance_storage.add_topology(node.topology)
   instance_storage.add_topology(topology)
+
+def select_node(source, target):
+  source.attributes = target.attributes
+  source.capabilities = target.capabilities
+  source.requirements = target.requirements
+
+  source.selection = (target.topology.name, target.name)
+
+  instance_storage.add_topology(source.topology)
+
+  # for attr_name in source.attributes.keys():
+  #   source.attributes[attr_name] = target.attributes[attr_name]
+  
+  # for cap_name in source.capabilities.keys():
+  #   source.capabilities[cap_name] = target.capabilities[cap_name]
+
+  # req_keys = set()
+  # for req in source.requirements:
+  #   req_keys.add(req.name)
+
+  # source.requirements = []
+  # for req in target.requirements:
+  #   source.requirements.append()
+
+  # for prop_name, mapping in topology.definition['substitution']['inputPointers'].items():
+  #   if prop_name not in node.attributes.keys():
+  #     # TODO: better propagation
+  #     continue
+  #   topology.inputs[mapping['target']] = node.attributes[prop_name]
+
+  # for attr_name, mapping in topology.definition['substitution']['attributePointers'].items():
+  #   # print(mapping)
+  #   node.attributes[attr_name] = topology\
+  #       .nodes[mapping['nodeTemplateName']]\
+  #       .attributes[mapping['target']]
+
+  # for cap_name, mapping in topology.definition['substitution']['capabilityPointers'].items():
+  #   # print(mapping)
+  #   abstract_capability = node.capabilities[cap_name]
+  #   topology_capability = topology\
+  #     .nodes[mapping['nodeTemplateName']]\
+  #     .capabilities[mapping['target']]
+  #   for attr_name in abstract_capability.attributes.keys():
+  #     attr = abstract_capability.attributes[attr_name]
+  #     if attr.is_property:
+  #       topology_capability.attributes[attr_name] = attr
+  #     else:
+  #       abstract_capability.attributes[attr_name] = topology_capability.attributes[attr_name]
+      
+
+  #   # topology\
+  #   #   .nodes[mapping['nodeTemplateName']]\
+  #   #   .capabilities[mapping['target']] = node.capabilities[cap_name]
+
+  # for req_name, mapping in topology.definition['substitution']['requirementPointers'].items():
+  #   # print('REQUIREMENTS')
+  #   # print(mapping)
+  #   nodeTarget = topology.nodes[mapping['nodeTemplateName']]
+  #   reqTargetId = None
+  #   for i in range(len(nodeTarget.requirements)):
+  #     node_relationship = nodeTarget.requirements[i]
+  #     if node_relationship.name == mapping['target']:
+  #       reqTargetId = i
+  #       break
+  #   nodeTarget.requirements.pop(reqTargetId)
+
+  #   for relationship in node.requirements:
+  #     if relationship.name != req_name:
+  #       continue
+  #     topology\
+  #       .nodes[mapping['nodeTemplateName']]\
+  #       .requirements.append(relationship)
+
+  # node.substitution = topology.name
+
+  

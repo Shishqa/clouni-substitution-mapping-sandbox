@@ -176,10 +176,13 @@ class GetProperty(ValueInstance):
   def get(self):
     # print('GETPROP', self.args)
     start = self.args[0]
-    if start == 'SELF':
-      return self.node.get_property(self.args[1:])
-    else:
-      return self.node.topology.nodes[start].get_property(self.args[1:])
+    try:
+      if start == 'SELF':
+        return self.node.get_property(self.args[1:])
+      else:
+        return self.node.topology.nodes[start].get_property(self.args[1:])
+    except RuntimeError:
+      raise RuntimeError(f'{self.node.topology.name}: cannot find property from node {self.node.name}: {self.args}')
 
 
 class GetAttribute(ValueInstance):
@@ -190,10 +193,13 @@ class GetAttribute(ValueInstance):
   def get(self):
     # print('GETATTR', self.args)
     start = self.args[0]
-    if start == 'SELF':
-      return self.node.get_attribute(self.args[1:])
-    else:
-      return self.node.topology.nodes[start].get_attribute(self.args[1:])
+    try:
+      if start == 'SELF':
+        return self.node.get_attribute(self.args[1:])
+      else:
+        return self.node.topology.nodes[start].get_attribute(self.args[1:])
+    except RuntimeError:
+      raise RuntimeError(f'{self.node.topology.name}: cannot find attribute from node {self.node.name}: {self.args}')
 
 
 class Concat(ValueInstance):
@@ -258,6 +264,7 @@ class CapabilityInstance:
 
   def get_property(self, args):
     path = args[0]
+    print(f'CAP ATTRIBUTES: {self.attributes.keys()}')
     if path in self.attributes.keys():
       attr = self.attributes[path]
       if not attr.is_property:
@@ -340,6 +347,7 @@ class NodeInstance:
     self.topology = topology
     self.abstract = True
     self.substitution = None
+    self.selection = None
 
     self.definition = copy.deepcopy(definition)
 
@@ -385,6 +393,7 @@ class NodeInstance:
         raise RuntimeError(f'there is the attribute with name {path}, but it is not a property')
       return attr.get()
 
+    print(f'CAPABILITIES: {self.capabilities.keys()}')
     if path in self.capabilities.keys():
       return self.capabilities[path].get_property(rest)
 

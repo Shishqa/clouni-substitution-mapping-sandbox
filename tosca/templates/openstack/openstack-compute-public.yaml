@@ -12,25 +12,23 @@ topology_template:
     key_name:
       type: string
       description: Name of key-pair to be used for compute instance
-      default: ""
+      default: shishqa
 
     floating_ip_pool:
       type: string
       description: Name of public network to get floating ip from
-      default: ""
+      default: net-for-intra-sandbox
 
   node_templates:
 
     os_server:
       type: openstack:nova.Server
+      directives: [ substitute ]
       requirements:
         - image: os_image
         - flavor: os_flavor
         - key_pair: os_key_pair
         - security_group: os_security_group_default
-        - security_group: os_security_group_custom
-      directives:
-        - substitute
       
     os_key_pair:
       type: openstack:nova.KeyPair
@@ -41,13 +39,23 @@ topology_template:
 
     os_image:
       type: openstack:glance.WebImage
-      directives:
-        - substitute
+      directives: [ substitute ]
+      capabilities:
+        image:
+          properties:
+            architecture: { get_property: [ os_server, os, architecture ] }
+            distribution: { get_property: [ os_server, os, distribution ] }
+            version: { get_property: [ os_server, os, version ] }
 
     os_flavor:
       type: openstack:nova.Flavor
-      directives:
-        - substitute
+      directives: [ substitute ]
+      capabilities:
+        flavor:
+          properties:
+            num_cpus: { get_property: [ os_server, host, num_cpus ] }
+            disk_size: { get_property: [ os_server, host, disk_size ] }
+            mem_size: { get_property: [ os_server, host, mem_size ] }
 
     os_security_group_default:
       type: openstack:neutron.SecurityGroup
@@ -58,44 +66,19 @@ topology_template:
 
     os_floating_ip:
       type: openstack:neutron.FloatingIp
+      directives: [ substitute ]
       capabilities:
         endpoint:
           properties:
             network_name: { get_input: [ floating_ip_pool ] }
       requirements:
         - nova_server: os_server
-      directives:
-        - substitute
-
-    os_security_group_custom:
-      type: openstack:neutron.SecurityGroup
-      capabilities:
-        security_group:
-          properties:
-            name:
-              concat:
-                - { get_attribute: [ os_server, tosca_name ] }
-                - '-security-group'
-      directives:
-        - substitute
-
-    os_security_group_custom_rule_incoming_tcp_traffic:
-      type: openstack:neutron.SecurityGroupRule
-      properties:
-        direction: ingress
-        ethertype: IPv4
-        protocol: tcp
-        remote_ip_prefix: 0.0.0.0/0
-      requirements:
-        - security_group: os_security_group_custom
-      directives:
-        - substitute
 
   substitution_mappings:
     node_type: tosca.nodes.Compute
     capabilities:
-      host: [ os_flavor, flavor ]
-      os: [ os_image, image ]
+      host: [ os_server, host ]
+      os: [ os_server, os ]
       endpoint: [ os_server, private_endpoint ]
       scalable: [ os_server, scalable ]
       binding: [ os_server, binding ]
@@ -104,4 +87,3 @@ topology_template:
       public_address: [ os_server, public_address ]
       networks: [ os_server, networks ]
       ports: [ os_server, ports ]
-      tosca_name: [ os_server, tosca_name ]

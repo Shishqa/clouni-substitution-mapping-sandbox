@@ -17,8 +17,10 @@ topology_template:
             create:
               inputs:
                 floating_ip_pool: { get_property: [ SELF, endpoint, network_name ] }
-                server_id: { get_attribute: [ SELF, nova_server, server, openstack_id ] }
-              implementation: artifacts/os_floating_ip_create.yaml
+                server_id: { get_attribute: [ SELF, nova_server, host, openstack_id ] }
+              implementation:
+                primary: artifacts/openstack/ansible/os_floating_ip_create.yaml
+                operation_host: ORCHESTRATOR
 
   substitution_mappings:
     node_type: openstack:neutron.FloatingIp

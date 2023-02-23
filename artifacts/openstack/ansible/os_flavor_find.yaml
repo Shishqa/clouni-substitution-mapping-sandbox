@@ -1,26 +1,36 @@
 ---
-- hosts: localhost
-  connection: local
+- hosts: all
   gather_facts: no
-  vars:
-    required_ram: 1024
-    required_vcpus: 2
   tasks:
 
+  - debug:
+      msg: "ram: {{ (required_ram / 1048576) | int }}"
+  
+  - debug:
+      msg: "vcpus: {{ required_vcpus }}"
+
+  - debug:
+      msg: "disk: {{ (required_disk / 1073741824) | int }}"
+
   - name: retrieve info about flavor
-    openstack.cloud.compute_flavor_info:
-      ram: "{{ required_ram }}"
+    os_flavor_info:
+      ram: "{{ (required_ram / 1024 / 1024) | int }}"
       vcpus: "{{ required_vcpus }}" # Not filtering for some reason
     register: result
 
-  - name: filter by vcpus
-    set_fact:
-      result: "{{ result.openstack_flavors | selectattr('vcpus', 'eq', required_vcpus) | list }}"
+  - name: print result
+    debug:
+      msg: "{{ result }}"
 
-  - debug:
-      msg: "matched flavor {{ (result | sort(attribute='disk'))[0].id }}"
-    when: result | length > 0
+  - name: filter by disk
+    set_fact:
+      matching_flavors: "{{ result.openstack_flavors | selectattr('disk', 'eq', (required_disk / 1073741824) | int) | list }}"
 
   - fail:
       msg: "no matching flavors"
-    when: result | length == 0
+    when: matching_flavors | length == 0
+
+  - set_stats:
+      data:
+        id: "{{ matching_flavors[0]['id'] }}"
+  

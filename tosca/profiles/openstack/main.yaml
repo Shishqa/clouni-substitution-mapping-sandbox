@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_3
 capability_types:
 
   nova.Server:
-    derived_from: tosca.capabilities.Root
+    derived_from: tosca.capabilities.Compute
     attributes:
       openstack_id:
         type: string
@@ -16,7 +16,14 @@ capability_types:
         required: false
 
   nova.Flavor:
-    derived_from: tosca.capabilities.Compute
+    derived_from: tosca.capabilities.Root
+    properties:
+      num_cpus:
+        type: integer
+      disk_size:
+        type: scalar-unit.size
+      mem_size:
+        type: scalar-unit.size
     attributes:
       openstack_id:
         type: string
@@ -91,8 +98,10 @@ node_types:
         entry_schema:
           type: string
     capabilities:
-      server:
+      host:
         type: nova.Server
+      os:
+        type: tosca.capabilities.OperatingSystem
       scalable:
         type: tosca.capabilities.Scalable
       binding:

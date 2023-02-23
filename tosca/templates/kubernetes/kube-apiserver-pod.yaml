@@ -19,11 +19,23 @@ node_types:
     capabilities:
       access_address:
         type: tosca.capabilities.Endpoint
+      kubelet_client_cert:
+        type: kubetos.capabilities.Certificate
+      tls_cert:
+        type: kubetos.capabilities.Certificate
     requirements:
       - etcd:
           capability: tosca.capabilities.Endpoint
           relationship: tosca.relationships.ConnectsTo
           occurrences: [ 1, UNBOUNDED ]
+      - service_account_issuer:
+          capability: kubetos.capabilities.Certificate
+          relationship: tosca.relationships.DependsOn
+          occurrences: [ 1, 1 ]
+      - ca:
+          capability: kubetos.capabilities.CertificateAuthority
+          relationship: tosca.relationships.DependsOn
+          occurrences: [ 1, 1 ]
 
 relationship_types:
 
@@ -65,13 +77,13 @@ topology_template:
     kube_apiserver_pod:
       type: kubetos.nodes.Kubernetes.APIServer.StaticPod
       requirements:
-        - host: kube_node
+        - host: worker
 
-    kube_node:
-      type: kubetos.nodes.Kubernetes.Node
+    worker:
+      type: kubetos.nodes.Kubernetes.Worker
       directives: [ substitute ]
       properties:
-        component_version: { get_input: [ kubernetes_version ] }
+        kubernetes_version: { get_input: [ kubernetes_version ] }
       requirements:
         - apiserver: kube_apiserver_pod
 
@@ -83,4 +95,3 @@ topology_template:
       component_version: [ kubernetes_version ]
     requirements:
       etcd: [ kube_apiserver_pod, etcd ]
-      host: [ kube_node, host ]

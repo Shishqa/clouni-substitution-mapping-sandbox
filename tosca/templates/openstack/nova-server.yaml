@@ -24,8 +24,10 @@ topology_template:
               outputs:
                 public_address: [ SELF, public_address ]
                 private_address: [ SELF, private_address ]
-                id: [ SELF, server, openstack_id ]
-              implementation: artifacts/os_server_create.yaml
+                id: [ SELF, host, openstack_id ]
+              implementation:
+                primary: artifacts/openstack/ansible/os_server_create.yaml
+                operation_host: ORCHESTRATOR
 
   substitution_mappings:
     node_type: openstack:nova.Server
@@ -36,7 +38,8 @@ topology_template:
       ports: [ os_server, ports ]
       security_groups: [ os_server, security_groups ]
     capabilities:
-      server: [ os_server, server ]
+      host: [ os_server, host ]
+      os: [ os_server, os ]
       scalable: [ os_server, scalable ]
       binding: [ os_server, binding ]
       private_endpoint: [ os_server, private_endpoint ]

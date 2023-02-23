@@ -2,6 +2,7 @@ import graphlib
 
 import compositor
 import instance_model
+import runner
 
 
 def traverse_topology(topology_name):
@@ -45,27 +46,42 @@ def deploy(topology_status):
     update_node_state(node, 'creating')
 
     print(f'creating {node.name}')
-    # op = node.interfaces['Standard'].operations['create']
-    # print(op.definition)
-    # inputs = { name: inp.get() for name, inp in op.inputs.items() }
-    # print(inputs)
+    run_operation(node.interfaces['Standard'].operations['create'])
 
     update_node_state(node, 'created')
     update_node_state(node, 'configuring')
 
     print(f'configuring {node.name}')
-    # op = node.interfaces['Standard'].operations['configure']
-    # print(op.definition)
-    # inputs = { name: inp.get() for name, inp in op.inputs.items() }
-    # print(inputs)
+    run_operation(node.interfaces['Standard'].operations['configure'])
 
     update_node_state(node, 'configured')
     update_node_state(node, 'starting')
 
     print(f'starting {node.name}')
-    # op = node.interfaces['Standard'].operations['start']
-    # print(op.definition)
-    # inputs = { name: inp.get() for name, inp in op.inputs.items() }
-    # print(inputs)
+    run_operation(node.interfaces['Standard'].operations['start'])
 
     update_node_state(node, 'started')
+
+
+def run_operation(operation):
+  if operation.implementation is None:
+    return
+
+  print(operation.definition)
+  inputs = { name: inp.get() for name, inp in operation.inputs.items() }
+  print(inputs)
+  
+  host = 'SELF'
+  if 'host' in operation.definition.keys():
+    host = operation.definition['host']
+
+  if host != 'ORCHESTRATOR':
+    raise RuntimeError(f'cannot run operation on {host}')
+
+  address = 'localhost'
+
+  outputs = runner.run_artifact(address, operation.implementation, inputs)
+
+
+
+  

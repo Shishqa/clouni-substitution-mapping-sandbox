@@ -21,7 +21,9 @@ topology_template:
                 required_version: { get_property: [ SELF, image, version ] }
               outputs:
                 id: [ SELF, image, openstack_id ]
-              implementation: artifacts/os_image_find.yaml
+              implementation:
+                primary: artifacts/openstack/ansible/os_image_find.yaml
+                operation_host: ORCHESTRATOR
 
   substitution_mappings:
     node_type: openstack:glance.WebImage

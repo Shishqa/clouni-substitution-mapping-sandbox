@@ -6,10 +6,7 @@ metadata:
   template_version: "1.0"
 
 imports:
-  - profiles/etcd/main.yaml
-  - profiles/cri/main.yaml
-  - profiles/cni/main.yaml
-  - profiles/kubernetes/main.yaml
+  - main.yaml
 
 topology_template:
 

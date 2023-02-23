@@ -35,13 +35,23 @@ topology_template:
 
     os_image:
       type: openstack:glance.WebImage
-      directives:
-        - substitute
+      directives: [ substitute ]
+      capabilities:
+        image:
+          properties:
+            architecture: { get_property: [ os_server, os, architecture ] }
+            distribution: { get_property: [ os_server, os, distribution ] }
+            version: { get_property: [ os_server, os, version ] }
 
     os_flavor:
       type: openstack:nova.Flavor
-      directives:
-        - substitute
+      directives: [ substitute ]
+      capabilities:
+        flavor:
+          properties:
+            num_cpus: { get_property: [ os_server, server, num_cpus ] }
+            disk_size: { get_property: [ os_server, server, disk_size ] }
+            mem_size: { get_property: [ os_server, server, mem_size ] }
 
     os_security_group_default:
       type: openstack:neutron.SecurityGroup
@@ -53,8 +63,8 @@ topology_template:
   substitution_mappings:
     node_type: tosca.nodes.Compute
     capabilities:
-      host: [ os_flavor, flavor ]
-      os: [ os_image, image ]
+      host: [ os_server, host ]
+      os: [ os_server, os ]
       endpoint: [ os_server, private_endpoint ]
       scalable: [ os_server, scalable ]
       binding: [ os_server, binding ]
@@ -63,4 +73,3 @@ topology_template:
       public_address: [ os_server, public_address ]
       networks: [ os_server, networks ]
       ports: [ os_server, ports ]
-      tosca_name: [ os_server, tosca_name ]

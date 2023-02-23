@@ -35,12 +35,23 @@ def fulfill(topology_status):
       selection = select_node(options)
       if selection is not None:
         print(f'- selecting {issue["target"]} -> {selection.name}')
+        actions.append({
+          'type': 'select',
+          'target': issue["target"],
+          'topology': selection.topology.name,
+          'node': selection.name
+        })
         continue
       print('cannot select node in inventory, substitute?')
       target = topology_status['topology'].nodes[issue["target"]]
       options = tosca_repository.get_substitutions_for_type(target.type)
       substitution_template = select_substitution(options)
       print(f'- substituting {issue["target"]} -> {substitution_template}')
+      actions.append({
+        'type': 'substitute',
+        'target': issue["target"],
+        'template': substitution_template,
+      })
 
       # actions.append({
       #   'type': 'substitute',

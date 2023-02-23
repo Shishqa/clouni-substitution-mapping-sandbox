@@ -7,20 +7,43 @@ imports:
 
 topology_template:
 
+  inputs:
+  
+    num_cpus:
+      type: integer
+      default: 1
+
+    mem_size:
+      type: scalar-unit.size
+      default: 1 GiB
+    
+    disk_size:
+      type: scalar-unit.size
+      default: 10 GiB
+
   node_templates:
 
     os_flavor:
       type: openstack:nova.Flavor
+      capabilities:
+        flavor:
+          properties:
+            mem_size: { get_input: [ mem_size ] }
+            num_cpus: { get_input: [ num_cpus ] }
+            disk_size: { get_input: [ disk_size ] }
       interfaces:
         Standard:
           operations:
             configure:
               inputs:
                 required_ram: { get_property: [ SELF, flavor, mem_size ] }
-                required_vcups: { get_property: [ SELF, flavor, num_cpus ] }
+                required_vcpus: { get_property: [ SELF, flavor, num_cpus ] }
+                required_disk: { get_property: [ SELF, flavor, disk_size ] }
               outputs:
                 id: [ SELF, flavor, openstack_id ]
-              implementation: artifacts/os_flavor_find.yaml
+              implementation:
+                primary: artifacts/openstack/ansible/os_flavor_find.yaml
+                operation_host: ORCHESTRATOR
 
   substitution_mappings:
     node_type: openstack:nova.Flavor
