@@ -12,45 +12,46 @@ imports:
   - ../../profiles/kubernetes/cluster.yaml
   - ../../profiles/kubernetes/resources.yaml
 
-node_types:
+# node_types:
 
-  kubetos.nodes.Kubernetes.APIServer.StaticPod:
-    derived_from: kubetos.nodes.Kubernetes.StaticPod
-    capabilities:
-      access_address:
-        type: tosca.capabilities.Endpoint
-      kubelet_client_cert:
-        type: kubetos.capabilities.Certificate
-      tls_cert:
-        type: kubetos.capabilities.Certificate
-    requirements:
-      - etcd:
-          capability: tosca.capabilities.Endpoint
-          relationship: tosca.relationships.ConnectsTo
-          occurrences: [ 1, UNBOUNDED ]
-      - service_account_issuer:
-          capability: kubetos.capabilities.Certificate
-          relationship: tosca.relationships.DependsOn
-          occurrences: [ 1, 1 ]
-      - ca:
-          capability: kubetos.capabilities.CertificateAuthority
-          relationship: tosca.relationships.DependsOn
-          occurrences: [ 1, 1 ]
+  # kubetos.nodes.Kubernetes.APIServer.StaticPod:
+  #   derived_from: kubetos.nodes.Kubernetes.StaticPod
+  #   capabilities:
+  #     access_address:
+  #       type: tosca.capabilities.Endpoint
+  #     kubelet_client_cert:
+  #       type: kubetos.capabilities.Certificate
+  #     tls_cert:
+  #       type: kubetos.capabilities.Certificate
+  #   requirements:
+  #     - etcd:
+  #         capability: tosca.capabilities.Endpoint
+  #         relationship: tosca.relationships.ConnectsTo
+  #         occurrences: [ 1, UNBOUNDED ]
+  #     - service_account_issuer:
+  #         capability: kubetos.capabilities.Certificate
+  #         relationship: tosca.relationships.DependsOn
+  #         occurrences: [ 1, 1 ]
+  #     - ca:
+  #         capability: kubetos.capabilities.CertificateAuthority
+  #         relationship: tosca.relationships.DependsOn
+  #         occurrences: [ 1, 1 ]
 
-relationship_types:
+  # kubetos.nodes.Kubernetes.ControllerManager.StaticPod:
+  #   derived_from: kubetos.nodes.Kubernetes.StaticPod
+  #   requirements:
+  #     - apiserver:
+  #         capability: tosca.capabilities.Endpoint
+  #         relationship: tosca.relationships.ConnectsTo
+  #         occurrences: [ 1, 1 ]
 
-  kubetos.relationships.ConnectsWithKubeconfig.Ansible:
-    derived_from: kubetos.relationships.ConnectsWithKubeconfig
-    interfaces:
-      Configure:
-        operations:
-          pre_configure_target:
-            # inputs:
-            #   dns_ip:
-            #     value: { get_property: [ SOURCE, dns_ip ] }
-            #     type: string
-            implementation:
-              primary: ./ansible/kubelet-to-runtime--pre-configure-target.yaml
+  # kubetos.nodes.Kubernetes.Scheduler.StaticPod:
+  #   derived_from: kubetos.nodes.Kubernetes.StaticPod
+  #   requirements:
+  #     - apiserver:
+  #         capability: tosca.capabilities.Endpoint
+  #         relationship: tosca.relationships.ConnectsTo
+  #         occurrences: [ 1, 1 ]
 
 topology_template:
 
@@ -75,23 +76,45 @@ topology_template:
   node_templates:
 
     kube_apiserver_pod:
-      type: kubetos.nodes.Kubernetes.APIServer.StaticPod
-      requirements:
-        - host: worker
-
-    worker:
-      type: kubetos.nodes.Kubernetes.Worker
-      directives: [ substitute ]
-      properties:
-        kubernetes_version: { get_input: [ kubernetes_version ] }
-      requirements:
-        - apiserver: kube_apiserver_pod
+      type: kubetos.nodes.Kubernetes.APIServer.Pod
+      capabilities:
+        apiserver:
+          properties:
+            kubernetes_version: { get_input: [ kubernetes_version ] }
+            service_cidr: { get_input: [ service_cidr ] }
+      interfaces:
+        Standard:
+          operations:
+            start:
+              implementation:
+                primary: artifacts/kubernetes/ansible/kube-apiserver--start.yaml
+                dependencies:
+                  - artifacts/kubernetes/ansible/files/kube-apiserver.yaml.j2
+                operation_host: ORCHESTRATOR
+              inputs:
+                ca_cert_path: a
+                cert_path: b
+                key_path: c
+                sa_cert_path: d
+                sa_key_path: e
+                kubelet_client_cert_path: f
+                kubelet_client_key_path: g
+                etcd_peers: ['joka', 'boka']
+                kube_version: 'v1.2.3'
+                private_address: '10.10.10.10'
+                public_address: '100.100.100.100'
+                service_cidr: '1.2.3.4/2'
+                apiserver_count: 1
+              outputs:
+                manifest: [ SELF, manifest ]
 
   substitution_mappings:
-    node_type: kubetos.nodes.Kubernetes.APIServer
+    node_type: kubetos.nodes.Kubernetes.APIServer.Pod
     capabilities:
+      apiserver: [ kube_apiserver_pod, apiserver ]
       access_address: [ kube_apiserver_pod, access_address ]
-    properties:
-      component_version: [ kubernetes_version ]
     requirements:
+      host: [ kube_apiserver_pod, host ]
       etcd: [ kube_apiserver_pod, etcd ]
+    # requirements:
+    #   etcd: [ kube_apiserver_pod, network ]

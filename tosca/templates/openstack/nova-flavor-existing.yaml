@@ -11,15 +11,15 @@ topology_template:
   
     num_cpus:
       type: integer
-      default: 1
+      default: -1
 
     mem_size:
       type: scalar-unit.size
-      default: 1 GiB
+      default: 0 GiB
     
     disk_size:
       type: scalar-unit.size
-      default: 10 GiB
+      default: 0 GiB
 
   node_templates:
 

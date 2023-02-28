@@ -32,3 +32,9 @@ node_types:
     capabilities:
       ca:
         type: kubetos.capabilities.CertificateAuthority
+
+  kubetos.nodes.Certificate:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      cert:
+        type: kubetos.capabilities.Certificate

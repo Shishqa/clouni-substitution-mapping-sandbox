@@ -15,7 +15,7 @@
   - name: retrieve info about flavor
     os_flavor_info:
       ram: "{{ (required_ram / 1024 / 1024) | int }}"
-      vcpus: "{{ required_vcpus }}" # Not filtering for some reason
+      vcpus: "{{ required_vcpus }}"
     register: result
 
   - name: print result

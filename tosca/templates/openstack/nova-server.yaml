@@ -11,18 +11,21 @@ topology_template:
 
     os_server:
       type: openstack:nova.Server
+      capabilities:
+        private_endpoint:
+          attributes:
+            ip_address: { get_attribute: [ SELF, private_address ] }
       interfaces:
         Standard:
           operations:
             configure:
               inputs:
-                server_name: { get_attribute: [ SELF, tosca_name ] }
+                server_name: { get_attribute: [ SELF, host, name ] }
                 server_image: { get_attribute: [ SELF, image, image, openstack_id ] }
                 server_flavor: { get_attribute: [ SELF, flavor, flavor, openstack_id ] }
                 server_keypair: { get_property: [ SELF, key_pair, key_pair, name ] }
                 server_network: { get_property: [ SELF, private_endpoint, network_name ] }
               outputs:
-                public_address: [ SELF, public_address ]
                 private_address: [ SELF, private_address ]
                 id: [ SELF, host, openstack_id ]
               implementation:

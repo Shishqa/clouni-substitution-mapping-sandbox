@@ -1,0 +1,81 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: "kubetos"
+  template_author: "shishqa"
+  template_version: "1.0"
+
+imports:
+  #- ../profiles/etcd/main.yaml
+  - ../../profiles/kubernetes/cluster.yaml
+
+topology_template:
+
+  inputs:
+
+    kubernetes_version:
+      type: version
+
+    cluster_name:
+      type: string
+
+    pod_cidr:
+      type: string
+      default: 10.233.0.0/16
+
+    service_cidr:
+      type: string
+      default: 10.32.0.0/16
+
+    dns_ip:
+      type: string
+      default: 10.32.0.3
+
+  node_templates:
+
+    load_balancer:
+      type: tosca.nodes.LoadBalancer
+      requirements:
+        - application: control_plane_1
+        - application: control_plane_2
+        - application: control_plane_3
+
+    control_plane_1:
+      type: kubetos.nodes.Kubernetes.ControlPlane
+      directives: [ substitute ]
+      properties:
+        kubernetes_version: { get_input: [ kubernetes_version ] }
+        cluster_name: { get_input: [ cluster_name ] }
+        service_cidr: { get_input: [ service_cidr ] }
+        pod_cidr: { get_input: [ pod_cidr ] }
+
+    control_plane_2:
+      type: kubetos.nodes.Kubernetes.ControlPlane
+      directives: [ substitute ]
+      properties:
+        kubernetes_version: { get_input: [ kubernetes_version ] }
+        cluster_name: { get_input: [ cluster_name ] }
+        service_cidr: { get_input: [ service_cidr ] }
+        pod_cidr: { get_input: [ pod_cidr ] }
+
+    control_plane_3:
+      type: kubetos.nodes.Kubernetes.ControlPlane
+      directives: [ substitute ]
+      properties:
+        kubernetes_version: { get_input: [ kubernetes_version ] }
+        cluster_name: { get_input: [ cluster_name ] }
+        service_cidr: { get_input: [ service_cidr ] }
+        pod_cidr: { get_input: [ pod_cidr ] }
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Kubernetes.ControlPlane
+    capabilities:
+      # XXX: should I fix this?
+      ca: [ control_plane_1, ca ]
+      access_address: [ load_balancer, client ]
+      # scalable: [ compute, scalable ]
+    properties:
+      kubernetes_version: [ kubernetes_version ]
+      cluster_name: [ cluster_name ]
+      pod_cidr: [ pod_cidr ]
+      service_cidr: [ service_cidr ]

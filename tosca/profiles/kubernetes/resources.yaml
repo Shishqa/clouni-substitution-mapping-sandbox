@@ -1,56 +1,142 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
 
-imports:
-  - cluster.yaml
+# data_types:
 
-data_types:
+  # kubetos.datatypes.Kubernetes.VolumeMount:
+  #   derived_from: tosca.datatypes.Root
+  #   properties:
+  #     mountPath:
+  #       type: string
+  #     name:
+  #       type: string
+  #     readOnly:
+  #       type: boolean
 
-  kubetos.datatypes.Kubernetes.VolumeMount:
-    derived_from: tosca.datatypes.Root
-    properties:
-      mount_path:
-        type: string
-      name:
-        type: string
-      read_only:
-        type: string
+  # kubetos.datatypes.Kubernetes.Volume:
+  #   derived_from: tosca.datatypes.Root
+  #   properties:
+  #     name:
+  #       type: string
+      
+
+  # kubetos.datatypes.Kubernetes.ContainerSpec:
+  #   derived_from: tosca.datatypes.Root
+  #   properties:
+  #     command:
+  #       type: list
+  #       entry_schema:
+  #         type: string
+  #     name:
+  #       type: string
+  #     image:
+  #       type: string
+  #     image_pull_policy:
+  #       type: string
+  #       default: IfNotPresent
+  #     host_network:
+  #       type: boolean
+  #       default: false
+  #     volume_mounts:
+  #       type: list
+  #       entry_schema:
+  #         type: kubetos.datatypes.Kubernetes.VolumeMount
+
+  # kubetos.datatypes.Kubernetes.PodSpec:
+  #   derived_from: tosca.datatypes.Root
+  #   properties:
+  #     containers:
+  #       type: list
+  #       entry_schema:
+  #         type: kubetos.datatypes.Kubernetes.ContainerSpec
+  #     host_network:
+  #       type: boolean
+  #       default: false
+  #     priority_class_name:
+  #       type: string
+  #       required: false
 
 capability_types:
 
-  kubetos.capabilities.Kubernetes.Container:
-    derived_from: tosca.capabilities.Root
-    properties:
-      name:
-        type: string
+  kubetos.capabilities.Kubernetes.ResourceHost:
+    derived_from: tosca.capabilities.Container
+
+  # kubetos.capabilities.Kubernetes.Manifestable:
+  #   derived_from: tosca.capabilities.Root
+  #   attributes:
+  #     manifest:
+  #       type: string
+
+  # kubetos.capabilities.Kubernetes.Resource:
+  #   derived_from: tosca.capabilities.Root
+
+  # kubetos.capabilities.Kubernetes.Pod:
+  #   derived_from: kubetos.capabilities.Kubernetes.Resource
+
+  # kubetos.capabilities.Kubernetes.Container:
+  #   derived_from: tosca.capabilities.Root
+
+  # kubetos.capabilities.Kubernetes.Volume:
+  #   derived_from: tosca.capabilities.Root
 
 node_types:
 
-  kubetos.nodes.Kubernetes.Container:
-    derived_from: tosca.nodes.Root
-    capabilities:
-      container:
-        type: kubetos.capabilities.Kubernetes.Container
-    properties:
-      command:
-        type: list
-        entry_schema:
-          type: string
-      name:
-        type: string
-      image:
-        type: string
-      image_pull_policy:
-        type: string
-        default: IfNotPresent
+  # kubetos.nodes.Kubernetes.Container:
+  #   derived_from: tosca.nodes.Root
+  #   capabilities:
+  #     container:
+  #       type: kubetos.capabilities.Kubernetes.Container
+  #   properties:
+  #     spec:
+  #       type: kubetos.datatypes.Kubernetes.ContainerSpec
+  #   attributes:
+  #     volume_mounts:
+  #       type: list
+  #       entry_schema:
+  #         type: string
+  #     # spec:
+  #     #   type: string
+  #     #   default: { get_property: [ SELF, volume, ALL, TARGET, spec ] }
+  #   requirements:
+  #     - volume:
+  #         capability: kubetos.capabilities.Kubernetes.Volume
+  #         relationship: tosca.relationships.DependsOn
+  #         occurrences: [ 0, UNBOUNDED ]
 
-  kubetos.nodes.Kubernetes.Pod:
+  # kubetos.nodes.Kubernetes.Volume:
+  #   derived_from: tosca.nodes.Root
+  #   capabilities:
+  #     volume:
+  #       type: kubetos.capabilities.Kubernetes.Volume
+  #   properties:
+  #     name:
+  #       type: string
+
+  # kubetos.nodes.Kubernetes.Volume.HostPath:
+  #   derived_from: kubetos.nodes.Kubernetes.Volume
+  #   properties:
+  #     path:
+  #       type: string
+  #     type:
+  #       type: string
+
+  # kubetos.nodes.Kubernetes.Port:
+  #   derived_from: tosca.nodes.Root
+  #   capabilities:
+  #     endpoint:
+  #       type: tosca.capabilities.Endpoint
+
+
+  kubetos.nodes.Kubernetes.Resource:
     derived_from: tosca.nodes.Root
-    
-  kubetos.nodes.Kubernetes.StaticPod:
-    derived_from: kubetos.nodes.Kubernetes.Pod
+    attributes:
+      manifest:
+        type: string
     requirements:
       - host:
-          capability: kubetos.capabilities.Kubelet
+          capability: kubetos.capabilities.Kubernetes.ResourceHost
           relationship: tosca.relationships.HostedOn
-      
+          occurrences: [ 1, 1 ]
+
+  kubetos.nodes.Kubernetes.Pod:
+    derived_from: kubetos.nodes.Kubernetes.Resource
     

@@ -1,16 +1,32 @@
 ---
-- hosts: localhost
-  connection: local
+- hosts: all
   gather_facts: no
-  vars:
-    server_name: shishqa-test-from-ansible
-    floating_ip_pool: ispras
   tasks:
   
+  - name: get server info
+    os_server_info:
+      server: "{{ server_id }}"
+    register: server_info
+
+  - name: asdaa
+    debug:
+      msg: "{{ server_info }}"
+
   - name: Acquire floating IPs for instance
-    openstack.cloud.floating_ip:
+    os_floating_ip:
       state: present
-      server: "{{ server_name }}"
+      server: "{{ server_id }}"
       network: "{{ floating_ip_pool }}"
+      reuse: yes
       wait: yes
-    register: result
+    when: server_info.openstack_servers[0].public_v4 == ''
+
+  - name: get server info
+    os_server_info:
+      server: "{{ server_id }}"
+    register: server_info
+
+  - name: Set public ip from acquired floating IP
+    set_stats:
+      data:
+        ip_address: "{{ server_info.openstack_servers[0].public_v4 }}"

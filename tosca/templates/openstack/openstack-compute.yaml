@@ -49,9 +49,9 @@ topology_template:
       capabilities:
         flavor:
           properties:
-            num_cpus: { get_property: [ os_server, server, num_cpus ] }
-            disk_size: { get_property: [ os_server, server, disk_size ] }
-            mem_size: { get_property: [ os_server, server, mem_size ] }
+            num_cpus: { get_property: [ os_server, host, num_cpus ] }
+            disk_size: { get_property: [ os_server, host, disk_size ] }
+            mem_size: { get_property: [ os_server, host, mem_size ] }
 
     os_security_group_default:
       type: openstack:neutron.SecurityGroup

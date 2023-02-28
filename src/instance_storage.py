@@ -13,20 +13,16 @@ def init_database():
   if not os.path.exists('instances'):
     os.makedirs('instances')
 
-  for filename in os.listdir('instances'):
-    path = os.path.join('instances', filename)
-    with open(path, 'rb') as file:
-      topology_name = os.path.splitext(os.path.basename(path))[0]
-      # print(topology_name)
-      topology = pickle.load(file)
-      add_topology(topology)
+  if not os.path.exists('instances/.topologies'):
+    return
+
+  with open('instances/.topologies', 'rb') as file:
+    topologies = pickle.load(file)
 
 
 def dump_database():
-  for topology_name, topology in topologies.items():
-    path = os.path.join('instances', f'{topology_name}.obj')
-    with open(path, 'wb') as file:
-      pickle.dump(topology, file)
+  with open('instances/.topologies', 'wb') as file:
+    pickle.dump(topologies, file)
 
 
 def add_topology(topology: instance_model.TopologyTemplateInstance):

@@ -1,0 +1,120 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+metadata:
+  template_name: "kubetos"
+  template_author: "shishqa"
+  template_version: "1.0"
+
+imports:
+  - ../../profiles/etcd/main.yaml
+  - ../../profiles/cri/main.yaml
+  - ../../profiles/cni/main.yaml
+  - ../../profiles/kubernetes/cluster.yaml
+  - ../../profiles/kubernetes/resources.yaml
+
+topology_template:
+
+  inputs:
+
+    kubernetes_version:
+      type: version
+      default: 1.21.0
+
+    cluster_name:
+      type: string
+      default: kubernetes-cluster
+
+    pod_cidr:
+      type: string
+      default: 10.233.0.0/16
+
+    service_cidr:
+      type: string
+      default: 10.32.0.0/16
+
+  node_templates:
+
+    kube_apiserver:
+      type: kubetos.nodes.Kubernetes.APIServer.Pod
+      directives: [ substitute ]
+      capabilities:
+        access_address:
+          attributes:
+            ip_address: { get_attribute: [ worker, endpoint, ip_address ] }
+        apiserver:
+          properties:
+            kubernetes_version: { get_input: [ kubernetes_version ] }
+            service_cidr: { get_input: [ service_cidr ] }
+      requirements:
+        - host: worker
+        - etcd: etcd
+
+    kube_controller_manager:
+      type: kubetos.nodes.Kubernetes.ControllerManager.Pod
+      directives: [ substitute ]
+      capabilities:
+        controller_manager:
+          properties:
+            kubernetes_version: { get_input: [ kubernetes_version ] }
+            service_cidr: { get_input: [ service_cidr ] }
+            pod_cidr: { get_input: [ pod_cidr ] }
+      requirements:
+        - apiserver: kube_apiserver
+        - host: worker
+
+    kube_scheduler:
+      type: kubetos.nodes.Kubernetes.Scheduler.Pod
+      directives: [ substitute ]
+      capabilities:
+        scheduler:
+          properties:
+            kubernetes_version: { get_input: [ kubernetes_version ] }
+      requirements:
+        - apiserver: kube_apiserver
+        - host: worker
+
+    worker:
+      type: kubetos.nodes.Kubernetes.Worker
+      directives: [ substitute ]
+      capabilities:
+        kubelet:
+          properties:
+            api_version: TODO
+            dns_ip: TODO
+            pod_cidr: { get_input: [ pod_cidr ] }
+            static_pod_path: /etc/kubernetes/manifests
+      requirements:
+        - apiserver: kube_apiserver
+
+    ca:
+      type: kubetos.nodes.CertificateAuthority
+      directives: [ substitute ]
+      capabilities:
+        ca:
+          properties:
+            common_name: kubernetes-ca
+            organisation: kubernetes
+
+    etcd:
+      type: kubetos.nodes.Etcd
+      directives: [ select ]
+      # capabilities:
+      #   access_address:
+      #     properties:
+      #       port: 2379
+      #       api_version: v2
+      #   peer_address:
+      #     properties:
+      #       port: 2380
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Kubernetes.ControlPlane
+    capabilities:
+      ca: [ ca, ca ]
+      access_address: [ kube_apiserver, access_address ]
+      # scalable: [ compute, scalable ]
+    properties:
+      kubernetes_version: [ kubernetes_version ]
+      cluster_name: [ cluster_name ]
+      pod_cidr: [ pod_cidr ]
+      service_cidr: [ service_cidr ]

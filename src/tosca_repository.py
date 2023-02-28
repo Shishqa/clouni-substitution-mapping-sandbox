@@ -24,6 +24,10 @@ def init_database():
   for root, dirs, files in os.walk("tosca/templates"):
     for file in files:
       path = os.path.join(root, file)
+      if 'tosca/templates/openstack' not in path:
+        if path != 'tosca/templates/tosca-server-example.yaml':
+          continue
+
       print(path)
 
       normalized_template = parse(path)

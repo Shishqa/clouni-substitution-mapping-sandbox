@@ -18,6 +18,33 @@ data_types:
 
 capability_types:
 
+  kubetos.capabilities.Etcd:
+    derived_from: tosca.capabilities.Root
+    properties:
+      name:
+        type: string
+      backup_retention_count:
+        type: integer
+        default: -1
+      heartbeat_interval:
+        type: scalar-unit.time
+        default: 250 ms
+      election_timeout:
+        type: scalar-unit.time
+        default: 5000 ms
+      snapshot_count:
+        type: integer
+        default: 10000
+      quota_backend_bytes:
+        type: scalar-unit.size
+        default: 2147483648 B
+      max_snapshots:
+        type: integer
+        default: 0
+      max_wals:
+        type: integer
+        default: 0
+
   kubetos.capabilities.Etcd.Endpoint.Peer:
     derived_from: tosca.capabilities.Endpoint
     properties:
@@ -66,57 +93,29 @@ relationship_types:
 
 node_types:
 
-  kubetos.nodes.Etcd.Cluster:
+  kubetos.nodes.Etcd.Discovery:
     derived_from: tosca.nodes.Root
     attributes:
       peers:
         type: list
         entry_schema:
-          type: kubetos.datatypes.Etcd.PeerSpec
-    requirements:
-      - peer:
-          capability: kubetos.capabilities.Etcd.Endpoint.Peer
-          node: kubetos.nodes.Etcd
-          relationship: kubetos.relationships.EtcdPeer
-          occurrences: [ 0, UNBOUNDED ]
+          type: string
 
   kubetos.nodes.Etcd:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
+      etcd:
+        type: kubetos.capabilities.Etcd
       access_address:
         type: kubetos.capabilities.Etcd.Endpoint.Access
       peer_address:
         type: kubetos.capabilities.Etcd.Endpoint.Peer
-    attributes:
-      name:
-        type: string
-        default: { get_attribute: [ SELF, tosca_id ] }
-      peers:
-        type: list
-        entry_schema:
-          type: kubetos.datatypes.Etcd.PeerSpec
     properties:
       component_version:
         type: version
-        default: 3.4.13
-      backup_retention_count:
-        type: integer
-        default: -1
-      heartbeat_interval:
-        type: scalar-unit.time
-        default: 250 ms
-      election_timeout:
-        type: scalar-unit.time
-        default: 5000 ms
-      snapshot_count:
-        type: integer
-        default: 10000
-      quota_backend_bytes:
-        type: scalar-unit.size
-        default: 2147483648 B
-      max_snapshots:
-        type: integer
-        default: 0
-      max_wals:
-        type: integer
-        default: 0
+        required: true
+    attributes:
+      peers:
+        type: list
+        entry_schema:
+          type: string

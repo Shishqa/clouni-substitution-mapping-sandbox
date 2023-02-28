@@ -1,0 +1,42 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- ../../profiles/pki/main.yaml
+
+topology_template:
+
+  node_templates:
+
+    certificate:
+      type: kubetos.nodes.Certificate
+      requirements:
+        - dependency: signer
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                common_name: { get_property: [ SELF, cert, common_name ] }
+                organisation: { get_property: [ SELF, cert, organisation ] }
+                hostnames: { get_property: [ SELF, hostnames ] }
+                ca_cert: { get_attribute: [ signer, ca, cert ] }
+                ca_key: { get_attribute: [ signer, ca, key ] }
+              outputs:
+                cert: [ SELF, cert, cert ]
+                key: [ SELF, cert, key ]
+              implementation:
+                primary: ./ansible/cert--create.yaml
+                dependencies:
+                  - ./ansible/files/csr.json.j2
+                  - ./ansible/files/ca-config.json
+                operation_host: ORCHESTRATOR
+
+    signer:
+      type: kubetos.nodes.CertificateAuthority
+      directives: [ select ]
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Certificate
+    capabilities:
+      cert: [ certificate, cert ]

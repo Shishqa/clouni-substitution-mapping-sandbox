@@ -12,18 +12,37 @@ topology_template:
     key_name:
       type: string
       description: Name of key-pair to be used for compute instance
-      default: shishqa
+      default: shishqa-toadster
 
     floating_ip_pool:
       type: string
       description: Name of public network to get floating ip from
-      default: net-for-intra-sandbox
+      default: ispras
 
   node_templates:
 
     os_server:
       type: openstack:nova.Server
       directives: [ substitute ]
+      capabilities:
+        host:
+          properties:
+            name: shishqa-test-from-orchestrator
+            disk_size: 10 GiB
+            mem_size: 1 GiB
+            num_cpus: 1
+        os:
+          properties:
+            architecture: LTS-Focal-Fossa
+            distribution: Ubuntu-Server
+            version: "20.04"
+        private_endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+          attributes:
+            ip_address: { get_attribute: [ SELF, public_address ] }
+      attributes:
+        public_address: { get_attribute: [ os_floating_ip, endpoint, ip_address ] }
       requirements:
         - image: os_image
         - flavor: os_flavor

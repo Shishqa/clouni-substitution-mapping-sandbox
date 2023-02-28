@@ -4,32 +4,64 @@ imports:
   - ../cri/main.yaml
   - ../etcd/main.yaml
   - ../pki/main.yaml
+  - resources.yaml
 
-data_types:
+capability_types:
 
-  kubetos.datatypes.KubeletConfiguration:
-    derived_from: tosca.datatypes.Root
+  kubetos.capabilities.Kubernetes.ResourceHost.Static:
+    derived_from: kubetos.capabilities.Kubernetes.ResourceHost
+    attributes:
+      path:
+        type: string
+
+  kubetos.capabilities.Kubelet:
+    derived_from: tosca.capabilities.Root
     properties:
       api_version:
         type: string
       pod_cidr:
         type: string
-        required: false
       dns_ip:
         type: string
-        required: false
       static_pod_path:
         type: string
-        required: false
 
-capability_types:
-
-  kubetos.capabilities.Kubelet:
-    derived_from: tosca.capabilities.Container
+  kubetos.capabilities.Kubernetes.App:
+    derived_from: tosca.capabilities.Root
     properties:
-      config:
-        type: kubetos.datatypes.KubeletConfiguration
-        required: false
+      kubernetes_version:
+        type: version
+
+  kubetos.capabilities.Kubernetes.APIServer:
+    derived_from: kubetos.capabilities.Kubernetes.App
+    properties:
+      service_cidr:
+        type: string
+    attributes:
+      advertise_address:
+        type: string
+      bind_address:
+        type: string
+      etcd_servers:
+        type: list
+        entry_schema:
+          type: string
+      tls_private_key_file:
+        type: string
+
+  kubetos.capabilities.Kubernetes.Scheduler:
+    derived_from: kubetos.capabilities.Kubernetes.App
+    attributes:
+      config_path:
+        type: string
+
+  kubetos.capabilities.Kubernetes.ControllerManager:
+    derived_from: kubetos.capabilities.Kubernetes.App
+    properties:
+      pod_cidr:
+        type: string
+      service_cidr:
+        type: string
 
 relationship_types:
 
@@ -106,6 +138,12 @@ node_types:
   kubetos.nodes.Kubernetes.Worker:
     derived_from: kubetos.nodes.Kubernetes.Root
     capabilities:
+      static_host:
+        type: kubetos.capabilities.Kubernetes.ResourceHost.Static
+        attributes:
+          path:
+            type: string
+            default: { get_property: [ SELF, kubelet, static_pod_path ] }
       kubelet:
         type: kubetos.capabilities.Kubelet
       endpoint:
@@ -118,20 +156,14 @@ node_types:
           relationship: tosca.relationships.ConnectsTo
           occurrences: [ 1, 1 ]
 
-  kubetos.nodes.Kubernetes.Node:
-    derived_from: tosca.nodes.SoftwareComponent
-    capabilities:
-      client_cert:
-        type: kubetos.capabilities.Certificate
-      kubelet:
-        type: kubetos.capabilities.Kubelet
-      endpoint:
-        type: tosca.capabilities.Endpoint
-    requirements:
-      - apiserver:
-          capability: tosca.capabilities.Endpoint
-          relationship: tosca.relationships.ConnectsTo
-          occurrences: [ 1, 1 ]
+
+  # kubetos.nodes.Kubernetes.StaticPod:
+  #   derived_from: kubetos.nodes.Kubernetes.Pod
+    # requirements:
+    #   - host:
+    #       capability: kubetos.capabilities.Kubelet
+    #       relationship: tosca.relationships.HostedOn
+     
 
   # kubetos.nodes.Kubernetes.Worker:
   #   derived_from: kubetos.nodes.Kubernetes.Root
@@ -186,8 +218,8 @@ node_types:
         type: kubetos.capabilities.CertificateAuthority
       access_address:
         type: tosca.capabilities.Endpoint
-      scalable:
-        type: tosca.capabilities.Scalable
+      # scalable:
+      #   type: tosca.capabilities.Scalable
     properties:
       cluster_name:
         type: string
@@ -209,43 +241,45 @@ node_types:
   kubetos.nodes.Kubernetes.APIServer:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
+      apiserver:
+        type: kubetos.capabilities.Kubernetes.APIServer
       access_address:
         type: tosca.capabilities.Endpoint
-      kubelet_client_cert:
-        type: kubetos.capabilities.Certificate
-      tls_cert:
-        type: kubetos.capabilities.Certificate
-    properties:
-      component_version:
-        type: version
-        default: 1.21.0
-      service_cidr:
-        type: string
     requirements:
       - etcd:
           capability: tosca.capabilities.Endpoint
           relationship: tosca.relationships.ConnectsTo
           occurrences: [ 1, UNBOUNDED ]
-      - service_account_issuer:
-          capability: kubetos.capabilities.Certificate
-          relationship: tosca.relationships.DependsOn
-          occurrences: [ 1, 1 ]
-      - ca:
-          capability: kubetos.capabilities.CertificateAuthority
-          relationship: tosca.relationships.DependsOn
-          occurrences: [ 1, 1 ]
+
+  kubetos.nodes.Kubernetes.APIServer.Pod:
+    derived_from: kubetos.nodes.Kubernetes.Pod
+    capabilities:
+      apiserver:
+        type: kubetos.capabilities.Kubernetes.APIServer
+      access_address:
+        type: tosca.capabilities.Endpoint
+    requirements:
+      - etcd:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, UNBOUNDED ]
 
   kubetos.nodes.Kubernetes.Scheduler:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
-      client_cert:
-        type: kubetos.capabilities.Certificate
-    properties:
-      component_version:
-        type: version
-        default: 1.21.0
-      config_path:
-        type: string
+      scheduler:
+        type: kubetos.capabilities.Kubernetes.Scheduler
+    requirements:
+      - apiserver:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, 1 ]
+
+  kubetos.nodes.Kubernetes.Scheduler.Pod:
+    derived_from: kubetos.nodes.Kubernetes.Pod
+    capabilities:
+      scheduler:
+        type: kubetos.capabilities.Kubernetes.Scheduler
     requirements:
       - apiserver:
           capability: tosca.capabilities.Endpoint
@@ -255,28 +289,23 @@ node_types:
   kubetos.nodes.Kubernetes.ControllerManager:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
-      client_cert:
-        type: kubetos.capabilities.Certificate
-    properties:
-      component_version:
-        type: version
-        default: 1.21.0
-      pod_cidr:
-        type: string
-      service_cidr:
-        type: string
+      controller_manager:
+        type: kubetos.capabilities.Kubernetes.ControllerManager
     requirements:
       - apiserver:
           capability: tosca.capabilities.Endpoint
           relationship: tosca.relationships.ConnectsTo
           occurrences: [ 1, 1 ]
-      - service_account_issuer:
-          capability: tosca.capabilities.Node
-          relationship: tosca.relationships.DependsOn
-          occurrences: [ 1, 1 ]
-      - ca:
-          capability: kubetos.capabilities.CertificateAuthority
-          relationship: tosca.relationships.DependsOn
+
+  kubetos.nodes.Kubernetes.ControllerManager.Pod:
+    derived_from: kubetos.nodes.Kubernetes.Pod
+    capabilities:
+      controller_manager:
+        type: kubetos.capabilities.Kubernetes.ControllerManager
+    requirements:
+      - apiserver:
+          capability: tosca.capabilities.Endpoint
+          relationship: tosca.relationships.ConnectsTo
           occurrences: [ 1, 1 ]
 
 

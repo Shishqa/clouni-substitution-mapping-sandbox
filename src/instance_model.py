@@ -79,7 +79,7 @@ def create_function(node, meta, function_call):
   if function_call['name'] == 'tosca.function.concat':
     return Concat(node, meta, function_call['arguments'])
 
-  raise RuntimeError('unknown function')
+  raise RuntimeError(f'unknown function {function_call}')
 
 
 class ValueInstance:
@@ -165,7 +165,7 @@ class GetInput(ValueInstance):
     self.input_name = args[0]['$primitive']
 
   def get(self):
-    return self.node.topology.get_input(self.input_name)
+    return self.node.topology.find_input(self.input_name).get()
 
 
 class GetProperty(ValueInstance):
@@ -178,9 +178,9 @@ class GetProperty(ValueInstance):
     start = self.args[0]
     try:
       if start == 'SELF':
-        return self.node.get_property(self.args[1:])
+        return self.node.find_property(self.args[1:]).get()
       else:
-        return self.node.topology.nodes[start].get_property(self.args[1:])
+        return self.node.topology.nodes[start].find_property(self.args[1:]).get()
     except RuntimeError:
       raise RuntimeError(f'{self.node.topology.name}: cannot find property from node {self.node.name}: {self.args}')
 
@@ -195,9 +195,26 @@ class GetAttribute(ValueInstance):
     start = self.args[0]
     try:
       if start == 'SELF':
-        return self.node.get_attribute(self.args[1:])
+        return self.node.find_attribute(self.args[1:]).get()
       else:
-        return self.node.topology.nodes[start].get_attribute(self.args[1:])
+        return self.node.topology.nodes[start].find_attribute(self.args[1:]).get()
+    except RuntimeError:
+      raise RuntimeError(f'{self.node.topology.name}: cannot find attribute from node {self.node.name}: {self.args}')
+
+
+class AttributeMapping(ValueInstance):
+  def __init__(self, node, meta, mapping):
+    super().__init__(node, meta)
+    self.args = [e['$primitive'] for e in mapping]
+
+  def set(self, value):
+    print(f'SET {self.args}')
+    start = self.args[0]
+    try:
+      if start == 'SELF':
+        return self.node.find_attribute(self.args[1:]).set(value)
+      else:
+        return self.node.topology.nodes[start].find_attribute(self.args[1:]).set(value)
     except RuntimeError:
       raise RuntimeError(f'{self.node.topology.name}: cannot find attribute from node {self.node.name}: {self.args}')
 
@@ -221,15 +238,25 @@ class Concat(ValueInstance):
 class AttributeInstance:
   def __init__(self, node, definition, is_property=False):
     self.node = node
+    self.mapping = None
     self.is_property = is_property
     self.definition = copy.deepcopy(definition)
     self.value = create_value_atom(node, self.definition)
 
+  def map(self, other):
+    self.mapping = other
+    # self.set(self.mapping.get())
+
   def get(self):
+    if self.mapping is not None:
+      return self.mapping.get()
     return self.value.get()
 
   def set(self, value):
     self.value = value
+    if self.mapping is not None:
+      self.mapping.set(value)      
+    print(f'UPDATED ATTR {self.node.topology.name} {self.node.name} : {self.value.get()}')
 
 
 class CapabilityInstance:
@@ -262,20 +289,20 @@ class CapabilityInstance:
         seen.remove(type_body['parent'])
     self.type = seen.pop()
 
-  def get_property(self, args):
+  def find_property(self, args):
     path = args[0]
     print(f'CAP ATTRIBUTES: {self.attributes.keys()}')
     if path in self.attributes.keys():
       attr = self.attributes[path]
       if not attr.is_property:
         raise RuntimeError(f'there is the attribute with name {path}, but it is not a property')
-      return attr.get()
+      return attr
     raise RuntimeError('no property')
 
-  def get_attribute(self, args):
+  def find_attribute(self, args):
     path = args[0]
     if path in self.attributes.keys():
-      return self.attributes[path].get()
+      return self.attributes[path]
     raise RuntimeError('no attribute')
 
 
@@ -292,6 +319,9 @@ class OperationInstance:
     for input_name, input_def in self.definition['inputs'].items():
       self.inputs[input_name] = AttributeInstance(node, input_def, is_property=True)
 
+    self.outputs = {}
+    for output_name, output_def in self.definition['outputs'].items():
+      self.outputs[output_name] = AttributeMapping(node, output_def['$meta'], output_def['$list'])
 
 class InterfaceInstance:
   def __init__(self, node, definition):
@@ -383,7 +413,7 @@ class NodeInstance:
         seen.remove(type_body['parent'])
     self.type = seen.pop()
 
-  def get_property(self, args):
+  def find_property(self, args):
     path = args[0]
     rest = args[1:]
 
@@ -391,31 +421,31 @@ class NodeInstance:
       attr = self.attributes[path]
       if not attr.is_property:
         raise RuntimeError(f'there is the attribute with name {path}, but it is not a property')
-      return attr.get()
+      return attr
 
     print(f'CAPABILITIES: {self.capabilities.keys()}')
     if path in self.capabilities.keys():
-      return self.capabilities[path].get_property(rest)
+      return self.capabilities[path].find_property(rest)
 
     for r in self.requirements:
       if r.name == path:
-        return r.target.get_attribute(rest)
+        return r.target.find_attribute(rest)
 
     raise RuntimeError('no property')
 
-  def get_attribute(self, args):
+  def find_attribute(self, args):
     path = args[0]
     rest = args[1:]
 
     if path in self.attributes.keys():
-      return self.attributes[path].get()
+      return self.attributes[path]
 
     if path in self.capabilities.keys():
-      return self.capabilities[path].get_attribute(rest)
+      return self.capabilities[path].find_attribute(rest)
 
     for r in self.requirements:
       if r.name == path:
-        return r.target.get_attribute(rest)
+        return r.target.find_attribute(rest)
 
     raise RuntimeError('no attribute')
 
@@ -453,7 +483,7 @@ class TopologyTemplateInstance:
           req_def['relationship']
         ))
 
-  def get_input(self, input_name):
+  def find_input(self, input_name):
     if input_name not in self.inputs.keys():
       raise RuntimeError(f'no input named {input_name}')
-    return self.inputs[input_name].get()
+    return self.inputs[input_name]

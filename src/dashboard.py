@@ -2,21 +2,18 @@ import os
 import subprocess as sp
 
 import compositor
+import instance_storage
 
 
-def display_topology(name):
+def display_topology(topology_name):
   if not os.path.exists('dashboard'):
     os.makedirs('dashboard')
 
-  topology_status = compositor.query(name)
-  display(topology_status)
-
-
-def display(topology_status):
-  topology_name = topology_status['name']
   print(f'displaying {topology_name}')
 
-  res = dump_topology(topology_status['topology'])
+  topology = instance_storage.get_topology(topology_name)
+  topology_status = compositor.query(topology_name)
+  res = dump_topology(topology)
 
   f = open(f'dashboard/{topology_name}.d2', "w")
   f.write(res)
@@ -34,7 +31,7 @@ def display(topology_status):
     raise RuntimeError(res[1])
   
   for subtopology in topology_status['subtopologies'].values():
-    display(subtopology)
+    display_topology(subtopology['name'])
 
 
 def dump_topology(topology):

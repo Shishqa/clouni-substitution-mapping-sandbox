@@ -1,22 +1,27 @@
 ---
-- hosts: localhost
-  connection: local
+- hosts: all
   gather_facts: no
-  vars:
-    required_distro: cirros
-    required_version: 0.4.0
-    required_arch: x86_64
   tasks:
 
   - name: retrieve info about image
-    openstack.cloud.image_info:
-      image: "{{ required_distro }}-{{ required_version }}-{{ required_arch }}"
+    os_image_info:
+      image: "{{ required_distro }}-{{ required_version }}"
     register: result
 
-  - debug:
-      msg: "matched image {{ result.openstack_images[0].id }} named {{ result.openstack_images[0].name }}"
-    when: result.openstack_images | length > 0
+  - name: retrieve info about image with arch
+    os_image_info:
+      image: "{{ required_distro }}-{{ required_version }}-{{ required_arch }}"
+    register: result
+    when: result.openstack_images | length == 0
 
-  - fail:
+
+  - name: fail if there is no matching images
+    fail:
       msg: "no matching images"
     when: result.openstack_images | length == 0
+
+  - name: return id of the image
+    set_stats:
+      data:
+        id: "{{ result.openstack_images[0].id }}"
+    when: result.openstack_images | length > 0

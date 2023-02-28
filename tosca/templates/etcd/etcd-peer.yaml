@@ -1,0 +1,62 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+
+- ../../profiles/etcd/main.yaml
+
+topology_template:
+
+  inputs:
+
+    etcd_version:
+      type: version
+      default: 3.4.13
+
+  node_templates:
+
+    etcd:
+      type: kubetos.nodes.Etcd
+      directives: [ substitute ]
+      capabilities:
+        etcd:
+          properties:
+            name: { get_property: [ compute, host, name ] }
+      properties:
+        component_version: { get_input: [ etcd_version ] }
+      requirements:
+        - host: compute
+
+    compute:
+      type: tosca.nodes.Compute
+      directives: [ substitute ]
+      capabilities:
+        host:
+          properties:
+            name: { get_attribute: [ etcd, etcd, name ] }
+            num_cpus: 1
+            disk_size: 10 GiB
+            mem_size: 1 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: LTS-Focal-Fossa
+            distribution: Ubuntu-Server
+            version: "20.04"
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 5
+            default_instances: 3
+
+
+  substitution_mappings:
+    node_type: kubetos.nodes.Etcd
+    capabilities:
+      peer_address: [ etcd, peer_address ]
+      access_address: [ etcd, access_address ]
+    properties:
+      component_version: [ component_version ]
+    # requirements:
+    #   host: [ etcd, host ]

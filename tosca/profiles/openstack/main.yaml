@@ -8,25 +8,18 @@ capability_types:
       openstack_id:
         type: string
 
+  nova.Flavor:
+    derived_from: tosca.capabilities.Compute
+    attributes:
+      openstack_id:
+        type: string
+
   nova.KeyPair:
     derived_from: tosca.capabilities.Root
     properties:
       name:
         type: string
         required: false
-
-  nova.Flavor:
-    derived_from: tosca.capabilities.Root
-    properties:
-      num_cpus:
-        type: integer
-      disk_size:
-        type: scalar-unit.size
-      mem_size:
-        type: scalar-unit.size
-    attributes:
-      openstack_id:
-        type: string
 
   neutron.FloatingIp:
     derived_from: tosca.capabilities.Endpoint
@@ -80,6 +73,17 @@ node_types:
   # https://docs.openstack.org/heat/wallaby/template_guide/openstack.html#OS::Nova::Server
   nova.Server:
     derived_from: tosca.nodes.Root
+    capabilities:
+      host:
+        type: nova.Server
+      os:
+        type: glance.WebImage
+      scalable:
+        type: tosca.capabilities.Scalable
+      binding:
+        type: tosca.capabilities.network.Bindable
+      private_endpoint:
+        type: tosca.capabilities.Endpoint
     attributes:
       private_address:
         type: string
@@ -97,17 +101,6 @@ node_types:
         type: list
         entry_schema:
           type: string
-    capabilities:
-      host:
-        type: nova.Server
-      os:
-        type: tosca.capabilities.OperatingSystem
-      scalable:
-        type: tosca.capabilities.Scalable
-      binding:
-        type: tosca.capabilities.network.Bindable
-      private_endpoint:
-        type: tosca.capabilities.Endpoint
     requirements:
     - image:
         capability: glance.WebImage
