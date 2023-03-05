@@ -15,60 +15,63 @@ topology_template:
 
     etcd:
       type: kubetos.nodes.Etcd
+      capabilities:
+        etcd:
+          properties:
+            name: etcd
       properties:
         component_version: { get_input: [ component_version ] }
-      capabilities:
-        access_address:
-          properties:
-            port: 2379
-            api_version: v2
-        peer_address:
-          properties:
-            port: 2380
       interfaces:
         Standard:
-          inputs:
-            etcd_version: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
           operations:
             create:
+              inputs:
+                etcd_version: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
               implementation:
-                primary: ansible/etcd--create.yaml
+                primary: artifacts/etcd/ansible/etcd--create.yaml
                 dependencies:
-                  - etcd_role
-                  - download_role
+                  - artifacts/etcd/ansible/roles/etcd
+                  - artifacts/utils/roles/download
+                operation_host: HOST
             configure:
               inputs:
-                # etcd_address: { get_attribute: [ SELF, host, private_address ] }
-                etcd_peer_port: { get_property: [ SELF, peer_address, port ] }
-                # etcd_access_address: { get_attribute: [ SELF, host, private_address ] }
-                etcd_access_port: { get_property: [ SELF, access_address, port ] }
-                etcd_member_name: { get_attribute: [ SELF, name ] }
+                etcd_version: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
+                etcd_address: { get_attribute: [ SELF, peer_endpoint, ip_address ] }
+                etcd_peer_port: { get_property: [ SELF, peer_endpoint, port ] }
+                etcd_access_address: { get_attribute: [ SELF, access_endpoint, ip_address ] }
+                etcd_access_port: { get_property: [ SELF, access_endpoint, port ] }
+                etcd_member_name: { get_attribute: [ SELF, etcd, name ] }
                 etcd_peers: { get_attribute: [ SELF, peers ] }
               implementation:
-                primary: ansible/etcd--configure.yaml
+                primary: artifacts/etcd/ansible/etcd--configure.yaml
                 dependencies:
-                  - etcd_role
+                  - artifacts/etcd/ansible/roles/etcd
+                operation_host: HOST
             start:
+              inputs:
+                etcd_version: { concat: [ "v", { get_property: [ SELF, component_version ] } ] }
               implementation:
-                primary: ansible/etcd--start.yaml
+                primary: artifacts/etcd/ansible/etcd--start.yaml
                 dependencies:
-                  - etcd_role
+                  - artifacts/etcd/ansible/roles/etcd
+                operation_host: HOST
       artifacts:
-        etcd_role:
-          file: ansible/roles/etcd
+        artifacts/etcd/ansible/roles/etcd:
+          file: artifacts/etcd/ansible/roles/etcd
           type: tosca.artifacts.File
           deploy_path: roles/etcd
-        download_role:
-          file: ../../utils/roles/download
+        artifacts/utils/roles/download:
+          file: artifacts/utils/roles/download
           type: tosca.artifacts.File
           deploy_path: roles/download
 
   substitution_mappings:
     node_type: kubetos.nodes.Etcd
     capabilities:
-      peer_address: [ etcd, peer_address ]
-      access_address: [ etcd, access_address ]
+      etcd: [ etcd, etcd ]
+      peer_endpoint: [ etcd, peer_endpoint ]
+      access_endpoint: [ etcd, access_endpoint ]
     properties:
       component_version: [ component_version ]
-    # requirements:
-    #   host: [ etcd, host ]
+    requirements:
+      host: [ etcd, host ]

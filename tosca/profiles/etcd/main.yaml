@@ -93,22 +93,22 @@ relationship_types:
 
 node_types:
 
-  kubetos.nodes.Etcd.Discovery:
-    derived_from: tosca.nodes.Root
-    attributes:
-      peers:
-        type: list
-        entry_schema:
-          type: string
+  # kubetos.nodes.Etcd.Discovery:
+  #   derived_from: tosca.nodes.Root
+  #   attributes:
+  #     peers:
+  #       type: list
+  #       entry_schema:
+  #         type: string
 
   kubetos.nodes.Etcd:
     derived_from: tosca.nodes.SoftwareComponent
     capabilities:
       etcd:
         type: kubetos.capabilities.Etcd
-      access_address:
+      access_endpoint:
         type: kubetos.capabilities.Etcd.Endpoint.Access
-      peer_address:
+      peer_endpoint:
         type: kubetos.capabilities.Etcd.Endpoint.Peer
     properties:
       component_version:
@@ -119,3 +119,15 @@ node_types:
         type: list
         entry_schema:
           type: string
+
+  kubetos.nodes.Etcd.Cluster:
+    derived_from: tosca.nodes.Root
+    capabilities:
+      etcd:
+        type: kubetos.capabilities.Etcd
+      access_address:
+        type: kubetos.capabilities.Etcd.Endpoint.Access
+    properties:
+      component_version:
+        type: version
+        required: true

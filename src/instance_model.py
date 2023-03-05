@@ -249,7 +249,10 @@ class AttributeInstance:
 
   def get(self):
     if self.mapping is not None:
-      return self.mapping.get()
+      mapped = self.mapping.get()
+      if mapped is not None:
+        return mapped
+
     return self.value.get()
 
   def set(self, value):

@@ -47,6 +47,7 @@ def update_node_state(node_name, new_state):
   node = topology.nodes[node_name[1]]
   node.attributes['state'].set(instance_model.Primitive(node, {}, new_state))
   instance_storage.add_topology(topology)
+  return new_state
 
 
 def deploy(topology_status):
@@ -55,8 +56,17 @@ def deploy(topology_status):
 
     print(node_name, node_state)
 
-    if node_state in ['creating', 'configuring', 'starting']:
-      raise RuntimeError('somebody already operates on node')
+    if node_state in ['creating', 'failed']:
+      print('rescuing from failed create operation')
+      node_state = update_node_state(node_name, 'initial')
+
+    if node_state == 'configuring':
+      print('rescuing from failed configure operation')
+      node_state = update_node_state(node_name, 'created')
+
+    if node_state == 'starting':
+      print('rescuing from failed start operation')
+      node_state = update_node_state(node_name, 'configured')
 
     if node_state == 'initial':
       update_node_state(node_name, 'creating')
@@ -64,23 +74,43 @@ def deploy(topology_status):
       print(f'creating {node_name}')
       run_operation(node_name, 'Standard', 'create')
 
-      update_node_state(node_name, 'created')
+      node_state = update_node_state(node_name, 'created')
 
-    if node_state in ['initial', 'created']:
+    if node_state == 'created':
       update_node_state(node_name, 'configuring')
 
       print(f'configuring {node_name}')
       run_operation(node_name, 'Standard', 'configure')
 
-      update_node_state(node_name, 'configured')
+      node_state = update_node_state(node_name, 'configured')
 
-    if node_state in ['initial', 'created', 'configured']:
+    if node_state == 'configured':
       update_node_state(node_name, 'starting')
 
       print(f'starting {node_name}')
       run_operation(node_name, 'Standard', 'start')
 
-      update_node_state(node_name, 'started')
+      node_state = update_node_state(node_name, 'started')
+
+
+def get_address_by_host(node_name, host):
+  topology = instance_storage.get_topology(node_name[0])
+  node = topology.nodes[node_name[1]]
+
+  address = None
+  if host == 'HOST':
+    for req in node.requirements:
+      print(req.type)
+      if req.type != 'tosca::HostedOn':
+        continue
+      
+      address = req.target.attributes['public_address'].get()
+      break
+
+  if host == 'ORCHESTRATOR':
+    address = 'localhost'
+  
+  return address
 
 
 def run_operation(node_name, interface, operation):
@@ -99,16 +129,29 @@ def run_operation(node_name, interface, operation):
   if 'host' in operation.definition.keys():
     host = operation.definition['host']
 
-  if host != 'ORCHESTRATOR':
-    raise RuntimeError(f'cannot run operation on {host}')
+  address = get_address_by_host(node_name, host)
+  if address is None:
+    raise RuntimeError(f'cannot run operation, no valid address for {host}')
 
-  address = 'localhost'
+  dependencies = []
+  print(node.definition['artifacts'].keys())
+  for dependency_name in operation.definition['dependencies']:
+    if dependency_name in node.definition['artifacts'].keys():
+      dependencies.append({
+        'source': dependency_name,
+        'dest': node.definition['artifacts'][dependency_name]['targetPath']
+      })
+    else:
+      dependencies.append({
+        'source': dependency_name,
+        'dest': os.path.basename(d)
+      })
 
   ok, run_outputs = runner.run_artifact(
     address,
     operation.implementation,
     inputs,
-    operation.definition['dependencies']
+    dependencies
   )
 
   if not ok:

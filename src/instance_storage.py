@@ -33,7 +33,7 @@ def add_topology(topology: instance_model.TopologyTemplateInstance):
     if node.type not in nodes.keys():
       nodes[node.type] = {}
     nodes[node.type][topology.name + '$' + node_name] = node
-
+  dump_database()
 
 def get_topology(name):
   return topologies[name]

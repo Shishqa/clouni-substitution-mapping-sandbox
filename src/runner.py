@@ -27,16 +27,19 @@ def _get_inventory(host):
         inventory["ansible_connection"] = "local"
         inventory["ansible_python_interpreter"] = sys.executable
     else:
-        inventory["ansible_user"] = os.environ.get("OPERA_SSH_USER", "centos")
+        inventory["ansible_user"] = os.environ.get("OPERA_SSH_USER", "ubuntu")
         opera_ssh_identity_file = os.environ.get("OPERA_SSH_IDENTITY_FILE")
         if opera_ssh_identity_file is not None:
             inventory["ansible_ssh_private_key_file"] = opera_ssh_identity_file
+
+    print(yaml.safe_dump(dict(all=dict(hosts=dict(opera=inventory)))))
 
     return yaml.safe_dump(dict(all=dict(hosts=dict(opera=inventory))))
 
 
 def run_artifact(host, primary, variables, dependencies):
     print(dependencies)
+    print(host)
 
     # pylint: disable=too-many-locals
     with tempfile.TemporaryDirectory() as dir_path:
@@ -44,7 +47,7 @@ def run_artifact(host, primary, variables, dependencies):
         ucopy(primary, playbook)
 
         for d in dependencies:
-            ucopy(d, os.path.join(dir_path, os.path.basename(d)))
+            ucopy(d['source'], os.path.join(dir_path, d['dest']))
         # for a in artifacts:
         #     utils.copy(os.path.join(workdir, a), os.path.join(dir_path, os.path.basename(a)))
 
@@ -62,6 +65,14 @@ def run_artifact(host, primary, variables, dependencies):
             #         fd.write("host_key_checking = False\n")
 
         print(json.dumps({"inputs": {key: variables[key] for key in variables}}, indent=2, sort_keys=True))
+
+        for root, dirs, files in os.walk(dir_path):
+            level = root.replace(dir_path, '').count(os.sep)
+            indent = ' ' * 4 * (level)
+            print('{}{}/'.format(indent, os.path.basename(root)))
+            subindent = ' ' * 4 * (level + 1)
+            for f in files:
+                print('{}{}'.format(subindent, f))
 
         cmd = [
             "ansible-playbook",

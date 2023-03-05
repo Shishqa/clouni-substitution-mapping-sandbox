@@ -20,19 +20,27 @@ topology_template:
       capabilities:
         etcd:
           properties:
-            name: { get_property: [ compute, host, name ] }
+            name: { get_property: [ shishqa_test_etcd_compute, host, name ] }
+        peer_endpoint:
+          attributes:
+            ip_address: { get_attribute: [ shishqa_test_etcd_compute, private_address ] }
+        access_endpoint:
+          attributes:
+            ip_address: { get_attribute: [ shishqa_test_etcd_compute, public_address ] }
+      attributes:
+        etcd
       properties:
         component_version: { get_input: [ etcd_version ] }
       requirements:
-        - host: compute
+        - host: shishqa_test_etcd_compute
 
-    compute:
+    shishqa_test_etcd_compute:
       type: tosca.nodes.Compute
       directives: [ substitute ]
       capabilities:
         host:
           properties:
-            name: { get_attribute: [ etcd, etcd, name ] }
+            name: { get_attribute: [ SELF, tosca_name ] }
             num_cpus: 1
             disk_size: 10 GiB
             mem_size: 1 GiB
@@ -51,12 +59,12 @@ topology_template:
             default_instances: 3
 
 
-  substitution_mappings:
-    node_type: kubetos.nodes.Etcd
-    capabilities:
-      peer_address: [ etcd, peer_address ]
-      access_address: [ etcd, access_address ]
-    properties:
-      component_version: [ component_version ]
-    # requirements:
-    #   host: [ etcd, host ]
+  # substitution_mappings:
+  #   node_type: kubetos.nodes.Etcd
+  #   capabilities:
+  #     peer_address: [ etcd, peer_address ]
+  #     access_address: [ etcd, access_address ]
+  #   properties:
+  #     component_version: [ component_version ]
+  #   # requirements:
+  #   #   host: [ etcd, host ]
