@@ -24,9 +24,6 @@ def init_database():
   for root, dirs, files in os.walk("tosca/templates"):
     for file in files:
       path = os.path.join(root, file)
-      if 'tosca/templates/etcd' not in path:
-        if 'tosca/templates/openstack' not in path:
-          continue
 
       print(path)
 

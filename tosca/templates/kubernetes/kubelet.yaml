@@ -21,6 +21,13 @@ topology_template:
 
     kubelet:
       type: kubetos.nodes.Kubernetes.Kubelet
+      capabilities:
+        kubelet:
+          properties:
+            api_version: "1"
+            dns_ip: "1.2.3.4"
+            pod_cidr: "1.2.3.4/24"
+            static_pod_path: "manifests"
       properties:
         component_version: { get_input: [ component_version ] }
       interfaces:

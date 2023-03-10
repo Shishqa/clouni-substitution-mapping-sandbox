@@ -98,6 +98,12 @@ topology_template:
     etcd:
       type: kubetos.nodes.Etcd
       directives: [ select ]
+      properties:
+        component_version: "1.2.3"
+      capabilities:
+        etcd:
+          properties:
+            name: test
       # capabilities:
       #   access_address:
       #     properties:

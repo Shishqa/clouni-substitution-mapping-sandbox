@@ -36,6 +36,13 @@ topology_template:
     worker:
       type: kubetos.nodes.Kubernetes.Worker
       directives: [ substitute ]
+      capabilities:
+        kubelet:
+          properties:
+            api_version: "1"
+            dns_ip: "1.2.3.4"
+            pod_cidr: "1.2.3.4/24"
+            static_pod_path: "manifests"
       properties:
         kubernetes_version: { get_input: [ kubernetes_version ] }
       requirements:

@@ -87,6 +87,28 @@ def query(topology_name):
   return result
 
 
+def select_substitution(options):
+  substitution_template = None
+  if len(options) == 0:
+    return None
+
+  while substitution_template is None:
+    # if len(options) == 1:
+    #   substitution_template = options[0]["file"]
+    #   break
+
+    for i, item in enumerate(options):
+      print(f' {i} - {item["file"]}')
+
+    choose = int(input('your choice: '))
+    if choose in range(len(options)):
+      print(f'chosen {options[choose]["file"]}')
+      substitution_template = options[choose]["file"]
+    else:
+      print('please, choose correct option')
+  return substitution_template
+
+
 def resolve(topology_name):
   topology_status = query(topology_name)
   topology = instance_storage.get_topology(topology_status['name'])
@@ -95,7 +117,7 @@ def resolve(topology_name):
     if issue['type'] == 'substitute':
       options = issue['options']
       print(f'please choose desired substitution for node {issue["target"]} in {topology_status["name"]}')
-      substitution_template = options[0]['file']
+      substitution_template = select_substitution(options)
       print(f'- substituting {issue["target"]} -> {substitution_template}')
       normalized_template = tosca_repository.get_template(substitution_template)
       substitution = instantiate(

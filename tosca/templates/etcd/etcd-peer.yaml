@@ -27,8 +27,6 @@ topology_template:
         access_endpoint:
           attributes:
             ip_address: { get_attribute: [ shishqa_test_etcd_compute, public_address ] }
-      attributes:
-        etcd
       properties:
         component_version: { get_input: [ etcd_version ] }
       requirements:
