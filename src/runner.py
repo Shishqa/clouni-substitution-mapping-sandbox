@@ -32,14 +32,16 @@ def _get_inventory(host):
         if opera_ssh_identity_file is not None:
             inventory["ansible_ssh_private_key_file"] = opera_ssh_identity_file
 
+    print('host:')
     print(yaml.safe_dump(dict(all=dict(hosts=dict(opera=inventory)))))
+    print('')
 
     return yaml.safe_dump(dict(all=dict(hosts=dict(opera=inventory))))
 
 
 def run_artifact(host, primary, variables, dependencies):
-    print(dependencies)
-    print(host)
+    # print(dependencies)
+    # print(host)
 
     # pylint: disable=too-many-locals
     with tempfile.TemporaryDirectory() as dir_path:
@@ -66,6 +68,7 @@ def run_artifact(host, primary, variables, dependencies):
 
         print(json.dumps({"inputs": {key: variables[key] for key in variables}}, indent=2, sort_keys=True))
 
+        print('\nrunner_root:')
         for root, dirs, files in os.walk(dir_path):
             level = root.replace(dir_path, '').count(os.sep)
             indent = ' ' * 4 * (level)
@@ -74,6 +77,7 @@ def run_artifact(host, primary, variables, dependencies):
             for f in files:
                 print('{}{}'.format(subindent, f))
 
+        print('')
         cmd = [
             "ansible-playbook",
             "-i", inventory,
@@ -89,11 +93,11 @@ def run_artifact(host, primary, variables, dependencies):
         )
         code, out, err = urun_in_directory(dir_path, cmd, env)
         if code != 0:
-            print('out')
+            #print('out')
             with open(out, encoding="utf-8") as fd:
                 print(fd.read())
                 # thread_utils.SafePrinter.print_lines(fd)
-            print('err')
+            #print('err')
             with open(err, encoding="utf-8") as fd:
                 print(fd.read())
                 # thread_utils.SafePrinter.print_lines(fd)

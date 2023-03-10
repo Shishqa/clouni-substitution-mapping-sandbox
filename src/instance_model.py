@@ -208,7 +208,7 @@ class AttributeMapping(ValueInstance):
     self.args = [e['$primitive'] for e in mapping]
 
   def set(self, value):
-    print(f'SET {self.args}')
+    # print(f'SET {self.args}')
     start = self.args[0]
     try:
       if start == 'SELF':
@@ -259,7 +259,7 @@ class AttributeInstance:
     self.value = value
     if self.mapping is not None:
       self.mapping.set(value)      
-    print(f'UPDATED ATTR {self.node.topology.name} {self.node.name} : {self.value.get()}')
+    # print(f'UPDATED ATTR {self.node.topology.name} {self.node.name} : {self.value.get()}')
 
 
 class CapabilityInstance:
@@ -294,7 +294,7 @@ class CapabilityInstance:
 
   def find_property(self, args):
     path = args[0]
-    print(f'CAP ATTRIBUTES: {self.attributes.keys()}')
+    # print(f'CAP ATTRIBUTES: {self.attributes.keys()}')
     if path in self.attributes.keys():
       attr = self.attributes[path]
       if not attr.is_property:
@@ -426,7 +426,7 @@ class NodeInstance:
         raise RuntimeError(f'there is the attribute with name {path}, but it is not a property')
       return attr
 
-    print(f'CAPABILITIES: {self.capabilities.keys()}')
+    # print(f'CAPABILITIES: {self.capabilities.keys()}')
     if path in self.capabilities.keys():
       return self.capabilities[path].find_property(rest)
 

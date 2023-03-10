@@ -42,6 +42,9 @@ class CallbackModule(CallbackBase):
         # pylint: disable=protected-access
         self.tasks[task._uuid] = task.name
 
+    def v2_runner_on_failed(self, result, ignore_errors=False):
+        self.dump_result(result)
+
     def v2_playbook_on_stats(self, stats):
         custom_stats = {k.get_name() if isinstance(k, (Host,)) else k: v for k, v in stats.custom.items()}
 

@@ -21,7 +21,7 @@ def instantiate(normalized_template, topology_name, should_resolve=True):
 
 
 def query(topology_name):
-  print(f'query {topology_name}')
+  # print(f'query {topology_name}')
   topology = instance_storage.get_topology(topology_name)
   result = {
     'name': topology_name,
@@ -100,12 +100,17 @@ def select_substitution(options):
     for i, item in enumerate(options):
       print(f' {i} - {item["file"]}')
 
-    choose = int(input('your choice: '))
+    try:
+      choose = int(input('your choice: '))
+    except ValueError:
+      print(f'choice should be [0-{len(options) - 1}]')
+      continue
+    
     if choose in range(len(options)):
       print(f'chosen {options[choose]["file"]}')
       substitution_template = options[choose]["file"]
     else:
-      print('please, choose correct option')
+      print(f'choice should be [0-{len(options) - 1}]')
   return substitution_template
 
 
@@ -118,7 +123,7 @@ def resolve(topology_name):
       options = issue['options']
       print(f'please choose desired substitution for node {issue["target"]} in {topology_status["name"]}')
       substitution_template = select_substitution(options)
-      print(f'- substituting {issue["target"]} -> {substitution_template}')
+      print(f'- substituting {issue["target"]} -> {substitution_template}\n')
       normalized_template = tosca_repository.get_template(substitution_template)
       substitution = instantiate(
         normalized_template,
@@ -239,7 +244,7 @@ def map_node(node, topology):
   instance_storage.add_topology(topology)
 
 def select_node(source, target):
-  print('select')
+  # print('select')
 
   source.attributes = target.attributes
   source.capabilities = target.capabilities

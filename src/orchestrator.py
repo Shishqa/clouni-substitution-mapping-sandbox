@@ -121,9 +121,10 @@ def run_operation(node_name, interface, operation):
   if operation.implementation is None:
     return
 
+  print('\n========================================')
   print(operation.definition)
   inputs = { name: inp.get() for name, inp in operation.inputs.items() }
-  print(inputs)
+  # print(inputs)
   
   host = 'SELF'
   if 'host' in operation.definition.keys():
@@ -134,7 +135,7 @@ def run_operation(node_name, interface, operation):
     raise RuntimeError(f'cannot run operation, no valid address for {host}')
 
   dependencies = []
-  print(node.definition['artifacts'].keys())
+  # print(node.definition['artifacts'].keys())
   for dependency_name in operation.definition['dependencies']:
     if dependency_name in node.definition['artifacts'].keys():
       dependencies.append({
@@ -156,7 +157,7 @@ def run_operation(node_name, interface, operation):
 
   if not ok:
     update_node_state(node_name, 'failed')
-    raise RuntimeError(f'failed operation {operation.definition}')
+    raise RuntimeError('failed operation')
 
   for output_name, output in operation.outputs.items():
     if output_name not in run_outputs.keys():

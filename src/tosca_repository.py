@@ -21,11 +21,12 @@ def init_database():
   if not os.path.exists('tosca/templates'):
     os.makedirs('tosca/templates')
 
+  print('loading templates...')
   for root, dirs, files in os.walk("tosca/templates"):
     for file in files:
       path = os.path.join(root, file)
 
-      print(path)
+      print(f' - {path}')
 
       normalized_template = parse(path)
       templates[path] = normalized_template
@@ -39,6 +40,7 @@ def init_database():
         substitutions[substitution_type] = []
 
       substitutions[substitution_type].append({'file': path})
+  print('done!\n')
 
 
 def parse(path, phases=5):
