@@ -1,0 +1,67 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../../profiles/minio/main.yaml
+
+topology_template:
+  inputs:
+    component_version:
+      type: version
+    data_dir:
+      type: string
+    console_port:
+      type: PortDef
+    console_address:
+      type: string
+    minio_root_password:
+      type: string
+    minio_root_user:
+      type: string
+    minio_binary_file_url:
+      type: string
+
+  node_templates:
+    minio:
+      type: clouni.nodes.minio.server
+      properties:
+        data_dir: { get_input: [ data_dir ] }
+        console_port: { get_input: [ console_port ] }
+        console_address: { get_input: [ console_address ] }
+        minio_root_password: { get_input: [ minio_root_password ] }
+        minio_root_user: { get_input: [ minio_root_user ] }
+        minio_binary_file_url: { get_input: [ minio_binary_file_url ] }
+        component_version: { get_input: [ component_version ] }
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                data_dir: { get_property: [ SELF, data_dir ] }
+                console_port: { get_property: [ SELF, console_port ] }
+                console_address: { get_property: [ SELF, console_address ] }
+                minio_root_password: { get_property: [ SELF, minio_root_password ] }
+                minio_root_user:  { get_property: [ SELF, minio_root_user ] }
+                minio_binary_file_url: { get_property: [ SELF, minio_binary_file_url ] }
+              implementation:
+                primary: artifacts/minio/ansible/server.yaml
+                operation_host: HOST
+                dependencies:
+                  - artifacts/minio/ansible/roles/minio_install
+      artifacts:
+        artifacts/minio/ansible/roles/minio_install:
+          file: artifacts/minio/ansible/roles/minio_install
+          type: tosca.artifacts.File
+          deploy_path: roles/minio_install
+
+  substitution_mappings:
+    node_type: clouni.nodes.minio.server
+    properties:
+      data_dir: [ data_dir ]
+      console_port: [ console_port ]
+      console_address: [ console_address ]
+      minio_root_password: [ minio_root_password ]
+      minio_root_user: [ minio_root_user ]
+      minio_binary_file_url: [ minio_binary_file_url ]
+      component_version: [ component_version ]
+    requirements:
+      host: [ minio, host ]

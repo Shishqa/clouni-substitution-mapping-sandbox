@@ -18,9 +18,8 @@
         key_name: "{{ server_keypair }}"
         nics: 
           - net-name: "{{ server_network }}"
-          # - net-name: ispras
         boot_from_volume: false
-        security_groups: ["default"]
+        security_groups: ["default", "michman-slurm"] # PLEASE delete michman-slurm and add support of endpoint capability
         auto_ip: false
       register: server_info
 

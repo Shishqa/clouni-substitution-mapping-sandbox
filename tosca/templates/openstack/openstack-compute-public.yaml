@@ -12,7 +12,7 @@ topology_template:
     key_name:
       type: string
       description: Name of key-pair to be used for compute instance
-      default: shishqa-toadster
+      default: sadimer_clouni_test_keypair
 
     floating_ip_pool:
       type: string

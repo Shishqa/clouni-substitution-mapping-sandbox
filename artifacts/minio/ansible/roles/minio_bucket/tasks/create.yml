@@ -1,0 +1,3 @@
+---
+- name: Create bucket
+  shell: "mc mb /data/{{ minio_bucket }}"

@@ -1,0 +1,38 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../../profiles/postgres/main.yaml
+
+topology_template:
+  inputs:
+    postgres_version:
+      type: string
+
+  node_templates:
+    postgres:
+      type: clouni.nodes.postgres.standalone
+      properties:
+        postgres_version: { get_input: [ postgres_version ] }
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                postgres_version: { get_property: [ SELF, postgres_version ] }
+              implementation:
+                primary: artifacts/postgres/ansible/server.yaml
+                operation_host: HOST
+                dependencies:
+                  - artifacts/postgres/ansible/roles/postgres_install
+      artifacts:
+        artifacts/minio/ansible/roles/minio_install:
+          file: artifacts/postgres/ansible/roles/postgres_install
+          type: tosca.artifacts.File
+          deploy_path: roles/postgres_install
+
+  substitution_mappings:
+    node_type: clouni.nodes.postgres
+    properties:
+      postgres_version: [ postgres_version ]
+    requirements:
+      host: [ postgres, host ]

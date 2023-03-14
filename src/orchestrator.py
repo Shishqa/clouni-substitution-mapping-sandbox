@@ -1,5 +1,5 @@
 import graphlib
-
+import os
 import compositor
 import instance_model
 import instance_storage
@@ -145,7 +145,7 @@ def run_operation(node_name, interface, operation):
     else:
       dependencies.append({
         'source': dependency_name,
-        'dest': os.path.basename(d)
+        'dest': os.path.basename(dependency_name)
       })
 
   ok, run_outputs = runner.run_artifact(

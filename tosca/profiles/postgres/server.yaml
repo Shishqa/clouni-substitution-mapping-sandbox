@@ -1,0 +1,20 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+node_types:
+  clouni.nodes.postgres:
+    derived_from: tosca.nodes.SoftwareComponent
+    properties:
+      postgres_version:
+        type: string
+        required: true
+        constraints:
+          - valid_values: [ "9.6", "10", "11", "12", "14" ]
+
+  clouni.nodes.postgres.standalone:
+    derived_from: tosca.nodes.SoftwareComponent
+    properties:
+      postgres_version:
+        type: string
+        required: true
+        constraints:
+          - valid_values: [ "9.6", "10", "11", "12", "14" ]

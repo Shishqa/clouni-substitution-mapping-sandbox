@@ -1,0 +1,11 @@
+---
+- hosts: all
+  gather_facts: yes
+  vars:
+    ansible_become: yes
+  tasks:
+    - name: Install Minio S3 server
+      include_role:
+        name: minio_install
+
+

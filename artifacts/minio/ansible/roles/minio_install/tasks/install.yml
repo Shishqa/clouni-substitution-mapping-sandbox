@@ -1,0 +1,9 @@
+---
+- name: Download minio binary
+  get_url:
+    url: '{{ minio_binary_file_url }}'
+    dest: /usr/bin/
+
+- name: Chmod minio
+  shell: "chmod +x /usr/bin/minio"
+

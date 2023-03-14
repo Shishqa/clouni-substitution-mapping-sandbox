@@ -1,9 +1,11 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
 
+imports:
+- ../../profiles/minio/main.yaml
+
 topology_template:
   node_templates:
-
-    sadimer-shishqa-test-from-orchestrator:
+    sadimer-minio-host:
       type: tosca.nodes.Compute
       directives: [ substitute ]
       capabilities:
@@ -24,5 +26,15 @@ topology_template:
         scalable:
           properties:
             min_instances: 1
-            max_instances: 5
-            default_instances: 3
+            max_instances: 1
+            default_instances: 1
+
+    minio:
+      type: clouni.nodes.minio.server
+      properties:
+        minio_root_user: test
+        minio_root_password: password
+        data_dir: /data
+      directives: [ substitute ]
+      requirements:
+        - host: sadimer-minio-host

@@ -1,0 +1,24 @@
+---
+- name: configure postgresql server
+  become: yes
+  become_user: postgres
+  block:
+    - name: get psql config file path
+      shell: psql -c 'SHOW config_file' -tA
+      register: conffile
+
+    - name: get psql hba file path
+      shell: psql -c 'SHOW hba_file' -tA
+      register: hbafile
+
+    - name: set listen_addresses parameter
+      lineinfile:
+        path: "{{ conffile.stdout }}"
+        regexp: '^listen_addresses ='
+        line: listen_addresses = '*'
+
+    - name: accept all incoming connections
+      lineinfile:
+        path: "{{ hbafile.stdout }}"
+        regexp: '^host all all 0.0.0.0/0 md5'
+        line: host all all 0.0.0.0/0 md5

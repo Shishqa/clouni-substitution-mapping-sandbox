@@ -1,0 +1,9 @@
+---
+- name: Include installation task
+  become: yes
+  import_tasks: install.yml
+
+- name: Include create task
+  become: yes
+  import_tasks: create.yml
+

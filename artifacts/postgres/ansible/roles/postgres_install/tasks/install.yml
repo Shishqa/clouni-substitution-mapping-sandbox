@@ -1,0 +1,39 @@
+---
+- name: remove old apt cache
+  shell: rm -rf /var/lib/apt/lists/*
+  args:
+    warn: false
+
+- name: Add postgresql repo key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: add postgresql repo
+  apt_repository:
+    repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
+    state: present
+    filename: postgresql_repo
+
+- name: add security repo
+  apt_repository:
+    repo: deb http://security.ubuntu.com/ubuntu {{ ansible_distribution_release }}-security main
+    state: present
+    filename: postgresql_repo
+
+- name: "Install packages"
+  apt:
+    name:
+      - "postgresql-{{ postgres_version }}"
+      - postgresql-contrib
+      - python3-psycopg2
+      - acl
+    update_cache: yes
+    allow_unauthenticated: yes
+    state: present
+
+- name: "Start and enable services"
+  service:
+    name: postgresql
+    state: started
+    enabled: yes

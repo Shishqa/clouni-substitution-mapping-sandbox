@@ -1,0 +1,26 @@
+---
+- name: "Create db user"
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    state: present
+    name: "{{ postgres_db_user }}"
+    password: "{{ postgres_db_password }}"
+
+- name: "Create database"
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    state: present
+    name: "{{ postgres_db_name }}"
+    owner: "{{ postgres_db_user }}"
+
+- name: "Grant db user access to app db"
+  become: yes
+  become_user: postgres
+  postgresql_privs:
+    type: database
+    database: "{{ postgres_db_name }}"
+    roles: "{{ postgres_db_user }}"
+    grant_option: no
+    privs: all

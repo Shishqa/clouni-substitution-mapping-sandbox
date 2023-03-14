@@ -1,0 +1,14 @@
+---
+- name: Include installation task
+  become: yes
+  import_tasks: install.yml
+
+- name: Include postgresql configuration task
+  become: yes
+  import_tasks: postgresql.yml
+
+- name: restart postgres
+  become: yes
+  service:
+    name: postgresql
+    state: restarted

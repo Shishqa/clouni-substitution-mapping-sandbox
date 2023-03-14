@@ -1,0 +1,8 @@
+---
+- name: Download mc binary
+  get_url:
+    url: '{{ mc_binary_file_url }}'
+    dest: /usr/bin/
+
+- name: Chmod mc
+  shell: "chmod +x /usr/bin/mc"
