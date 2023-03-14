@@ -1,0 +1,44 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../../profiles/object-storage/minio/main.yaml
+
+topology_template:
+  inputs:
+    bucket_name:
+      type: string
+    mc_binary_file_url:
+      type: string
+
+  node_templates:
+    bucket:
+      type: clouni.nodes.minio.bucket
+      properties:
+        bucket_name: { get_input: [ bucket_name ] }
+        mc_binary_file_url: { get_input: [ mc_binary_file_url ] }
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                minio_bucket: { get_property: [ SELF, bucket_name ] }
+                mc_binary_file_url: { get_property: [ SELF, mc_binary_file_url ] }
+              implementation:
+                primary: artifacts/minio/ansible/bucket.yaml
+                operation_host: HOST
+                dependencies:
+                  - artifacts/minio/ansible/roles/minio_bucket
+      artifacts:
+        artifacts/minio/ansible/roles/minio_bucket:
+          file: artifacts/minio/ansible/roles/minio_bucket
+          type: tosca.artifacts.File
+          deploy_path: roles/minio_bucket
+
+  substitution_mappings:
+    node_type: clouni.nodes.minio.bucket
+    properties:
+      bucket_name: [ bucket_name ]
+      mc_binary_file_url: [ mc_binary_file_url ]
+    requirements:
+      host: [ bucket, host ]
+      storage: [ bucket, storage ]

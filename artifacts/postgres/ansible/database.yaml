@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: yes
+  vars:
+    ansible_become: yes
+  tasks:
+    - name: Create PostgreSQL database
+      include_role:
+        name: postgres_database

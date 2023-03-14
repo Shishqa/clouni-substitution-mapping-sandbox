@@ -1,0 +1,41 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../profiles/ray/main.yaml
+- ../profiles/object-storage/main.yaml
+- ../profiles/sql-database/main.yaml
+
+topology_template:
+  node_templates:
+    ray:
+      type: clouni.nodes.ray
+      properties:
+        additional_packages:
+          - pandas==1.5.3
+          - matplotlib==3.6.3
+          - seaborn==0.12.2
+          - scikit-learn==1.2.1
+          - catboost==1.1.1
+          - lightgbm==3.1.0
+          - optuna==2.10.1
+          - hydra-core==1.3.1
+          - hydra-optuna-sweeper==1.2.0
+          - ray[tune]==2.3.0
+      directives: [ substitute ]
+
+    object-store:
+      type: clouni.nodes.objectStorage
+      properties:
+        access_token: test
+        access_password: password
+        storage_name: test
+        storage_dir: data
+      directives: [ substitute ]
+
+    database:
+      type: clouni.nodes.database
+      properties:
+        access_login: test
+        access_password: password
+        database: test
+      directives: [ substitute ]

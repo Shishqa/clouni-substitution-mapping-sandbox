@@ -1,0 +1,18 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+node_types:
+  clouni.nodes.postgres.database:
+    derived_from: tosca.nodes.SoftwareComponent
+    properties:
+      db_user:
+        type: string
+      db_password:
+        type: string
+      db_name:
+        type: string
+    requirements:
+      - dbms:
+          capability: tosca.capabilities.Root
+          relationship: tosca.relationships.HostedOn
+          occurrences: [ 1, 1 ]
+

@@ -1,0 +1,18 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+node_types:
+  clouni.nodes.objectStorage:
+    derived_from: tosca.nodes.SoftwareComponent
+    properties:
+      access_token:
+        type: string
+        required: false # может быть локальным хранилищем
+      access_password:
+        type: string
+        required: false # может быть локальным хранилищем
+      storage_name:
+        type: string
+        required: false
+      storage_dir:
+        type: string
+        required: true

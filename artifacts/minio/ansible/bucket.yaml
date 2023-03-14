@@ -1,0 +1,11 @@
+---
+- hosts: all
+  gather_facts: yes
+  vars:
+    ansible_become: yes
+  tasks:
+    - name: Create Minio S3 bucket
+      include_role:
+        name: minio_bucket
+
+

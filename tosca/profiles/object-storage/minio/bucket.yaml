@@ -1,0 +1,17 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+node_types:
+  clouni.nodes.minio.bucket:
+    derived_from: tosca.nodes.SoftwareComponent
+    properties:
+      mc_binary_file_url:
+        type: string
+        default: https://dl.min.io/client/mc/release/linux-amd64/mc
+      bucket_name:
+        type: string
+        required: true
+    requirements:
+      - storage:
+          capability: tosca.capabilities.Root
+          relationship: tosca.relationships.HostedOn
+          occurrences: [ 1, 1 ]

@@ -92,11 +92,11 @@ def select_substitution(options):
   if len(options) == 0:
     return None
 
-  while substitution_template is None:
-    # if len(options) == 1:
-    #   substitution_template = options[0]["file"]
-    #   break
+  if len(options) == 1:
+    substitution_template = options[0]["file"]
+    return substitution_template
 
+  while substitution_template is None:
     for i, item in enumerate(options):
       print(f' {i} - {item["file"]}')
 

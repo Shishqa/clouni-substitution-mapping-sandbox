@@ -1,0 +1,58 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../../profiles/ray/main.yaml
+
+
+topology_template:
+  inputs:
+    additional_packages:
+      type: list
+      entry_schema:
+        type: string
+    port:
+      type: PortDef
+      default: 6379
+    address:
+      type: string
+      default: 127.0.0.1
+
+  node_templates:
+    ray-slave:
+      type: clouni.nodes.ray.slave
+      properties:
+        additional_packages: { get_input: [ additional_packages ] }
+      capabilities:
+        slave:
+          properties:
+            port: { get_input: [ port ] }
+            address: { get_input: [ address ] }
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                additional_packages: { get_property: [ SELF, additional_packages ] }
+                master_port: { get_property: [ SELF, slave, port ] }
+                master_address: { get_property: [ SELF, slave, address ] }
+              implementation:
+                primary: artifacts/ray/ansible/slave.yaml
+                operation_host: HOST
+                dependencies:
+                  - artifacts/ray/ansible/roles/ray_slave_install
+      artifacts:
+        artifacts/ray/ansible/roles/ray_slave_install:
+          file: artifacts/ray/ansible/roles/ray_slave_install
+          type: tosca.artifacts.File
+          deploy_path: roles/ray_slave_install
+
+  substitution_mappings:
+    node_type: clouni.nodes.ray.slave
+    properties:
+      additional_packages: [ additional_packages ]
+    capabilities:
+      slave: [ ray-slave, slave ]
+    requirements:
+      host: [ ray-slave, host ]
+
+

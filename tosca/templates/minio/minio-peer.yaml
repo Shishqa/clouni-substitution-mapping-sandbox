@@ -1,9 +1,21 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
 
 imports:
-- ../../profiles/minio/main.yaml
+- ../../profiles/object-storage/minio/main.yaml
+- ../../profiles/object-storage/main.yaml
+
 
 topology_template:
+  inputs:
+    storage_dir:
+      type: string
+    access_password:
+      type: string
+    access_token:
+      type: string
+    storage_name:
+      type: string
+
   node_templates:
     sadimer-minio-host:
       type: tosca.nodes.Compute
@@ -32,9 +44,26 @@ topology_template:
     minio:
       type: clouni.nodes.minio.server
       properties:
-        minio_root_user: test
-        minio_root_password: password
-        data_dir: /data
+        minio_root_user: { get_input: [ access_token ] }
+        minio_root_password: { get_input: [ access_password ] }
+        data_dir: { concat: ["/", { get_input: [ storage_dir ] }] }
       directives: [ substitute ]
       requirements:
         - host: sadimer-minio-host
+
+    bucket:
+      type: clouni.nodes.minio.bucket
+      properties:
+        bucket_name: { get_input: [ storage_name ] }
+      directives: [ substitute ]
+      requirements:
+        - host: sadimer-minio-host
+        - storage: minio
+
+  substitution_mappings:
+    node_type: clouni.nodes.objectStorage
+    properties:
+      storage_dir: [ storage_dir ]
+      access_password: [ access_password ]
+      access_token: [ access_token ]
+      storage_name: [ storage_name ]

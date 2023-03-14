@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: yes
+  vars:
+    ansible_become: yes
+  tasks:
+    - name: Install software for RAY cluster slave
+      include_role:
+        name: ray_slave_install

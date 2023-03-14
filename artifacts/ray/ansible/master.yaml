@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: yes
+  vars:
+    ansible_become: yes
+  tasks:
+    - name: Install software for RAY cluster master
+      include_role:
+        name: ray_master_install

@@ -1,0 +1,23 @@
+---
+- name: "Install packages"
+  apt:
+    name: python3-pip
+    update_cache: yes
+    allow_unauthenticated: yes
+    state: present
+
+- name: "Install pip packages"
+  pip:
+    name:
+      - ray[default]
+      - protobuf==3.20.0
+      - mlflow==2.1.1
+      - boto3
+    state: present
+
+- name: "Install additional pip packages"
+  pip:
+    name:
+      - "{{ item }}"
+    state: present
+  with_list: "{{ additional_packages }}"

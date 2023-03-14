@@ -1,0 +1,49 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../../profiles/sql-database/postgres/main.yaml
+
+topology_template:
+  inputs:
+    db_user:
+      type: string
+    db_password:
+      type: string
+    db_name:
+      type: string
+
+  node_templates:
+    postgres-db:
+      type: clouni.nodes.postgres.database
+      properties:
+        db_user: { get_input: [ db_user ] }
+        db_password: { get_input: [ db_password ] }
+        db_name: { get_input: [ db_name ] }
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                postgres_db_user: { get_property: [ SELF, db_user ] }
+                postgres_db_password: { get_property: [ SELF, db_password ] }
+                postgres_db_name: { get_property: [ SELF, db_name ] }
+              implementation:
+                primary: artifacts/postgres/ansible/database.yaml
+                operation_host: HOST
+                dependencies:
+                  - artifacts/postgres/ansible/roles/postgres_database
+      artifacts:
+        artifacts/postgres/ansible/roles/postgres_install:
+          file: artifacts/postgres/ansible/roles/postgres_database
+          type: tosca.artifacts.File
+          deploy_path: roles/postgres_database
+
+  substitution_mappings:
+    node_type: clouni.nodes.postgres.database
+    properties:
+      db_name: [ db_name ]
+      db_user: [ db_user ]
+      db_password: [ db_password ]
+    requirements:
+      host: [ postgres-db, host ]
+      dbms: [ postgres-db, dbms ]

@@ -1,0 +1,45 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+node_types:
+  clouni.nodes.ray:
+    derived_from: tosca.nodes.SoftwareComponent
+    properties:
+      additional_packages:
+        type: list
+        required: false
+        entry_schema:
+          type: string
+
+  clouni.nodes.ray.master:
+    derived_from: clouni.nodes.ray
+    properties:
+      port:
+        type: PortDef
+        default: 6379
+        constraints:
+          - in_range: [ 0, 65535 ]
+    requirements:
+      - slave:
+          capability: clouni.capabilities.ray.slave
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 0, UNBOUNDED ]
+
+  clouni.nodes.ray.slave:
+    derived_from: clouni.nodes.ray
+    capabilities:
+      slave:
+        type: clouni.capabilities.ray.slave
+
+capability_types:
+  clouni.capabilities.ray.slave:
+    derived_from: tosca.capabilities.Root
+    properties:
+      address:
+        type: string
+        required: true
+      port:
+        type: PortDef
+        default: 6379
+        constraints:
+          - in_range: [ 0, 65535 ]
+

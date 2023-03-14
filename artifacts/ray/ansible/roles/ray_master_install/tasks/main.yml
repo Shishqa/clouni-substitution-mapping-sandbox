@@ -1,0 +1,14 @@
+---
+- name: Include installation task
+  become: yes
+  import_tasks: install.yml
+
+- name: Run Ray
+  become: yes
+  shell: MLFLOW_S3_ENDPOINT_URL=http://{{ s3_endpoint_uri }} AWS_ACCESS_KEY_ID={{ minio_key }} AWS_SECRET_ACCESS_KEY={{ minio_secret }} nohup ray start --head --port={{ master_port }} &
+  when: s3_endpoint_uri is defined
+
+- name: Run Ray
+  become: yes
+  shell: nohup ray start --head --port={{ master_port }} &
+  when: s3_endpoint_uri is undefined

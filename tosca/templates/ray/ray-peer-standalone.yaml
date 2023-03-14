@@ -1,20 +1,17 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
 
 imports:
-- ../../profiles/sql-database/postgres/main.yaml
-- ../../profiles/sql-database/main.yaml
+- ../../profiles/ray/main.yaml
 
 topology_template:
   inputs:
-    access_login:
-      type: string
-    access_password:
-      type: string
-    database:
-      type: string
+    additional_packages:
+      type: list
+      entry_schema:
+        type: string
 
   node_templates:
-    sadimer-pg-host:
+    sadimer-ray-master:
       type: tosca.nodes.Compute
       directives: [ substitute ]
       capabilities:
@@ -38,28 +35,18 @@ topology_template:
             max_instances: 1
             default_instances: 1
 
-    postgres:
-      type: clouni.nodes.postgres
-      properties:
-        postgres_version: "14"
+    ray-master:
+      type: clouni.nodes.ray.master
       directives: [ substitute ]
-      requirements:
-        - host: sadimer-pg-host
-
-    postgres-db:
-      type: clouni.nodes.postgres.database
       properties:
-        db_user: { get_input: [ access_login ] }
-        db_password: { get_input: [ access_password ] }
-        db_name: { get_input: [ database ] }
+        additional_packages: { get_input: [ additional_packages ] }
       requirements:
-        - host: sadimer-pg-host
-        - dbms: postgres
+        - host: sadimer-ray-master
 
   substitution_mappings:
-    node_type: clouni.nodes.database
+    node_type: clouni.nodes.ray
     properties:
-      access_login: [ access_login ]
-      access_password: [ access_password ]
-      database: [ database ]
+      additional_packages: [ additional_packages ]
+
+
 
