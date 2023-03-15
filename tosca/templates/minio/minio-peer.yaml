@@ -48,6 +48,8 @@ topology_template:
         minio_root_password: { get_input: [ access_password ] }
         data_dir: { concat: ["/", { get_input: [ storage_dir ] }] }
       directives: [ substitute ]
+      attributes:
+        access_uri: { concat: [ { get_attribute: [ SELF, host, public_address ] }, ":9000" ] }
       requirements:
         - host: sadimer-minio-host
 
@@ -56,6 +58,8 @@ topology_template:
       properties:
         bucket_name: { get_input: [ storage_name ] }
       directives: [ substitute ]
+      attributes:
+        artifact_store_uri: { concat: [ "s3://", { get_property: [ SELF, bucket_name ] } ] }
       requirements:
         - host: sadimer-minio-host
         - storage: minio
@@ -67,3 +71,6 @@ topology_template:
       access_password: [ access_password ]
       access_token: [ access_token ]
       storage_name: [ storage_name ]
+    attributes:
+      access_uri: [ minio, access_uri ]
+      artifact_store_uri: [ bucket, artifact_store_uri ]

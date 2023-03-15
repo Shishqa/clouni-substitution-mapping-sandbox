@@ -26,6 +26,9 @@ topology_template:
               inputs:
                 additional_packages: { get_property: [ SELF, additional_packages ] }
                 master_port: { get_property: [ SELF, port ] }
+                s3_endpoint_uri: { get_attribute: [ SELF, artifact-storage, access_uri ] }
+                minio_key: { get_property: [ SELF, artifact-storage, access_token ] }
+                minio_secret: { get_property: [ SELF, artifact-storage, access_password ] }
               implementation:
                 primary: artifacts/ray/ansible/master.yaml
                 operation_host: HOST
@@ -44,3 +47,5 @@ topology_template:
       port: [ port ]
     requirements:
       host: [ ray-master, host ]
+      slave: [ ray-master, slave ]
+      artifact-storage: [ ray-master, artifact-storage ]

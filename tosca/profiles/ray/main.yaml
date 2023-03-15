@@ -9,6 +9,11 @@ node_types:
         required: false
         entry_schema:
           type: string
+    requirements:
+      - artifact-storage:
+          capability: tosca.capabilities.Root
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, 1 ]
 
   clouni.nodes.ray.master:
     derived_from: clouni.nodes.ray
@@ -22,7 +27,7 @@ node_types:
       - slave:
           capability: clouni.capabilities.ray.slave
           relationship: tosca.relationships.ConnectsTo
-          occurrences: [ 0, UNBOUNDED ]
+          occurrences: [ 1, UNBOUNDED ]
 
   clouni.nodes.ray.slave:
     derived_from: clouni.nodes.ray
@@ -42,4 +47,3 @@ capability_types:
         default: 6379
         constraints:
           - in_range: [ 0, 65535 ]
-

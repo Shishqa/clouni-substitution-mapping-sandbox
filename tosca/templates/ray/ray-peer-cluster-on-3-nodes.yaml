@@ -121,6 +121,9 @@ topology_template:
     node_type: clouni.nodes.ray
     properties:
       additional_packages: [ additional_packages ]
+    requirements:
+      artifact-storage: [ ray-master, artifact-storage ]
+
 
 
 

@@ -6,6 +6,9 @@ node_types:
     capabilities:
       storage:
         type: tosca.capabilities.Root
+    attributes:
+      access_uri:
+        type: string
     properties:
       minio_binary_file_url:
         type: string

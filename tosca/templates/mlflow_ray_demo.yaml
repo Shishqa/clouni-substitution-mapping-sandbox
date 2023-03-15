@@ -22,6 +22,8 @@ topology_template:
           - hydra-optuna-sweeper==1.2.0
           - ray[tune]==2.3.0
       directives: [ substitute ]
+      requirements:
+        - artifact-storage: object-store
 
     object-store:
       type: clouni.nodes.objectStorage
@@ -32,10 +34,10 @@ topology_template:
         storage_dir: data
       directives: [ substitute ]
 
-    database:
-      type: clouni.nodes.database
-      properties:
-        access_login: test
-        access_password: password
-        database: test
-      directives: [ substitute ]
+    #database:
+    #  type: clouni.nodes.database
+    #  properties:
+    #    access_login: test
+    #    access_password: password
+    #    database: test
+    #  directives: [ substitute ]
