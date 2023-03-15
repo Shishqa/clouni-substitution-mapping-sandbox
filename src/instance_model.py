@@ -231,7 +231,7 @@ class Concat(ValueInstance):
         self.args.append(create_function(node, {}, arg['$functionCall']))
 
   def get(self):
-    strings = [a.get() for a in self.args]
+    strings = [a.get() or "<unk>" for a in self.args]
     return ''.join(strings)
 
 
