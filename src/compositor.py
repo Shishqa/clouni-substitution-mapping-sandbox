@@ -128,10 +128,11 @@ def resolve(topology_name):
       substitution = instantiate(
         normalized_template,
         f'{topology_name}_sub_{issue["target"]}',
-        should_resolve=True
+        should_resolve=False
       )
       target_topology = instance_storage.get_topology(substitution["name"])
       map_node(topology.nodes[issue["target"]], target_topology)
+      resolve(substitution["name"])
     if issue['type'] == 'select':
       # options = issue['options']
       print(f'please choose desired node to replace node {issue["target"]} in {topology_status["name"]}')
@@ -156,10 +157,11 @@ def resolve(topology_name):
       substitution = instantiate(
         normalized_template,
         f'{topology_name}_sub_{issue["target"]}',
-        should_resolve=True
+        should_resolve=False
       )
       target_topology = instance_storage.get_topology(substitution["name"])
       map_node(topology.nodes[issue["target"]], target_topology)
+      resolve(substitution["name"])
 
   return query(topology_name)
 
