@@ -13,3 +13,6 @@ node_types:
       database:
         type: string
         required: true
+    attributes:
+      storage_uri:
+        type: string

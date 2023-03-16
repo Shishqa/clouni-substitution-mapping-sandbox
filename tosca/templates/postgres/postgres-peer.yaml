@@ -22,8 +22,8 @@ topology_template:
           properties:
             name: { get_attribute: [ SELF, tosca_name ] }
             num_cpus: 1
-            disk_size: 10 GiB
-            mem_size: 1 GiB
+            disk_size: 50 GiB
+            mem_size: 2 GiB
         endpoint:
           properties:
             network_name: net-for-intra-sandbox
@@ -39,7 +39,7 @@ topology_template:
             default_instances: 1
 
     postgres:
-      type: clouni.nodes.postgres
+      type: clouni.nodes.postgres.server
       properties:
         postgres_version: "14"
       directives: [ substitute ]
@@ -52,6 +52,9 @@ topology_template:
         db_user: { get_input: [ access_login ] }
         db_password: { get_input: [ access_password ] }
         db_name: { get_input: [ database ] }
+      attributes:
+        storage_uri: { concat: [ "postgresql://", { get_property: [ SELF, db_user ] }, ":", { get_property: [ SELF, db_password ] }, "@", { get_attribute: [ SELF, host, public_address ] }, ":5432/", { get_property: [ SELF, db_name ] } ] }
+      directives: [ substitute ]
       requirements:
         - host: sadimer-pg-host
         - dbms: postgres
@@ -62,4 +65,6 @@ topology_template:
       access_login: [ access_login ]
       access_password: [ access_password ]
       database: [ database ]
+    attributes:
+      storage_uri: [ postgres-db, storage_uri ]
 

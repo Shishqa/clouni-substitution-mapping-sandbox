@@ -10,7 +10,7 @@ topology_template:
 
   node_templates:
     postgres:
-      type: clouni.nodes.postgres
+      type: clouni.nodes.postgres.server
       properties:
         postgres_version: { get_input: [ postgres_version ] }
       interfaces:
@@ -31,7 +31,7 @@ topology_template:
           deploy_path: roles/postgres_install
 
   substitution_mappings:
-    node_type: clouni.nodes.postgres
+    node_type: clouni.nodes.postgres.server
     properties:
       postgres_version: [ postgres_version ]
     requirements:

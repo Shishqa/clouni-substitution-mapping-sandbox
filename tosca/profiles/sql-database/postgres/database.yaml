@@ -10,9 +10,12 @@ node_types:
         type: string
       db_name:
         type: string
+    attributes:
+      storage_uri:
+        type: string
     requirements:
       - dbms:
           capability: tosca.capabilities.Root
-          relationship: tosca.relationships.HostedOn
+          relationship: tosca.relationships.DependsOn
           occurrences: [ 1, 1 ]
 

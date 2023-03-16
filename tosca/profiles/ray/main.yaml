@@ -9,6 +9,9 @@ node_types:
         required: false
         entry_schema:
           type: string
+    attributes:
+      ray_uri:
+        type: string
     requirements:
       - artifact-storage:
           capability: tosca.capabilities.Root
@@ -23,27 +26,14 @@ node_types:
         default: 6379
         constraints:
           - in_range: [ 0, 65535 ]
-    requirements:
-      - slave:
-          capability: clouni.capabilities.ray.slave
-          relationship: tosca.relationships.ConnectsTo
-          occurrences: [ 1, UNBOUNDED ]
+    attributes:
+      ray_uri:
+        type: string
 
   clouni.nodes.ray.slave:
     derived_from: clouni.nodes.ray
-    capabilities:
-      slave:
-        type: clouni.capabilities.ray.slave
-
-capability_types:
-  clouni.capabilities.ray.slave:
-    derived_from: tosca.capabilities.Root
-    properties:
-      address:
-        type: string
-        required: true
-      port:
-        type: PortDef
-        default: 6379
-        constraints:
-          - in_range: [ 0, 65535 ]
+    requirements:
+      - master:
+          capability: tosca.capabilities.Root
+          relationship: tosca.relationships.ConnectsTo
+          occurrences: [ 1, 1 ]

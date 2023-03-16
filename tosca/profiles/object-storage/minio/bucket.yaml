@@ -16,5 +16,5 @@ node_types:
     requirements:
       - storage:
           capability: tosca.capabilities.Root
-          relationship: tosca.relationships.HostedOn
+          relationship: tosca.relationships.DependsOn
           occurrences: [ 1, 1 ]

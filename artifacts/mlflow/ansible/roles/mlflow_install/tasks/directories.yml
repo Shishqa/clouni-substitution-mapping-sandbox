@@ -1,0 +1,10 @@
+---
+- name: Creates directory for credentials
+  file:
+    path: /root/.aws
+    state: directory
+
+- name: Creates directory for logs
+  file:
+    path: /var/log/mlflow_logs
+    state: directory

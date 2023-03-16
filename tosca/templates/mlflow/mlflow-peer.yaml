@@ -1,1 +1,41 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../../profiles/mlflow/main.yaml
+
+topology_template:
+  node_templates:
+    sadimer-mlflow:
+      type: tosca.nodes.Compute
+      directives: [ substitute ]
+      capabilities:
+        host:
+          properties:
+            name: { get_attribute: [ SELF, tosca_name ] }
+            num_cpus: 1
+            disk_size: 10 GiB
+            mem_size: 1 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: LTS-Focal-Fossa
+            distribution: Ubuntu-Server
+            version: "20.04"
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            default_instances: 1
+    mlflow:
+      type: clouni.nodes.mlflow.tracking
+      directives: [ substitute ]
+      requirements:
+        - host: sadimer-mlflow
+
+  substitution_mappings:
+    node_type: clouni.nodes.mlflow
+    requirements:
+      artifact-storage: [ mlflow, artifact-storage ]
+      backend-storage: [ mlflow, backend-storage ]

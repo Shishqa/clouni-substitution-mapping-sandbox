@@ -1,0 +1,9 @@
+---
+- name: Daemon_reload
+  systemd: daemon_reload=yes
+
+- name: Start mlflow service
+  systemd:
+    name: mlflow.service
+    state: started
+    enabled: yes

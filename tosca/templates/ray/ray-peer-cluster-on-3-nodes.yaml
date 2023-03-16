@@ -18,9 +18,9 @@ topology_template:
         host:
           properties:
             name: { get_attribute: [ SELF, tosca_name ] }
-            num_cpus: 1
-            disk_size: 10 GiB
-            mem_size: 1 GiB
+            num_cpus: 4
+            disk_size: 100 GiB
+            mem_size: 16 GiB
         endpoint:
           properties:
             network_name: net-for-intra-sandbox
@@ -42,9 +42,9 @@ topology_template:
         host:
           properties:
             name: { get_attribute: [ SELF, tosca_name ] }
-            num_cpus: 1
-            disk_size: 10 GiB
-            mem_size: 1 GiB
+            num_cpus: 4
+            disk_size: 100 GiB
+            mem_size: 16 GiB
         endpoint:
           properties:
             network_name: net-for-intra-sandbox
@@ -66,9 +66,9 @@ topology_template:
         host:
           properties:
             name: { get_attribute: [ SELF, tosca_name ] }
-            num_cpus: 1
-            disk_size: 10 GiB
-            mem_size: 1 GiB
+            num_cpus: 4
+            disk_size: 100 GiB
+            mem_size: 16 GiB
         endpoint:
           properties:
             network_name: net-for-intra-sandbox
@@ -90,32 +90,24 @@ topology_template:
         additional_packages: { get_input: [ additional_packages ] }
       requirements:
         - host: sadimer-ray-master
-        - slave: ray-slave-1
-        - slave: ray-slave-2
 
     ray-slave-1:
       type: clouni.nodes.ray.slave
       directives: [ substitute ]
       properties:
         additional_packages: { get_input: [ additional_packages ] }
-      capabilities:
-        slave:
-          properties:
-            address: { get_attribute: [ SELF, host, public_address ] }
       requirements:
         - host: sadimer-ray-slave-1
+        - master: ray-master
 
     ray-slave-2:
       type: clouni.nodes.ray.slave
       directives: [ substitute ]
       properties:
         additional_packages: { get_input: [ additional_packages ] }
-      capabilities:
-        slave:
-          properties:
-            address: { get_attribute: [ SELF, host, public_address ] }
       requirements:
         - host: sadimer-ray-slave-2
+        - master: ray-master
 
   substitution_mappings:
     node_type: clouni.nodes.ray

@@ -33,7 +33,7 @@ topology_template:
                 dependencies:
                   - artifacts/postgres/ansible/roles/postgres_database
       artifacts:
-        artifacts/postgres/ansible/roles/postgres_install:
+        artifacts/postgres/ansible/roles/postgres_database:
           file: artifacts/postgres/ansible/roles/postgres_database
           type: tosca.artifacts.File
           deploy_path: roles/postgres_database

@@ -1,0 +1,16 @@
+---
+- name: Include installation task
+  become: yes
+  import_tasks: install.yml
+
+- name: Include directories task
+  become: yes
+  import_tasks: directories.yml
+
+- name: Include templates task
+  become: yes
+  import_tasks: templates.yml
+
+- name: Include systemctl task
+  become: yes
+  import_tasks: systemctl.yml

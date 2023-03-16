@@ -1,1 +1,36 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../../profiles/mlflow/main.yaml
+
+topology_template:
+  node_templates:
+    mlflow:
+      type: clouni.nodes.mlflow.tracking
+      interfaces:
+        Standard:
+          operations:
+            create:
+              inputs:
+                s3_endpoint_uri: { get_attribute: [ SELF, artifact-storage, access_uri ] }
+                minio_key: { get_property: [ SELF, artifact-storage, access_token ] }
+                minio_secret: { get_property: [ SELF, artifact-storage, access_password ] }
+                backend_store_uri: { get_attribute: [ SELF, backend-storage, storage_uri ] }
+                default_artifact_store_uri: { get_attribute: [ SELF, artifact-storage, artifact_store_uri ] }
+              implementation:
+                primary: artifacts/mlflow/ansible/main.yaml
+                operation_host: HOST
+                dependencies:
+                  - artifacts/mlflow/ansible/roles/mlflow_install
+      artifacts:
+        artifacts/mlflow/ansible/roles/mlflow_install:
+          file: artifacts/mlflow/ansible/roles/mlflow_install
+          type: tosca.artifacts.File
+          deploy_path: roles/mlflow_install
+
+  substitution_mappings:
+    node_type: clouni.nodes.mlflow.tracking
+    requirements:
+      host: [ mlflow, host ]
+      artifact-storage: [ mlflow, artifact-storage ]
+      backend-storage: [ mlflow, backend-storage ]

@@ -47,5 +47,4 @@ topology_template:
       port: [ port ]
     requirements:
       host: [ ray-master, host ]
-      slave: [ ray-master, slave ]
       artifact-storage: [ ray-master, artifact-storage ]

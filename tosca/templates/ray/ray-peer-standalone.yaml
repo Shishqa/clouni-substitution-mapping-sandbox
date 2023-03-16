@@ -18,9 +18,9 @@ topology_template:
         host:
           properties:
             name: { get_attribute: [ SELF, tosca_name ] }
-            num_cpus: 1
-            disk_size: 10 GiB
-            mem_size: 1 GiB
+            num_cpus: 4
+            disk_size: 100 GiB
+            mem_size: 16 GiB
         endpoint:
           properties:
             network_name: net-for-intra-sandbox

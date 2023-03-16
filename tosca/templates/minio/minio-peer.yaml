@@ -25,7 +25,7 @@ topology_template:
           properties:
             name: { get_attribute: [ SELF, tosca_name ] }
             num_cpus: 1
-            disk_size: 10 GiB
+            disk_size: 100 GiB
             mem_size: 1 GiB
         endpoint:
           properties:

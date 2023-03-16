@@ -1,0 +1,20 @@
+---
+- name: "Install packages"
+  apt:
+    name:
+      - python3-pip
+      - libpq-dev
+      - python3-dev
+    update_cache: yes
+    allow_unauthenticated: yes
+    state: present
+
+- name: "Install pip packages"
+  pip:
+    name:
+      - boto3
+      - mlflow
+      - psycopg2
+      - click==8.0.4
+      - black==22.3.0
+    state: present

@@ -4,6 +4,7 @@ imports:
 - ../profiles/ray/main.yaml
 - ../profiles/object-storage/main.yaml
 - ../profiles/sql-database/main.yaml
+- ../profiles/mlflow/main.yaml
 
 topology_template:
   node_templates:
@@ -34,10 +35,17 @@ topology_template:
         storage_dir: data
       directives: [ substitute ]
 
-    #database:
-    #  type: clouni.nodes.database
-    #  properties:
-    #    access_login: test
-    #    access_password: password
-    #    database: test
-    #  directives: [ substitute ]
+    database:
+      type: clouni.nodes.database
+      properties:
+        access_login: test
+        access_password: password
+        database: test
+      directives: [ substitute ]
+
+    mlflow:
+      type: clouni.nodes.mlflow
+      requirements:
+        - artifact-storage: object-store
+        - backend-storage: database
+      directives: [ substitute ]

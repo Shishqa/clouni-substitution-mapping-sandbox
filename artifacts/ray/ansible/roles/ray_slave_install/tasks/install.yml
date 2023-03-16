@@ -11,8 +11,8 @@
     name:
       - ray[default]
       - protobuf==3.20.0
-      - mlflow==2.1.1
       - boto3
+      - mlflow==2.1.1
     state: present
 
 - name: "Install additional pip packages"
@@ -21,3 +21,4 @@
       - "{{ item }}"
     state: present
   with_list: "{{ additional_packages }}"
+  when: additional_packages is defined
