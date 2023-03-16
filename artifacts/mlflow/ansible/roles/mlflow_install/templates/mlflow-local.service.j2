@@ -1,0 +1,14 @@
+[Unit]
+Description=Mlflow server run
+
+[Service]
+Type=simple
+Environment=MLFLOW_S3_ENDPOINT_URL=http://{{ s3_endpoint_uri }} AWS_ACCESS_KEY_ID={{ minio_key }} AWS_SECRET_ACCESS_KEY={{ minio_secret }} MLFLOW_ARTIFACT_UPLOAD_DOWNLOAD_TIMEOUT=1000
+Restart=on-failure
+RestartSec=30
+StandardOutput=file:/var/log/mlflow_logs/stdout.log
+StandardError=file:/var/log/mlflow_logs/stderr.log
+ExecStart=mlflow server --backend-store-uri {{ backend_store_uri }} --default-artifact-root {{ default_artifact_store_uri }} --host 0.0.0.0
+
+[Install]
+WantedBy=multi-user.target

@@ -1,18 +1,18 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
 
 node_types:
-  clouni.nodes.database:
+  clouni.nodes.backendStorage:
     derived_from: tosca.nodes.SoftwareComponent
-    properties:
-      access_login:
-        type: string
-        required: true
-      access_password:
-        type: string
-        required: true
-      database:
-        type: string
-        required: true
     attributes:
       storage_uri:
         type: string
+    properties:
+      access_login:
+        type: string
+        default: admin
+      access_password:
+        type: string
+        default: admin
+      database_or_path:
+        type: string
+        required: true

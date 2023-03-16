@@ -1,0 +1,25 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../../profiles/backend-storage/local-mounted-disk/main.yaml
+- ../../profiles/object-storage/main.yaml
+
+topology_template:
+  inputs:
+    storage_dir:
+      type: string
+
+  node_templates:
+    disk:
+      type: clouni.nodes.mountedDisk.local
+      properties:
+        mount_path: { concat: [ "/", { get_input: [ storage_dir ] } ] }
+      attributes:
+        storage_uri: { get_property: [ SELF, mount_path ] }
+
+  substitution_mappings:
+    node_type: clouni.nodes.objectStorage
+    properties:
+      storage_dir: [ storage_dir ]
+    attributes:
+      artifact_store_uri: [ disk, storage_uri ]

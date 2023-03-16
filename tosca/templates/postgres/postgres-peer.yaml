@@ -1,8 +1,8 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
 
 imports:
-- ../../profiles/sql-database/postgres/main.yaml
-- ../../profiles/sql-database/main.yaml
+- ../../profiles/backend-storage/postgres/main.yaml
+- ../../profiles/backend-storage/main.yaml
 
 topology_template:
   inputs:
@@ -10,7 +10,7 @@ topology_template:
       type: string
     access_password:
       type: string
-    database:
+    database_or_path:
       type: string
 
   node_templates:
@@ -51,7 +51,7 @@ topology_template:
       properties:
         db_user: { get_input: [ access_login ] }
         db_password: { get_input: [ access_password ] }
-        db_name: { get_input: [ database ] }
+        db_name: { get_input: [ database_or_path ] }
       attributes:
         storage_uri: { concat: [ "postgresql://", { get_property: [ SELF, db_user ] }, ":", { get_property: [ SELF, db_password ] }, "@", { get_attribute: [ SELF, host, public_address ] }, ":5432/", { get_property: [ SELF, db_name ] } ] }
       directives: [ substitute ]
@@ -60,11 +60,11 @@ topology_template:
         - dbms: postgres
 
   substitution_mappings:
-    node_type: clouni.nodes.database
+    node_type: clouni.nodes.backendStorage
     properties:
       access_login: [ access_login ]
       access_password: [ access_password ]
-      database: [ database ]
+      database_or_path: [ database_or_path ]
     attributes:
       storage_uri: [ postgres-db, storage_uri ]
 

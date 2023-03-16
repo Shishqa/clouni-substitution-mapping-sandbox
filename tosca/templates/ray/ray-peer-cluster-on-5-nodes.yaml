@@ -1,0 +1,187 @@
+tosca_definitions_version: tosca_simple_yaml_1_3
+
+imports:
+- ../../profiles/ray/main.yaml
+
+topology_template:
+  inputs:
+    additional_packages:
+      type: list
+      entry_schema:
+        type: string
+
+  node_templates:
+    sadimer-ray-master:
+      type: tosca.nodes.Compute
+      directives: [ substitute ]
+      capabilities:
+        host:
+          properties:
+            name: { get_attribute: [ SELF, tosca_name ] }
+            num_cpus: 4
+            disk_size: 100 GiB
+            mem_size: 16 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: LTS-Focal-Fossa
+            distribution: Ubuntu-Server
+            version: "20.04"
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            default_instances: 1
+
+    sadimer-ray-slave-1:
+      type: tosca.nodes.Compute
+      directives: [ substitute ]
+      capabilities:
+        host:
+          properties:
+            name: { get_attribute: [ SELF, tosca_name ] }
+            num_cpus: 4
+            disk_size: 100 GiB
+            mem_size: 16 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: LTS-Focal-Fossa
+            distribution: Ubuntu-Server
+            version: "20.04"
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            default_instances: 1
+
+    sadimer-ray-slave-2:
+      type: tosca.nodes.Compute
+      directives: [ substitute ]
+      capabilities:
+        host:
+          properties:
+            name: { get_attribute: [ SELF, tosca_name ] }
+            num_cpus: 4
+            disk_size: 100 GiB
+            mem_size: 16 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: LTS-Focal-Fossa
+            distribution: Ubuntu-Server
+            version: "20.04"
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            default_instances: 1
+
+    sadimer-ray-slave-3:
+      type: tosca.nodes.Compute
+      directives: [ substitute ]
+      capabilities:
+        host:
+          properties:
+            name: { get_attribute: [ SELF, tosca_name ] }
+            num_cpus: 4
+            disk_size: 100 GiB
+            mem_size: 16 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: LTS-Focal-Fossa
+            distribution: Ubuntu-Server
+            version: "20.04"
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            default_instances: 1
+
+    sadimer-ray-slave-4:
+      type: tosca.nodes.Compute
+      directives: [ substitute ]
+      capabilities:
+        host:
+          properties:
+            name: { get_attribute: [ SELF, tosca_name ] }
+            num_cpus: 4
+            disk_size: 100 GiB
+            mem_size: 16 GiB
+        endpoint:
+          properties:
+            network_name: net-for-intra-sandbox
+        os:
+          properties:
+            architecture: LTS-Focal-Fossa
+            distribution: Ubuntu-Server
+            version: "20.04"
+        scalable:
+          properties:
+            min_instances: 1
+            max_instances: 1
+            default_instances: 1
+
+    ray-master:
+      type: clouni.nodes.ray.master
+      directives: [ substitute ]
+      properties:
+        additional_packages: { get_input: [ additional_packages ] }
+      requirements:
+        - host: sadimer-ray-master
+
+    ray-slave-1:
+      type: clouni.nodes.ray.slave
+      directives: [ substitute ]
+      properties:
+        additional_packages: { get_input: [ additional_packages ] }
+      requirements:
+        - host: sadimer-ray-slave-1
+        - master: ray-master
+
+    ray-slave-2:
+      type: clouni.nodes.ray.slave
+      directives: [ substitute ]
+      properties:
+        additional_packages: { get_input: [ additional_packages ] }
+      requirements:
+        - host: sadimer-ray-slave-2
+        - master: ray-master
+
+    ray-slave-3:
+      type: clouni.nodes.ray.slave
+      directives: [ substitute ]
+      properties:
+        additional_packages: { get_input: [ additional_packages ] }
+      requirements:
+        - host: sadimer-ray-slave-3
+        - master: ray-master
+
+    ray-slave-4:
+      type: clouni.nodes.ray.slave
+      directives: [ substitute ]
+      properties:
+        additional_packages: { get_input: [ additional_packages ] }
+      requirements:
+        - host: sadimer-ray-slave-4
+        - master: ray-master
+
+  substitution_mappings:
+    node_type: clouni.nodes.ray
+    properties:
+      additional_packages: [ additional_packages ]
+    requirements:
+      artifact-storage: [ ray-master, artifact-storage ]
+
+
+
+

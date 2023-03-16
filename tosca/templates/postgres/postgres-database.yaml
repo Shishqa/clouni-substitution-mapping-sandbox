@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_3
 
 imports:
-- ../../profiles/sql-database/postgres/main.yaml
+- ../../profiles/backend-storage/postgres/main.yaml
 
 topology_template:
   inputs:

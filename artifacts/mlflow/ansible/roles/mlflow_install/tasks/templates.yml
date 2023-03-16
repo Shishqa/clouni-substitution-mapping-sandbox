@@ -3,3 +3,10 @@
   template:
     src: mlflow.service.j2
     dest: "/etc/systemd/system/mlflow.service"
+  when: '"s3" in default_artifact_store_uri'
+
+- name: mlflow.service file
+  template:
+    src: mlflow-local.service.j2
+    dest: "/etc/systemd/system/mlflow.service"
+  when: '"s3" not in default_artifact_store_uri'

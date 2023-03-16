@@ -3,7 +3,7 @@ tosca_definitions_version: tosca_simple_yaml_1_3
 imports:
 - ../profiles/ray/main.yaml
 - ../profiles/object-storage/main.yaml
-- ../profiles/sql-database/main.yaml
+- ../profiles/backend-storage/main.yaml
 - ../profiles/mlflow/main.yaml
 
 topology_template:
@@ -35,17 +35,17 @@ topology_template:
         storage_dir: data
       directives: [ substitute ]
 
-    database:
-      type: clouni.nodes.database
+    back-store:
+      type: clouni.nodes.backendStorage
       properties:
         access_login: test
         access_password: password
-        database: test
+        database_or_path: test
       directives: [ substitute ]
 
     mlflow:
       type: clouni.nodes.mlflow
+      directives: [ substitute ]
       requirements:
         - artifact-storage: object-store
-        - backend-storage: database
-      directives: [ substitute ]
+        - backend-storage: back-store
